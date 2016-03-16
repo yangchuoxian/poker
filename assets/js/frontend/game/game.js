@@ -17,6 +17,7 @@ function preload() {
     game.load.spritesheet('setScoreButton', 'images/setScoreButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT);
     game.load.spritesheet('passButton', 'images/passButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT);
     game.load.spritesheet('surrenderButton', 'images/surrenderButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT);
+    game.load.spritesheet('settleMainButton', 'images/settleMainButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT);
     game.load.spritesheet('settleCoveredCardsButton', 'images/settleCoveredCardsButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT);
 
     game.load.image('back', 'images/back.png');
@@ -105,6 +106,9 @@ function create() {
 
     globalVariables.settleCoveredCardsButton = game.add.button(game.world.centerX + constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'settleCoveredCardsButton', actions.settleCoveredCards, this, 1, 0, 1, 0);
     globalVariables.settleCoveredCardsButton.visible = false;
+
+    globalVariables.settleMainButton = game.add.button(game.world.centerX + constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'settleMainButton', actions.settleCoveredCards, this, 1, 0, 1, 0);
+    globalVariables.settleMainButton.visible = false;
 
     /*
     var shuffledCards = toolbox.shuffleCards();
@@ -275,55 +279,24 @@ function socketCommunication() {
         var currentAimedScore = data.currentAimedScore;
         var usernameCalledScore = data.usernameCalledScore;
         var usernameToCallScore = data.usernameToCallScore;
-
         globalVariables.textOfAimedScores.text = '' + currentAimedScore;
-
         if (usernameToCallScore == globalVariables.username) {
             globalVariables.meStatusText.text = '叫分中...';
-            if (globalVariables.player1StatusText.text == '叫分中...') {
-                globalVariables.player1StatusText.text = '';
-            }
-            if (globalVariables.player2StatusText.text == '叫分中...') {
-                globalVariables.player2StatusText.text = '';
-            }
-            if (globalVariables.player3StatusText.text == '叫分中...') {
-                globalVariables.player3StatusText.text = '';
-            }
             actions.showCallScorePanel(game, currentAimedScore);
-        } else {
-            if (usernameToCallScore == globalVariables.player1Username.text) {
-                globalVariables.player1StatusText.text = '叫分中...';
-                if (globalVariables.player2StatusText.text == '叫分中...') {
-                    globalVariables.player2StatusText.text = '';
-                }
-                if (globalVariables.player3StatusText.text == '叫分中...') {
-                    globalVariables.player3StatusText.text = '';
-                }
-            } else if (usernameToCallScore == globalVariables.player2Username.text) {
-                if (globalVariables.player1StatusText.text == '叫分中...') {
-                    globalVariables.player1StatusText.text = '';
-                }
-                globalVariables.player2StatusText.text = '叫分中...';
-                if (globalVariables.player3StatusText.text == '叫分中...') {
-                    globalVariables.player3StatusText.text = '';
-                }
-            } else if (usernameToCallScore == globalVariables.player3Username.text) {
-                if (globalVariables.player1StatusText.text == '叫分中...') {
-                    globalVariables.player1StatusText.text = '';
-                }
-                if (globalVariables.player2StatusText.text == '叫分中...') {
-                    globalVariables.player2StatusText.text = '';
-                } 
-                globalVariables.player3StatusText.text = '叫分中...';
-            }
+        } else if (usernameToCallScore == globalVariables.player1Username.text) {
+            globalVariables.player1StatusText.text = '叫分中...';
+        } else if (usernameToCallScore == globalVariables.player2Username.text) {
+            globalVariables.player2StatusText.text = '叫分中...';
+        } else if (usernameToCallScore == globalVariables.player3Username.text) {
+            globalVariables.player3StatusText.text = '叫分中...';
+        }
 
-            if (usernameCalledScore == globalVariables.player1Username.text) {
-                globalVariables.player1StatusText.text = currentAimedScore + '分';
-            } else if (usernameCalledScore == globalVariables.player2Username.text) {
-                globalVariables.player2StatusText.text = currentAimedScore + '分';
-            } else if (usernameCalledScore == globalVariables.player3Username.text) {
-                globalVariables.player3StatusText.text = currentAimedScore + '分';
-            }
+        if (usernameCalledScore == globalVariables.player1Username.text) {
+            globalVariables.player1StatusText.text = currentAimedScore + '分';
+        } else if (usernameCalledScore == globalVariables.player2Username.text) {
+            globalVariables.player2StatusText.text = currentAimedScore + '分';
+        } else if (usernameCalledScore == globalVariables.player3Username.text) {
+            globalVariables.player3StatusText.text = currentAimedScore + '分';
         }
     });
     io.socket.on('userPassed', function (data) {

@@ -63,6 +63,7 @@
 	    game.load.spritesheet('setScoreButton', 'images/setScoreButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT);
 	    game.load.spritesheet('passButton', 'images/passButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT);
 	    game.load.spritesheet('surrenderButton', 'images/surrenderButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT);
+	    game.load.spritesheet('settleMainButton', 'images/settleMainButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT);
 	    game.load.spritesheet('settleCoveredCardsButton', 'images/settleCoveredCardsButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT);
 
 	    game.load.image('back', 'images/back.png');
@@ -152,6 +153,9 @@
 	    globalVariables.settleCoveredCardsButton = game.add.button(game.world.centerX + constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'settleCoveredCardsButton', actions.settleCoveredCards, this, 1, 0, 1, 0);
 	    globalVariables.settleCoveredCardsButton.visible = false;
 
+	    globalVariables.settleMainButton = game.add.button(game.world.centerX + constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'settleMainButton', actions.settleCoveredCards, this, 1, 0, 1, 0);
+	    globalVariables.settleMainButton.visible = false;
+
 	    /*
 	    var shuffledCards = toolbox.shuffleCards();
 	    var firstDeckOfCards = toolbox.sortCards(shuffledCards.slice(0, constants.INITIAL_NUM_CARDS_AT_HAND));
@@ -198,7 +202,7 @@
 	    globalVariables.textOfRoomName = game.add.text(globalVariables.screenWidth - 70, 2 * constants.MARGIN + 30, '', constants.TEXT_STYLE);
 	    globalVariables.textOfRoomName.setTextBounds(0, 0, 70, 30);
 
-	    globalVariables.meStatusText = game.add.text(game.world.centerX - constants.MARGIN, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, '', constants.TEXT_STYLE);
+	    globalVariables.meStatusText = game.add.text(game.world.centerX - constants.MARGIN, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 3 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET - constants.BUTTON_HEIGHT, '', constants.TEXT_STYLE);
 	    globalVariables.player1StatusText = game.add.text(globalVariables.screenWidth - 2 * constants.AVATAR_SIZE - 3 * constants.MARGIN, game.world.centerY, '', constants.TEXT_STYLE);
 	    globalVariables.player2StatusText = game.add.text(game.world.centerX - constants.MARGIN, constants.AVATAR_SIZE + 4 * constants.MARGIN, '', constants.TEXT_STYLE);
 	    globalVariables.player3StatusText = game.add.text(constants.AVATAR_SIZE + 2 * constants.MARGIN, game.world.centerY, '', constants.TEXT_STYLE);
@@ -321,55 +325,24 @@
 	        var currentAimedScore = data.currentAimedScore;
 	        var usernameCalledScore = data.usernameCalledScore;
 	        var usernameToCallScore = data.usernameToCallScore;
-
 	        globalVariables.textOfAimedScores.text = '' + currentAimedScore;
-
 	        if (usernameToCallScore == globalVariables.username) {
 	            globalVariables.meStatusText.text = '叫分中...';
-	            if (globalVariables.player1StatusText.text == '叫分中...') {
-	                globalVariables.player1StatusText.text = '';
-	            }
-	            if (globalVariables.player2StatusText.text == '叫分中...') {
-	                globalVariables.player2StatusText.text = '';
-	            }
-	            if (globalVariables.player3StatusText.text == '叫分中...') {
-	                globalVariables.player3StatusText.text = '';
-	            }
 	            actions.showCallScorePanel(game, currentAimedScore);
-	        } else {
-	            if (usernameToCallScore == globalVariables.player1Username.text) {
-	                globalVariables.player1StatusText.text = '叫分中...';
-	                if (globalVariables.player2StatusText.text == '叫分中...') {
-	                    globalVariables.player2StatusText.text = '';
-	                }
-	                if (globalVariables.player3StatusText.text == '叫分中...') {
-	                    globalVariables.player3StatusText.text = '';
-	                }
-	            } else if (usernameToCallScore == globalVariables.player2Username.text) {
-	                if (globalVariables.player1StatusText.text == '叫分中...') {
-	                    globalVariables.player1StatusText.text = '';
-	                }
-	                globalVariables.player2StatusText.text = '叫分中...';
-	                if (globalVariables.player3StatusText.text == '叫分中...') {
-	                    globalVariables.player3StatusText.text = '';
-	                }
-	            } else if (usernameToCallScore == globalVariables.player3Username.text) {
-	                if (globalVariables.player1StatusText.text == '叫分中...') {
-	                    globalVariables.player1StatusText.text = '';
-	                }
-	                if (globalVariables.player2StatusText.text == '叫分中...') {
-	                    globalVariables.player2StatusText.text = '';
-	                } 
-	                globalVariables.player3StatusText.text = '叫分中...';
-	            }
+	        } else if (usernameToCallScore == globalVariables.player1Username.text) {
+	            globalVariables.player1StatusText.text = '叫分中...';
+	        } else if (usernameToCallScore == globalVariables.player2Username.text) {
+	            globalVariables.player2StatusText.text = '叫分中...';
+	        } else if (usernameToCallScore == globalVariables.player3Username.text) {
+	            globalVariables.player3StatusText.text = '叫分中...';
+	        }
 
-	            if (usernameCalledScore == globalVariables.player1Username.text) {
-	                globalVariables.player1StatusText.text = currentAimedScore + '分';
-	            } else if (usernameCalledScore == globalVariables.player2Username.text) {
-	                globalVariables.player2StatusText.text = currentAimedScore + '分';
-	            } else if (usernameCalledScore == globalVariables.player3Username.text) {
-	                globalVariables.player3StatusText.text = currentAimedScore + '分';
-	            }
+	        if (usernameCalledScore == globalVariables.player1Username.text) {
+	            globalVariables.player1StatusText.text = currentAimedScore + '分';
+	        } else if (usernameCalledScore == globalVariables.player2Username.text) {
+	            globalVariables.player2StatusText.text = currentAimedScore + '分';
+	        } else if (usernameCalledScore == globalVariables.player3Username.text) {
+	            globalVariables.player3StatusText.text = currentAimedScore + '分';
 	        }
 	    });
 	    io.socket.on('userPassed', function (data) {
@@ -405,6 +378,25 @@
 	            actions.displayCards(globalVariables.cardsAtHand.indexes);
 	            globalVariables.surrenderButton.visible = true;
 	            globalVariables.settleCoveredCardsButton.visible = true;
+
+	            globalVariables.player1StatusText.text = '';
+	            globalVariables.player2StatusText.text = '';
+	            globalVariables.player3StatusText.text = '';
+	        } else if (makerUsername == globalVariables.player1Username.text) {
+	            globalVariables.meStatusText.text = '';
+	            globalVariables.player1StatusText.text = '庄家埋底中...';
+	            globalVariables.player2StatusText.text = '';
+	            globalVariables.player3StatusText.text = '';
+	        } else if (makerUsername == globalVariables.player2Username.text) {
+	            globalVariables.meStatusText.text = '';
+	            globalVariables.player1StatusText.text = '';
+	            globalVariables.player2StatusText.text = '庄家埋底中...';
+	            globalVariables.player3StatusText.text = '';
+	        } else if (makerUsername == globalVariables.player3Username.text) {
+	            globalVariables.meStatusText.text = '';
+	            globalVariables.player1StatusText.text = '';
+	            globalVariables.player2StatusText.text = '';
+	            globalVariables.player3StatusText.text = '庄家埋底中...';
 	        }
 	    });
 	}
@@ -492,26 +484,6 @@
 	var globalVariables = __webpack_require__(2);
 
 	module.exports = {
-		shuffleCards: function() {
-		    var array = [];
-		    var i, j;
-		    for (j = 0; j < 2; j ++) {
-		        for (i = 1; i <= 46; i ++) {
-		            array.push(i);
-		        }
-		    }
-		    var copy = [], n = array.length;
-		    while (n) {
-		        i = Math.floor(Math.random() * array.length);
-		        if (i in array) {
-		            copy.push(array[i]);
-		            delete array[i];
-		            n --;
-		        }
-		    }
-		    return copy;
-		},
-
 		sortCards: function(array) {
 		    var sortNumber = function(a, b) {
 		        return a - b;
@@ -727,22 +699,88 @@
 	var globalVariables = __webpack_require__(2);
 	var toolbox = __webpack_require__(3);
 
-	module.exports = {
-	    showCoveredCards: function() {
-	        var stageWidth = 11 * globalVariables.scaledCardWidth / 4 + 2 * constants.MARGIN;
-	        var stageHeight = globalVariables.scaledCardHeight + 2 * constants.MARGIN;
-
-	        var coveredCardsStage = globalVariables.coveredCards.create(globalVariables.screenWidth / 2 - stageWidth / 2, globalVariables.screenHeight / 2 - stageHeight / 2, 'stageBackground');
-	        coveredCardsStage.alpha = 0.3;
-	        coveredCardsStage.width = stageWidth;
-	        coveredCardsStage.height = stageHeight;
-	        for (var i = 0; i < globalVariables.coveredCards.indexes.length; i ++) {
-	            var cardName = toolbox.getCardName(globalVariables.coveredCards.indexes[i]);
-	            var coveredCard = globalVariables.coveredCards.create(coveredCardsStage.x + constants.MARGIN + i * globalVariables.scaledCardWidth / 4, coveredCardsStage.y + constants.MARGIN, cardName);
-	            coveredCard.scale.setTo(globalVariables.scaleWidthRatio, globalVariables.scaleHeightRatio);
+	var displayCards = function(array) {
+	    var leftMargin = (globalVariables.screenWidth - (Math.floor(globalVariables.scaledCardWidth / 4) * array.length + Math.floor(3 * globalVariables.scaledCardWidth / 4))) / 2;
+	    var i;
+	    var spritesShouldBeRemoved = [];
+	    if (globalVariables.cardsAtHand.children.length > 0) {
+	        for (i = 0; i < globalVariables.cardsAtHand.children.length; i ++) {
+	            spritesShouldBeRemoved.push(globalVariables.cardsAtHand.children[i]);
+	        } 
+	        for (i = 0; i < spritesShouldBeRemoved.length; i ++) {
+	            globalVariables.cardsAtHand.remove(spritesShouldBeRemoved[i]); 
 	        }
-	        globalVariables.isShowingCoveredCards = true;
-	    },
+	    }
+	    for (i = 0; i < array.length; i ++) {
+	        var cardName = toolbox.getCardName(array[i]);
+	        var cardSprite = globalVariables.cardsAtHand.create(leftMargin + i * Math.floor(globalVariables.scaledCardWidth / 4), globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.MARGIN, cardName);
+	        cardSprite.scale.setTo(globalVariables.scaleWidthRatio, globalVariables.scaleHeightRatio);
+	        cardSprite.isSelected = false;
+	        cardSprite.inputEnabled = true;
+	        cardSprite.index = i;
+	        cardSprite.value = array[i];
+	        cardSprite.input.useHandCursor = true;
+	        cardSprite.events.onInputDown.add(tapDownOnSprite, this);
+	        cardSprite.events.onInputUp.add(tapUp, this);
+	    }
+	};
+
+	var showCoveredCards = function() {
+	    var stageWidth = 11 * globalVariables.scaledCardWidth / 4 + 2 * constants.MARGIN;
+	    var stageHeight = globalVariables.scaledCardHeight + 2 * constants.MARGIN;
+
+	    var coveredCardsStage = globalVariables.coveredCards.create(globalVariables.screenWidth / 2 - stageWidth / 2, globalVariables.screenHeight / 2 - stageHeight / 2, 'stageBackground');
+	    coveredCardsStage.alpha = 0.3;
+	    coveredCardsStage.width = stageWidth;
+	    coveredCardsStage.height = stageHeight;
+	    for (var i = 0; i < globalVariables.coveredCards.indexes.length; i ++) {
+	        var cardName = toolbox.getCardName(globalVariables.coveredCards.indexes[i]);
+	        var coveredCard = globalVariables.coveredCards.create(coveredCardsStage.x + constants.MARGIN + i * globalVariables.scaledCardWidth / 4, coveredCardsStage.y + constants.MARGIN, cardName);
+	        coveredCard.scale.setTo(globalVariables.scaleWidthRatio, globalVariables.scaleHeightRatio);
+	    }
+	    globalVariables.isShowingCoveredCards = true;
+	};
+
+	var tapUp = function(sprite, pointer) {
+	    if (pointer.x >= globalVariables.cardsAtHand.children[0].x && 
+	        pointer.x <= (globalVariables.cardsAtHand.children[globalVariables.cardsAtHand.children.length - 1].x + globalVariables.cardsAtHand.children[globalVariables.cardsAtHand.children.length - 1].width) && 
+	        pointer.y >= globalVariables.cardsAtHand.children[0].y && 
+	        pointer.y <= (globalVariables.cardsAtHand.children[0].y + globalVariables.cardsAtHand.children[0].height)) {
+	        globalVariables.endSwipeCardIndex = -1;
+	        for (var i = 0; i < globalVariables.cardsAtHand.children.length - 1; i ++) {
+	            if (pointer.x >= globalVariables.cardsAtHand.children[i].x &&
+	                pointer.x <= globalVariables.cardsAtHand.children[i + 1].x) {
+	                globalVariables.endSwipeCardIndex = i;
+	                break;
+	            }
+	        }
+	        if (globalVariables.endSwipeCardIndex == -1) {
+	            globalVariables.endSwipeCardIndex = globalVariables.cardsAtHand.children.length - 1;
+	        }
+	        if (globalVariables.startSwipeCardIndex <= globalVariables.endSwipeCardIndex) {
+	            for (i = globalVariables.startSwipeCardIndex; i <= globalVariables.endSwipeCardIndex; i ++) {
+	                toolbox.toggleCardSelection(globalVariables.cardsAtHand.children[i]);
+	            }
+	        } else {
+	            for (i = globalVariables.startSwipeCardIndex; i >= globalVariables.endSwipeCardIndex; i --) {
+	                toolbox.toggleCardSelection(globalVariables.cardsAtHand.children[i]);
+	            }
+	        }
+	    }
+	};
+
+	var tapDownOnSprite = function(sprite, pointer) {
+	    globalVariables.startSwipeCardIndex = sprite.index;
+	};
+
+	module.exports = {
+	    displayCards: displayCards,
+
+	    showCoveredCards: showCoveredCards,
+
+	    tapUp: tapUp,
+
+	    tapDownOnSprite: tapDownOnSprite,
 
 	    backgroundTapped: function() {
 	        var i;
@@ -764,64 +802,6 @@
 	                }
 	            }
 	        }
-	    },
-
-	    displayCards: function(array) {
-	        var leftMargin = (globalVariables.screenWidth - (Math.floor(globalVariables.scaledCardWidth / 4) * array.length + Math.floor(3 * globalVariables.scaledCardWidth / 4))) / 2;
-	        var i;
-	        var spritesShouldBeRemoved = [];
-	        if (globalVariables.cardsAtHand.children.length > 0) {
-	            for (i = 0; i < globalVariables.cardsAtHand.children.length; i ++) {
-	                spritesShouldBeRemoved.push(globalVariables.cardsAtHand.children[i]);
-	            } 
-	            for (i = 0; i < spritesShouldBeRemoved.length; i ++) {
-	                globalVariables.cardsAtHand.remove(spritesShouldBeRemoved[i]); 
-	            }
-	        }
-	        for (i = 0; i < array.length; i ++) {
-	            var cardName = toolbox.getCardName(array[i]);
-	            var cardSprite = globalVariables.cardsAtHand.create(leftMargin + i * Math.floor(globalVariables.scaledCardWidth / 4), globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.MARGIN, cardName);
-	            cardSprite.scale.setTo(globalVariables.scaleWidthRatio, globalVariables.scaleHeightRatio);
-	            cardSprite.isSelected = false;
-	            cardSprite.inputEnabled = true;
-	            cardSprite.index = i;
-	            cardSprite.value = array[i];
-	            cardSprite.input.useHandCursor = true;
-	            cardSprite.events.onInputDown.add(this.tapDownOnSprite, this);
-	            cardSprite.events.onInputUp.add(this.tapUp, this);
-	        }
-	    },
-
-	    tapUp: function(sprite, pointer) {
-	        if (pointer.x >= globalVariables.cardsAtHand.children[0].x && 
-	            pointer.x <= (globalVariables.cardsAtHand.children[globalVariables.cardsAtHand.children.length - 1].x + globalVariables.cardsAtHand.children[globalVariables.cardsAtHand.children.length - 1].width) && 
-	            pointer.y >= globalVariables.cardsAtHand.children[0].y && 
-	            pointer.y <= (globalVariables.cardsAtHand.children[0].y + globalVariables.cardsAtHand.children[0].height)) {
-	            globalVariables.endSwipeCardIndex = -1;
-	            for (var i = 0; i < globalVariables.cardsAtHand.children.length - 1; i ++) {
-	                if (pointer.x >= globalVariables.cardsAtHand.children[i].x &&
-	                    pointer.x <= globalVariables.cardsAtHand.children[i + 1].x) {
-	                    globalVariables.endSwipeCardIndex = i;
-	                    break;
-	                }
-	            }
-	            if (globalVariables.endSwipeCardIndex == -1) {
-	                globalVariables.endSwipeCardIndex = globalVariables.cardsAtHand.children.length - 1;
-	            }
-	            if (globalVariables.startSwipeCardIndex <= globalVariables.endSwipeCardIndex) {
-	                for (i = globalVariables.startSwipeCardIndex; i <= globalVariables.endSwipeCardIndex; i ++) {
-	                    toolbox.toggleCardSelection(globalVariables.cardsAtHand.children[i]);
-	                }
-	            } else {
-	                for (i = globalVariables.startSwipeCardIndex; i >= globalVariables.endSwipeCardIndex; i --) {
-	                    toolbox.toggleCardSelection(globalVariables.cardsAtHand.children[i]);
-	                }
-	            }
-	        }
-	    },
-
-	    tapDownOnSprite: function(sprite, pointer) {
-	        globalVariables.startSwipeCardIndex = sprite.index;
 	    },
 
 	    playSelectedCards: function() {
@@ -1011,9 +991,26 @@
 	    },
 
 	    settleCoveredCards: function() {
-
+	        var valuesOfSelectedCoveredCards = [];
+	        for (var i = 0; i < globalVariables.cardsAtHand.children.length; i ++) {
+	            if (globalVariables.cardsAtHand.children[i].isSelected) {
+	                valuesOfSelectedCoveredCards.push(globalVariables.cardsAtHand.children[i].value);
+	            }
+	        }
+	        if (valuesOfSelectedCoveredCards.length != 8) {
+	            return;
+	        }
+	        for (i = 0; i < valuesOfSelectedCoveredCards.length; i ++) {
+	            var index = globalVariables.cardsAtHand.indexes.indexOf(valuesOfSelectedCoveredCards[i]);
+	            globalVariables.cardsAtHand.indexes.splice(index, 1);
+	        }
+	        displayCards(globalVariables.cardsAtHand.indexes);
+	        var coveredCardsIcon = globalVariables.coveredCards.create(constants.MARGIN, constants.MARGIN, 'back');
+	        coveredCardsIcon.scale.setTo(globalVariables.scaleWidthRatio, globalVariables.scaleHeightRatio);
+	        coveredCardsIcon.inputEnabled = true;
+	        globalVariables.coveredCards.indexes = valuesOfSelectedCoveredCards;
+	        coveredCardsIcon.events.onInputDown.add(showCoveredCards, this);
 	    }
-
 	};
 
 

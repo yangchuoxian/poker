@@ -2,26 +2,6 @@ var constants = require('./constants.js');
 var globalVariables = require('./globalVariables.js');
 
 module.exports = {
-	shuffleCards: function() {
-	    var array = [];
-	    var i, j;
-	    for (j = 0; j < 2; j ++) {
-	        for (i = 1; i <= 46; i ++) {
-	            array.push(i);
-	        }
-	    }
-	    var copy = [], n = array.length;
-	    while (n) {
-	        i = Math.floor(Math.random() * array.length);
-	        if (i in array) {
-	            copy.push(array[i]);
-	            delete array[i];
-	            n --;
-	        }
-	    }
-	    return copy;
-	},
-
 	sortCards: function(array) {
 	    var sortNumber = function(a, b) {
 	        return a - b;
