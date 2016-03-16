@@ -1,0 +1,22 @@
+<div class="container large-top-margin">
+    <div class="col-sm-4 col-sm-offset-4 error-message-box" ng-show="data.loginErrorMessage" ng-bind="data.loginErrorMessage"></div>
+    <form method="post" class="col-sm-4 col-sm-offset-4 login-form" role="login-form"
+          ng-submit="submitPlayerLogin($event)">
+        <div class="input-group login-input-group">
+            <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+            <input type="text" class="form-control" ng-model="data.username" name="username"
+                   placeholder="请输入用户名" required auto-focus="true">
+        </div>
+        <div class="input-group login-input-group">
+            <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+            <input type="password" class="form-control" ng-model="data.password" name="password"
+                   placeholder="请输入密码" required>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-primary btn-block">提交</button>
+        </div>
+    </form>
+    <div class="col-sm-4 col-sm-offset-4">
+		<a ui-sref="register" class="pull-right">注册新用户</a>
+    </div>
+</div>

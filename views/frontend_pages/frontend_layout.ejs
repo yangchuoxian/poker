@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>三打哈</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="csrf-token" content="<%= _csrf %>"/>
+    <% if (process.env.NODE_ENV == 'development') { %>
+    	<link rel="stylesheet" href="/styles/frontend/bootstrap.min.css">
+    	<link rel="stylesheet" href="/styles/frontend/ui-bootstrap-csp.css">
+    	<link rel="stylesheet" href="/styles/frontend/frontend.css">
+    <% } else { %>
+	    <link rel="stylesheet" href="/styles/frontend/production.frontend.min.css">
+    <% } %>
+</head>
+<body ng-app="vt-poker-app">
+<div ng-controller="BaseController">
+    <input type="hidden" id="userId" ng-bind="userId">
+    <input type="hidden" id="username" ng-bind="username">
+    <input type="hidden" id="loginToken" ng-bind="loginToken">
+    <input type="hidden" id="roomName" ng-bind="roomName">
+    <%- body %>
+    <% if (process.env.NODE_ENV == 'development') { %>
+    	<script src="/js/dependencies/sails.io.js"></script>
+    	<script src="/js/dependencies/angular.min.js"></script>
+    	<script src="/js/dependencies/ui-bootstrap.js"></script>
+    	<script src="/js/dependencies/angular-ui-router.min.js"></script>
+        <script src="/js/dependencies/ocLazyLoad.min.js"></script>
+    	<script src="/js/frontend/frontend.js"></script>
+        <script src="/js/dependencies/phaser.min.js"></script>
+    <% } else { %>
+    	<script src="/js/frontend/production.frontend.min.js"></script>
+    <% } %>
+</div>
+</body>
+</html>
