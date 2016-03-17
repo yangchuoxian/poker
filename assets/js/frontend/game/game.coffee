@@ -15,7 +15,7 @@ preload = () ->
     game.load.spritesheet 'setScoreButton', 'images/setScoreButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT
     game.load.spritesheet 'passButton', 'images/passButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT
     game.load.spritesheet 'surrenderButton', 'images/surrenderButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT
-    game.load.spritesheet 'settleMainButton', 'images/settleMainButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT
+    game.load.spritesheet 'selectSuitButton', 'images/selectSuitButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT
     game.load.spritesheet 'settleCoveredCardsButton', 'images/settleCoveredCardsButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT
     game.load.image 'back', 'images/back.png'
     game.load.image 'bigJoker', 'images/bigJoker.png'
@@ -65,6 +65,14 @@ preload = () ->
     game.load.image 'sixOfDiamonds', 'images/sixOfDiamonds.png'
     game.load.image 'fiveOfDiamonds', 'images/fiveOfDiamonds.png'
 
+    game.load.image 'spade', 'images/spade.png'
+    game.load.image 'heart', 'images/heart.png'
+    game.load.image 'club', 'images/club.png'
+    game.load.image 'diamond', 'images/diamond.png'
+
+    game.load.spritesheet 'suites', 'images/suites.png', constants.MAIN_SUIT_ICON_SIZE, constants.MAIN_SUIT_ICON_SIZE
+    game.load.image 'rectangle', 'images/rectangle.png'
+
 create = () ->
     globalVariables.background = game.add.sprite 0, 0, 'background'
     globalVariables.background.inputEnabled = true
@@ -82,28 +90,39 @@ create = () ->
 
     globalVariables.cardsAtHand = game.add.group()
     globalVariables.coveredCards = game.add.group()
+    globalVariables.selectSuitStage = game.add.group()
 
-    globalVariables.playCardsButton = game.add.button(game.world.centerX - constants.BUTTON_WIDTH / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'playButton', actions.playSelectedCards, this, 0, 0, 1, 0)
+    globalVariables.playCardsButton = game.add.button game.world.centerX - constants.BUTTON_WIDTH / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'playButton', actions.playSelectedCards, this, 1, 0, 1
     globalVariables.playCardsButton.visible = false
 
-    globalVariables.prepareButton = game.add.button(game.world.centerX - constants.BUTTON_WIDTH - constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'prepareButton', actions.sendGetReadyMessage, this, 1, 0, 1, 0)
+    globalVariables.prepareButton = game.add.button game.world.centerX - constants.BUTTON_WIDTH - constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'prepareButton', actions.sendGetReadyMessage, this, 1, 0, 1
 
-    globalVariables.leaveButton = game.add.button(game.world.centerX + constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'leaveButton', actions.leaveRoom, this, 1, 0, 1, 0)
+    globalVariables.leaveButton = game.add.button game.world.centerX + constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'leaveButton', actions.leaveRoom, this, 1, 0, 1
 
-    globalVariables.surrenderButton = game.add.button(game.world.centerX - constants.BUTTON_WIDTH - constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'surrenderButton', actions.surrender, this, 1, 0, 1, 0)
+    globalVariables.surrenderButton = game.add.button game.world.centerX - constants.BUTTON_WIDTH - constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'surrenderButton', actions.surrender, this, 1, 0, 1
     globalVariables.surrenderButton.visible = false
 
-    globalVariables.settleCoveredCardsButton = game.add.button(game.world.centerX + constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'settleCoveredCardsButton', actions.settleCoveredCards, this, 1, 0, 1, 0)
+    globalVariables.settleCoveredCardsButton = game.add.button game.world.centerX + constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'settleCoveredCardsButton', actions.settleCoveredCards, this, 1, 0, 1
+    globalVariables.settleCoveredCardsButton.setFrames 2, 2, 2
+    globalVariables.settleCoveredCardsButton.inputEnabled = false
     globalVariables.settleCoveredCardsButton.visible = false
 
-    globalVariables.settleMainButton = game.add.button(game.world.centerX + constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'settleMainButton', actions.settleCoveredCards, this, 1, 0, 1, 0)
-    globalVariables.settleMainButton.visible = false
+    globalVariables.selectSuitButton = game.add.button game.world.centerX + constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'selectSuitButton', actions.selectSuit, this, 2, 2, 2
+    globalVariables.selectSuitButton.inputEnabled = false
+    globalVariables.selectSuitButton.visible = false
 
     globalVariables.currentUserPlayedCards = game.add.group()
     globalVariables.user1PlayedCards = game.add.group()
     globalVariables.user2PlayedCards = game.add.group()
     globalVariables.user3PlayedCards = game.add.group()
-    titleOfAimedScores = game.add.text(globalVariables.screenWidth - 280, constants.MARGIN, '叫分', constants.TEXT_STYLE)
+
+    titleOfMainSuit = game.add.text globalVariables.screenWidth - 350, constants.MARGIN, '主牌', constants.TEXT_STYLE
+    titleOfMainSuit.setTextBounds 0, 0, 70, 30
+    globalVariables.iconOfMainSuit = game.add.sprite globalVariables.screenWidth - 350 + 20, 2 * constants.MARGIN + 30, 'suites'
+    globalVariables.iconOfMainSuit.scale.setTo 30 / constants.MAIN_SUIT_ICON_SIZE, 30 / constants.MAIN_SUIT_ICON_SIZE
+    globalVariables.iconOfMainSuit.frame = 0
+
+    titleOfAimedScores = game.add.text globalVariables.screenWidth - 280, constants.MARGIN, '叫分', constants.TEXT_STYLE
     titleOfAimedScores.setTextBounds 0, 0, 70, 30
     globalVariables.textOfAimedScores = game.add.text globalVariables.screenWidth - 280, 2 * constants.MARGIN + 30, '80', constants.TEXT_STYLE
     globalVariables.textOfAimedScores.setTextBounds 0, 0, 70, 30
@@ -124,36 +143,14 @@ create = () ->
     globalVariables.player1StatusText = game.add.text globalVariables.screenWidth - 2 * constants.AVATAR_SIZE - 3 * constants.MARGIN, game.world.centerY, '', constants.TEXT_STYLE
     globalVariables.player2StatusText = game.add.text game.world.centerX - constants.MARGIN, constants.AVATAR_SIZE + 4 * constants.MARGIN, '', constants.TEXT_STYLE
     globalVariables.player3StatusText = game.add.text constants.AVATAR_SIZE + 2 * constants.MARGIN, game.world.centerY, '', constants.TEXT_STYLE
+
+    actions.getRoomInfo game
+
     socketCommunication()
 
 update = () ->
 
 socketCommunication = () ->
-    io.socket.get '/get_room_info',
-        userId: globalVariables.userId
-        loginToken: globalVariables.loginToken
-    , (resData, jwres) ->
-        if jwres.statusCode is 200
-            globalVariables.textOfRoomName.text = resData.roomName
-            usernames = resData.usernames
-            switch usernames.length
-                when 2
-                    actions.showPlayer3Info game, usernames[0]
-                when 3
-                    actions.showPlayer3Info game, usernames[1]
-                    actions.showPlayer2Info game, usernames[0]
-                when 4
-                    actions.showPlayer3Info game, usernames[2]
-                    actions.showPlayer2Info game, usernames[1]
-                    actions.showPlayer1Info game, usernames[0]
-            readyPlayers = resData.readyPlayers
-            for i in [0...readyPlayers.length]
-                if globalVariables.player1Username
-                    if readyPlayers[i] is globalVariables.player1Username.text then globalVariables.player1StatusText.text = 'Ready'
-                if globalVariables.player2Username
-                    if readyPlayers[i] is globalVariables.player2Username.text then globalVariables.player2StatusText.text = 'Ready'
-                if globalVariables.player3Username
-                    if readyPlayers[i] is globalVariables.player3Username.text then globalVariables.player3StatusText.text = 'Ready'
     io.socket.on 'newPlayerJoined', (data) ->
         globalVariables.numberOfPlayersInRoom += 1
         switch globalVariables.numberOfPlayersInRoom
@@ -216,6 +213,7 @@ socketCommunication = () ->
         else if passedUser is globalVariables.player2Username.text then globalVariables.player2StatusText.text = '不要'
         else if passedUser is globalVariables.player3Username.text then globalVariables.player3StatusText.text = '不要'
         if usernameToCallScore is globalVariables.username then actions.showCallScorePanel game, currentAimedScore
+
     io.socket.on 'makerSettled', (data) ->
         aimedScore = data.aimedScore
         makerUsername = data.makerUsername
@@ -230,6 +228,8 @@ socketCommunication = () ->
             actions.displayCards globalVariables.cardsAtHand.indexes
             globalVariables.surrenderButton.visible = true
             globalVariables.settleCoveredCardsButton.visible = true
+            globalVariables.settleCoveredCardsButton.inputEnabled = false
+            globalVariables.settleCoveredCardsButton.setFrames 2, 2, 2
 
             globalVariables.player1StatusText.text = ''
             globalVariables.player2StatusText.text = ''
@@ -249,7 +249,22 @@ socketCommunication = () ->
             globalVariables.player1StatusText.text = ''
             globalVariables.player2StatusText.text = ''
             globalVariables.player3StatusText.text = '庄家埋底中...'
+        globalVariables.gameStatus = constants.GAME_STATUS_SETTLING_COVERED_CARDS
 
+    io.socket.on 'finishedSettlingCoveredCards', (data) ->
+        makerUsername = data.maker
+        if makerUsername is globalVariables.player1Username.text then globalVariables.player1StatusText.text = '庄家选主中...'
+        else if makerUsername is globalVariables.player2Username.text then globalVariables.player2StatusText.text = '庄家选主中...'
+        else if makerUsername is globalVariables.player3Username.text then globalVariables.player3StatusText.text = '庄家选主中...'
+
+    io.socket.on 'mainSuitChosen', (data) ->
+        mainSuit = data.mainSuit
+        globalVariables.mainSuit = mainSuit
+        globalVariables.iconOfMainSuit.frame = globalVariables.mainSuit
+        globalVariables.meStatusText.text = ''
+        globalVariables.player1StatusText.text = ''
+        globalVariables.player2StatusText.text = ''
+        globalVariables.player3StatusText.text = ''
 
 game = new Phaser.Game globalVariables.screenWidth, globalVariables.screenHeight, Phaser.AUTO, '',
     preload: preload

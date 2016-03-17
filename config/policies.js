@@ -26,5 +26,7 @@ module.exports.policies = {
 		'getReady': ['isLoggedIn'],
 		'setScore': ['isLoggedIn'],
 		'pass': ['isLoggedIn'],
+		'settleCoveredCards': ['isLoggedIn'],
+		'chooseMainSuit': ['isLoggedIn'],
 	}
 };

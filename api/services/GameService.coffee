@@ -8,10 +8,7 @@ module.exports =
         deck4 = shuffledCards.slice sails.config.constants.numOfCardsForEachPlayer * 3, sails.config.constants.numOfCardsForEachPlayer * 4
         coveredCards = shuffledCards.slice sails.config.constants.numOfCardsForEachPlayer * 4, sails.config.constants.numOfCardsForEachPlayer * 4 + sails.config.constants.numOfCoveredCards
         Room.update id: room.id,
-            deck1: deck1
-            deck2: deck2
-            deck3: deck3
-            deck4: deck4
+            decks: [deck1, deck2, deck3, deck4]
             coveredCards: coveredCards
         .then (updatedRooms) ->
             sails.sockets.broadcast room.socketIds[0], 'cardsSent', {cards: deck1, usernameToCallScore: usernameToCallScore}

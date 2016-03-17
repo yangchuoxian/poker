@@ -26,6 +26,7 @@
     settleCoveredCardsButton: null,
     startSwipeCardIndex: null,
     endSwipeCardIndex: null,
+    iconOfMainSuit: null,
     textOfCurrentScores: null,
     textOfAimedScores: null,
     textOfChipsWon: null,
@@ -44,7 +45,12 @@
     player1StatusText: null,
     player2StatusText: null,
     player3StatusText: null,
-    callScoreStage: null
+    callScoreStage: null,
+    selectMainStage: null,
+    gameStatus: null,
+    selectSuitButton: null,
+    selectSuitStage: null,
+    mainSuit: null
   };
 
 }).call(this);

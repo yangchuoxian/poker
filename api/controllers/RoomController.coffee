@@ -190,6 +190,7 @@ module.exports =
                 passedUsernames: foundRoomWithName.passedUsernames
         .then (updatedRooms) ->
             currentRoomObject = updatedRooms[0]
+            res.send 'OK'
             nextUsernameToCallScore = RoomService.getNextUsernameToCallScore currentRoomObject, currentUserObject
             if nextUsernameToCallScore isnt ''     # At least one user have not passed yet
                 sails.sockets.broadcast currentUserObject.roomName, 'userPassed',
@@ -201,5 +202,39 @@ module.exports =
                     aimedScore: currentRoomObject.aimedScore
                     makerUsername: currentRoomObject.lastCaller
                     coveredCards: currentRoomObject.coveredCards
+            Promise.resolve()
+        .catch (err) -> res.send 400, err
+
+    settleCoveredCards: (req, res) ->
+        roomName = req.param 'roomName'
+        coveredCards = req.param 'coveredCards'
+        cardsAtHand = req.param 'cardsAtHand'
+        maker = req.param 'maker'
+        Room.findOne name: roomName
+        .then (foundRoomWithName) ->
+            return Promise.reject '房间不存在' if not foundRoomWithName
+            index = foundRoomWithName.usernames.indexOf maker
+            foundRoomWithName.decks[index] = cardsAtHand
+            foundRoomWithName.coveredCards = coveredCards
+            Room.update id: foundRoomWithName.id,
+                decks: foundRoomWithName.decks
+                coveredCards: foundRoomWithName.coveredCards
+                maker: maker
+        .then (updatedRooms) ->
+            sails.sockets.broadcast roomName, 'finishedSettlingCoveredCards',
+                maker: maker
+            res.send 'OK'
+        .catch (err) -> res.send 400, err
+
+    chooseMainSuit: (req, res) ->
+        roomName = req.param 'roomName'
+        maker = req.param 'maker'
+        mainSuit = req.param 'mainSuit'
+        Room.update name: roomName,
+            mainSuit: mainSuit
+        .then (updatedRooms) ->
+            return Promise.reject '房间不存在' if not updatedRooms
+            sails.sockets.broadcast roomName, 'mainSuitChosen',
+                mainSuit: mainSuit
             res.send 'OK'
         .catch (err) -> res.send 400, err

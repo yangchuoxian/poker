@@ -24,6 +24,7 @@ module.exports =
     settleCoveredCardsButton: null
     startSwipeCardIndex: null
     endSwipeCardIndex: null
+    iconOfMainSuit: null
     textOfCurrentScores: null
     textOfAimedScores: null
     textOfChipsWon: null
@@ -43,3 +44,8 @@ module.exports =
     player2StatusText: null
     player3StatusText: null
     callScoreStage: null
+    selectMainStage: null
+    gameStatus: null
+    selectSuitButton: null
+    selectSuitStage: null
+    mainSuit: null

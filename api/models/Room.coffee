@@ -44,19 +44,11 @@ module.exports =
             defaultsTo: []
         lastCaller:
             type: 'string'
-        deck1:
-            type: 'array'
-            array: true
-            defaultsTo: []
-        deck2:
-            type: 'array'
-            array: true
-            defaultsTo: []
-        deck3:
-            type: 'array'
-            array: true
-            defaultsTo: []
-        deck4:
+        maker:
+            type: 'string'
+        mainSuit:
+            type: 'integer'
+        decks:
             type: 'array'
             array: true
             defaultsTo: []

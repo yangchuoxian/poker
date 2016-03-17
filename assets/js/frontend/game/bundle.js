@@ -68,7 +68,7 @@
 	    game.load.spritesheet('setScoreButton', 'images/setScoreButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT);
 	    game.load.spritesheet('passButton', 'images/passButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT);
 	    game.load.spritesheet('surrenderButton', 'images/surrenderButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT);
-	    game.load.spritesheet('settleMainButton', 'images/settleMainButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT);
+	    game.load.spritesheet('selectSuitButton', 'images/selectSuitButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT);
 	    game.load.spritesheet('settleCoveredCardsButton', 'images/settleCoveredCardsButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT);
 	    game.load.image('back', 'images/back.png');
 	    game.load.image('bigJoker', 'images/bigJoker.png');
@@ -116,11 +116,17 @@
 	    game.load.image('nineOfDiamonds', 'images/nineOfDiamonds.png');
 	    game.load.image('eightOfDiamonds', 'images/eightOfDiamonds.png');
 	    game.load.image('sixOfDiamonds', 'images/sixOfDiamonds.png');
-	    return game.load.image('fiveOfDiamonds', 'images/fiveOfDiamonds.png');
+	    game.load.image('fiveOfDiamonds', 'images/fiveOfDiamonds.png');
+	    game.load.image('spade', 'images/spade.png');
+	    game.load.image('heart', 'images/heart.png');
+	    game.load.image('club', 'images/club.png');
+	    game.load.image('diamond', 'images/diamond.png');
+	    game.load.spritesheet('suites', 'images/suites.png', constants.MAIN_SUIT_ICON_SIZE, constants.MAIN_SUIT_ICON_SIZE);
+	    return game.load.image('rectangle', 'images/rectangle.png');
 	  };
 
 	  create = function() {
-	    var titleOfAimedScores, titleOfChipsWon, titleOfCurrentScores, titleOfRoomName;
+	    var titleOfAimedScores, titleOfChipsWon, titleOfCurrentScores, titleOfMainSuit, titleOfRoomName;
 	    globalVariables.background = game.add.sprite(0, 0, 'background');
 	    globalVariables.background.inputEnabled = true;
 	    globalVariables.background.events.onInputDown.add(actions.backgroundTapped, this);
@@ -133,20 +139,29 @@
 	    globalVariables.scaledCardHeight = constants.CARD_HEIGHT * globalVariables.scaleHeightRatio;
 	    globalVariables.cardsAtHand = game.add.group();
 	    globalVariables.coveredCards = game.add.group();
-	    globalVariables.playCardsButton = game.add.button(game.world.centerX - constants.BUTTON_WIDTH / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'playButton', actions.playSelectedCards, this, 0, 0, 1, 0);
+	    globalVariables.selectSuitStage = game.add.group();
+	    globalVariables.playCardsButton = game.add.button(game.world.centerX - constants.BUTTON_WIDTH / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'playButton', actions.playSelectedCards, this, 1, 0, 1);
 	    globalVariables.playCardsButton.visible = false;
-	    globalVariables.prepareButton = game.add.button(game.world.centerX - constants.BUTTON_WIDTH - constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'prepareButton', actions.sendGetReadyMessage, this, 1, 0, 1, 0);
-	    globalVariables.leaveButton = game.add.button(game.world.centerX + constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'leaveButton', actions.leaveRoom, this, 1, 0, 1, 0);
-	    globalVariables.surrenderButton = game.add.button(game.world.centerX - constants.BUTTON_WIDTH - constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'surrenderButton', actions.surrender, this, 1, 0, 1, 0);
+	    globalVariables.prepareButton = game.add.button(game.world.centerX - constants.BUTTON_WIDTH - constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'prepareButton', actions.sendGetReadyMessage, this, 1, 0, 1);
+	    globalVariables.leaveButton = game.add.button(game.world.centerX + constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'leaveButton', actions.leaveRoom, this, 1, 0, 1);
+	    globalVariables.surrenderButton = game.add.button(game.world.centerX - constants.BUTTON_WIDTH - constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'surrenderButton', actions.surrender, this, 1, 0, 1);
 	    globalVariables.surrenderButton.visible = false;
-	    globalVariables.settleCoveredCardsButton = game.add.button(game.world.centerX + constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'settleCoveredCardsButton', actions.settleCoveredCards, this, 1, 0, 1, 0);
+	    globalVariables.settleCoveredCardsButton = game.add.button(game.world.centerX + constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'settleCoveredCardsButton', actions.settleCoveredCards, this, 1, 0, 1);
+	    globalVariables.settleCoveredCardsButton.setFrames(2, 2, 2);
+	    globalVariables.settleCoveredCardsButton.inputEnabled = false;
 	    globalVariables.settleCoveredCardsButton.visible = false;
-	    globalVariables.settleMainButton = game.add.button(game.world.centerX + constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'settleMainButton', actions.settleCoveredCards, this, 1, 0, 1, 0);
-	    globalVariables.settleMainButton.visible = false;
+	    globalVariables.selectSuitButton = game.add.button(game.world.centerX + constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'selectSuitButton', actions.selectSuit, this, 2, 2, 2);
+	    globalVariables.selectSuitButton.inputEnabled = false;
+	    globalVariables.selectSuitButton.visible = false;
 	    globalVariables.currentUserPlayedCards = game.add.group();
 	    globalVariables.user1PlayedCards = game.add.group();
 	    globalVariables.user2PlayedCards = game.add.group();
 	    globalVariables.user3PlayedCards = game.add.group();
+	    titleOfMainSuit = game.add.text(globalVariables.screenWidth - 350, constants.MARGIN, '主牌', constants.TEXT_STYLE);
+	    titleOfMainSuit.setTextBounds(0, 0, 70, 30);
+	    globalVariables.iconOfMainSuit = game.add.sprite(globalVariables.screenWidth - 350 + 20, 2 * constants.MARGIN + 30, 'suites');
+	    globalVariables.iconOfMainSuit.scale.setTo(30 / constants.MAIN_SUIT_ICON_SIZE, 30 / constants.MAIN_SUIT_ICON_SIZE);
+	    globalVariables.iconOfMainSuit.frame = 0;
 	    titleOfAimedScores = game.add.text(globalVariables.screenWidth - 280, constants.MARGIN, '叫分', constants.TEXT_STYLE);
 	    titleOfAimedScores.setTextBounds(0, 0, 70, 30);
 	    globalVariables.textOfAimedScores = game.add.text(globalVariables.screenWidth - 280, 2 * constants.MARGIN + 30, '80', constants.TEXT_STYLE);
@@ -167,59 +182,13 @@
 	    globalVariables.player1StatusText = game.add.text(globalVariables.screenWidth - 2 * constants.AVATAR_SIZE - 3 * constants.MARGIN, game.world.centerY, '', constants.TEXT_STYLE);
 	    globalVariables.player2StatusText = game.add.text(game.world.centerX - constants.MARGIN, constants.AVATAR_SIZE + 4 * constants.MARGIN, '', constants.TEXT_STYLE);
 	    globalVariables.player3StatusText = game.add.text(constants.AVATAR_SIZE + 2 * constants.MARGIN, game.world.centerY, '', constants.TEXT_STYLE);
+	    actions.getRoomInfo(game);
 	    return socketCommunication();
 	  };
 
 	  update = function() {};
 
 	  socketCommunication = function() {
-	    io.socket.get('/get_room_info', {
-	      userId: globalVariables.userId,
-	      loginToken: globalVariables.loginToken
-	    }, function(resData, jwres) {
-	      var i, j, readyPlayers, ref, results, usernames;
-	      if (jwres.statusCode === 200) {
-	        globalVariables.textOfRoomName.text = resData.roomName;
-	        usernames = resData.usernames;
-	        switch (usernames.length) {
-	          case 2:
-	            actions.showPlayer3Info(game, usernames[0]);
-	            break;
-	          case 3:
-	            actions.showPlayer3Info(game, usernames[1]);
-	            actions.showPlayer2Info(game, usernames[0]);
-	            break;
-	          case 4:
-	            actions.showPlayer3Info(game, usernames[2]);
-	            actions.showPlayer2Info(game, usernames[1]);
-	            actions.showPlayer1Info(game, usernames[0]);
-	        }
-	        readyPlayers = resData.readyPlayers;
-	        results = [];
-	        for (i = j = 0, ref = readyPlayers.length; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
-	          if (globalVariables.player1Username) {
-	            if (readyPlayers[i] === globalVariables.player1Username.text) {
-	              globalVariables.player1StatusText.text = 'Ready';
-	            }
-	          }
-	          if (globalVariables.player2Username) {
-	            if (readyPlayers[i] === globalVariables.player2Username.text) {
-	              globalVariables.player2StatusText.text = 'Ready';
-	            }
-	          }
-	          if (globalVariables.player3Username) {
-	            if (readyPlayers[i] === globalVariables.player3Username.text) {
-	              results.push(globalVariables.player3StatusText.text = 'Ready');
-	            } else {
-	              results.push(void 0);
-	            }
-	          } else {
-	            results.push(void 0);
-	          }
-	        }
-	        return results;
-	      }
-	    });
 	    io.socket.on('newPlayerJoined', function(data) {
 	      globalVariables.numberOfPlayersInRoom += 1;
 	      switch (globalVariables.numberOfPlayersInRoom) {
@@ -321,7 +290,7 @@
 	        return actions.showCallScorePanel(game, currentAimedScore);
 	      }
 	    });
-	    return io.socket.on('makerSettled', function(data) {
+	    io.socket.on('makerSettled', function(data) {
 	      var aimedScore, coveredCards, makerUsername;
 	      aimedScore = data.aimedScore;
 	      makerUsername = data.makerUsername;
@@ -340,25 +309,50 @@
 	        actions.displayCards(globalVariables.cardsAtHand.indexes);
 	        globalVariables.surrenderButton.visible = true;
 	        globalVariables.settleCoveredCardsButton.visible = true;
+	        globalVariables.settleCoveredCardsButton.inputEnabled = false;
+	        globalVariables.settleCoveredCardsButton.setFrames(2, 2, 2);
 	        globalVariables.player1StatusText.text = '';
 	        globalVariables.player2StatusText.text = '';
-	        return globalVariables.player3StatusText.text = '';
+	        globalVariables.player3StatusText.text = '';
 	      } else if (makerUsername === globalVariables.player1Username.text) {
 	        globalVariables.meStatusText.text = '';
 	        globalVariables.player1StatusText.text = '庄家埋底中...';
 	        globalVariables.player2StatusText.text = '';
-	        return globalVariables.player3StatusText.text = '';
+	        globalVariables.player3StatusText.text = '';
 	      } else if (makerUsername === globalVariables.player2Username.text) {
 	        globalVariables.meStatusText.text = '';
 	        globalVariables.player1StatusText.text = '';
 	        globalVariables.player2StatusText.text = '庄家埋底中...';
-	        return globalVariables.player3StatusText.text = '';
+	        globalVariables.player3StatusText.text = '';
 	      } else if (makerUsername === globalVariables.player3Username.text) {
 	        globalVariables.meStatusText.text = '';
 	        globalVariables.player1StatusText.text = '';
 	        globalVariables.player2StatusText.text = '';
-	        return globalVariables.player3StatusText.text = '庄家埋底中...';
+	        globalVariables.player3StatusText.text = '庄家埋底中...';
 	      }
+	      return globalVariables.gameStatus = constants.GAME_STATUS_SETTLING_COVERED_CARDS;
+	    });
+	    io.socket.on('finishedSettlingCoveredCards', function(data) {
+	      var makerUsername;
+	      console.log('received finishedSettlingCoveredCards');
+	      makerUsername = data.maker;
+	      if (makerUsername === globalVariables.player1Username.text) {
+	        return globalVariables.player1StatusText.text = '庄家选主中...';
+	      } else if (makerUsername === globalVariables.player2Username.text) {
+	        return globalVariables.player2StatusText.text = '庄家选主中...';
+	      } else if (makerUsername === globalVariables.player3Username.text) {
+	        return globalVariables.player3StatusText.text = '庄家选主中...';
+	      }
+	    });
+	    return io.socket.on('mainSuitChosen', function(data) {
+	      var mainSuit;
+	      console.log('received mainSuitChosen');
+	      mainSuit = data.mainSuit;
+	      globalVariables.mainSuit = mainSuit;
+	      globalVariables.iconOfMainSuit.frame = globalVariables.mainSuit;
+	      globalVariables.player1StatusText.text = '';
+	      globalVariables.player2StatusText.text = '';
+	      return globalVariables.player3StatusText.text = '';
 	    });
 	  };
 
@@ -384,6 +378,7 @@
 	    SELECTED_CARD_Y_OFFSET: 40,
 	    BUTTON_WIDTH: 150,
 	    BUTTON_HEIGHT: 40,
+	    MAIN_SUIT_ICON_SIZE: 100,
 	    ROUND_BUTTON_SIZE: 70,
 	    AVATAR_SIZE: 75,
 	    INITIAL_NUM_CARDS_AT_HAND: 21,
@@ -405,7 +400,16 @@
 	    RED_TEXT_STYLE: {
 	      font: "bold 20px Arial",
 	      fill: "#fa6161"
-	    }
+	    },
+	    GAME_STATUS_NOT_STARTED: 0,
+	    GAME_STATUS_SETTLING_COVERED_CARDS: 1,
+	    GAME_STATUS_DECIDING_SUIT: 2,
+	    GAME_STATUS_PLAYING: 3,
+	    SUIT_ICON_SIZE: 50,
+	    SUIT_SPADE: 1,
+	    SUIT_HEART: 2,
+	    SUIT_CLUB: 3,
+	    SUIT_DIAMOND: 4
 	  };
 
 	}).call(this);
@@ -443,6 +447,7 @@
 	    settleCoveredCardsButton: null,
 	    startSwipeCardIndex: null,
 	    endSwipeCardIndex: null,
+	    iconOfMainSuit: null,
 	    textOfCurrentScores: null,
 	    textOfAimedScores: null,
 	    textOfChipsWon: null,
@@ -461,7 +466,12 @@
 	    player1StatusText: null,
 	    player2StatusText: null,
 	    player3StatusText: null,
-	    callScoreStage: null
+	    callScoreStage: null,
+	    selectMainStage: null,
+	    gameStatus: null,
+	    selectSuitButton: null,
+	    selectSuitStage: null,
+	    mainSuit: null
 	  };
 
 	}).call(this);
@@ -699,13 +709,63 @@
 
 	// Generated by CoffeeScript 1.10.0
 	(function() {
-	  var backgroundTapped, constants, displayCards, globalVariables, hideLeftPlayer, leaveRoom, lowerScore, pass, playSelectedCards, raiseScore, sendGetReadyMessage, setScore, settleCoveredCards, showCallScorePanel, showCoveredCards, showPlayer1Info, showPlayer2Info, showPlayer3Info, surrender, tapDownOnSprite, tapUp, toolbox;
+	  var backgroundTapped, clubTapped, constants, diamondTapped, displayCards, getRoomInfo, globalVariables, heartTapped, hideLeftPlayer, leaveRoom, lowerScore, pass, playSelectedCards, raiseScore, selectSuit, sendGetReadyMessage, setScore, settleCoveredCards, showCallScorePanel, showCoveredCards, showPlayer1Info, showPlayer2Info, showPlayer3Info, showSelectSuitPanel, spadeTapped, surrender, tapDownOnSprite, tapUp, toolbox;
 
 	  constants = __webpack_require__(1);
 
 	  globalVariables = __webpack_require__(2);
 
 	  toolbox = __webpack_require__(3);
+
+	  getRoomInfo = function(game) {
+	    return io.socket.get('/get_room_info', {
+	      userId: globalVariables.userId,
+	      loginToken: globalVariables.loginToken
+	    }, function(resData, jwres) {
+	      var i, j, readyPlayers, ref, results, usernames;
+	      if (jwres.statusCode === 200) {
+	        globalVariables.textOfRoomName.text = resData.roomName;
+	        usernames = resData.usernames;
+	        switch (usernames.length) {
+	          case 2:
+	            showPlayer3Info(game, usernames[0]);
+	            break;
+	          case 3:
+	            showPlayer3Info(game, usernames[1]);
+	            showPlayer2Info(game, usernames[0]);
+	            break;
+	          case 4:
+	            showPlayer3Info(game, usernames[2]);
+	            showPlayer2Info(game, usernames[1]);
+	            showPlayer1Info(game, usernames[0]);
+	        }
+	        readyPlayers = resData.readyPlayers;
+	        results = [];
+	        for (i = j = 0, ref = readyPlayers.length; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
+	          if (globalVariables.player1Username) {
+	            if (readyPlayers[i] === globalVariables.player1Username.text) {
+	              globalVariables.player1StatusText.text = 'Ready';
+	            }
+	          }
+	          if (globalVariables.player2Username) {
+	            if (readyPlayers[i] === globalVariables.player2Username.text) {
+	              globalVariables.player2StatusText.text = 'Ready';
+	            }
+	          }
+	          if (globalVariables.player3Username) {
+	            if (readyPlayers[i] === globalVariables.player3Username.text) {
+	              results.push(globalVariables.player3StatusText.text = 'Ready');
+	            } else {
+	              results.push(void 0);
+	            }
+	          } else {
+	            results.push(void 0);
+	          }
+	        }
+	        return results;
+	      }
+	    });
+	  };
 
 	  displayCards = function(array) {
 	    var cardName, cardSprite, i, j, k, l, leftMargin, ref, ref1, ref2, results, spritesShouldBeRemoved;
@@ -754,7 +814,7 @@
 	  };
 
 	  tapUp = function(sprite, pointer) {
-	    var i, j, k, l, ref, ref1, ref2, ref3, ref4, results, results1;
+	    var i, j, k, l, m, numberOfSelectedCards, ref, ref1, ref2, ref3, ref4, ref5;
 	    if (pointer.x >= globalVariables.cardsAtHand.children[0].x && pointer.x <= (globalVariables.cardsAtHand.children[globalVariables.cardsAtHand.children.length - 1].x + globalVariables.cardsAtHand.children[globalVariables.cardsAtHand.children.length - 1].width) && pointer.y >= globalVariables.cardsAtHand.children[0].y && pointer.y <= (globalVariables.cardsAtHand.children[0].y + globalVariables.cardsAtHand.children[0].height)) {
 	      globalVariables.endSwipeCardIndex = -1;
 	      for (i = j = 0, ref = globalVariables.cardsAtHand.children.length - 1; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
@@ -767,17 +827,28 @@
 	        globalVariables.endSwipeCardIndex = globalVariables.cardsAtHand.children.length - 1;
 	      }
 	      if (globalVariables.startSwipeCardIndex <= globalVariables.endSwipeCardIndex) {
-	        results = [];
 	        for (i = k = ref1 = globalVariables.startSwipeCardIndex, ref2 = globalVariables.endSwipeCardIndex + 1; ref1 <= ref2 ? k < ref2 : k > ref2; i = ref1 <= ref2 ? ++k : --k) {
-	          results.push(toolbox.toggleCardSelection(globalVariables.cardsAtHand.children[i]));
+	          toolbox.toggleCardSelection(globalVariables.cardsAtHand.children[i]);
 	        }
-	        return results;
 	      } else {
-	        results1 = [];
 	        for (i = l = ref3 = globalVariables.endSwipeCardIndex, ref4 = globalVariables.startSwipeCardIndex + 1; ref3 <= ref4 ? l < ref4 : l > ref4; i = ref3 <= ref4 ? ++l : --l) {
-	          results1.push(toolbox.toggleCardSelection(globalVariables.cardsAtHand.children[i]));
+	          toolbox.toggleCardSelection(globalVariables.cardsAtHand.children[i]);
 	        }
-	        return results1;
+	      }
+	      if (globalVariables.gameStatus === constants.GAME_STATUS_SETTLING_COVERED_CARDS) {
+	        numberOfSelectedCards = 0;
+	        for (i = m = 0, ref5 = globalVariables.cardsAtHand.children.length; 0 <= ref5 ? m < ref5 : m > ref5; i = 0 <= ref5 ? ++m : --m) {
+	          if (globalVariables.cardsAtHand.children[i].isSelected) {
+	            numberOfSelectedCards += 1;
+	          }
+	        }
+	        if (numberOfSelectedCards === 8) {
+	          globalVariables.settleCoveredCardsButton.inputEnabled = true;
+	          return globalVariables.settleCoveredCardsButton.setFrames(1, 0, 1);
+	        } else {
+	          globalVariables.settleCoveredCardsButton.inputEnabled = false;
+	          return globalVariables.settleCoveredCardsButton.setFrames(2, 2, 2);
+	        }
 	      }
 	    }
 	  };
@@ -803,7 +874,7 @@
 	  };
 
 	  backgroundTapped = function() {
-	    var i, j, k, l, ref, ref1, results, spritesShouldBeRemoved;
+	    var i, j, k, l, ref, ref1, spritesShouldBeRemoved;
 	    if (globalVariables.isShowingCoveredCards) {
 	      spritesShouldBeRemoved = [];
 	      for (i = j = 1; j < 10; i = ++j) {
@@ -812,17 +883,17 @@
 	      for (i = k = 0, ref = spritesShouldBeRemoved.length; 0 <= ref ? k < ref : k > ref; i = 0 <= ref ? ++k : --k) {
 	        globalVariables.coveredCards.remove(spritesShouldBeRemoved[i]);
 	      }
-	      return globalVariables.isShowingCoveredCards = false;
+	      globalVariables.isShowingCoveredCards = false;
 	    } else {
-	      results = [];
 	      for (i = l = 0, ref1 = globalVariables.cardsAtHand.children.length; 0 <= ref1 ? l < ref1 : l > ref1; i = 0 <= ref1 ? ++l : --l) {
 	        if (globalVariables.cardsAtHand.children[i].isSelected) {
-	          results.push(toolbox.toggleCardSelection(globalVariables.cardsAtHand.children[i]));
-	        } else {
-	          results.push(void 0);
+	          toolbox.toggleCardSelection(globalVariables.cardsAtHand.children[i]);
 	        }
 	      }
-	      return results;
+	    }
+	    if (globalVariables.gameStatus === constants.GAME_STATUS_SETTLING_COVERED_CARDS) {
+	      globalVariables.settleCoveredCardsButton.inputEnabled = false;
+	      return globalVariables.settleCoveredCardsButton.setFrames(2, 2, 2);
 	    }
 	  };
 
@@ -881,6 +952,7 @@
 	  sendGetReadyMessage = function() {
 	    var csrfToken;
 	    csrfToken = document.getElementsByName('csrf-token')[0].content;
+	    globalVariables.meStatusText.text = 'Ready';
 	    return io.socket.post('/get_ready', {
 	      _csrf: csrfToken,
 	      userId: globalVariables.userId,
@@ -888,8 +960,7 @@
 	    }, function(resData, jwres) {
 	      if (jwres.statusCode === 200) {
 	        globalVariables.prepareButton.visible = false;
-	        globalVariables.leaveButton.visible = false;
-	        return globalVariables.meStatusText.text = 'Ready';
+	        return globalVariables.leaveButton.visible = false;
 	      } else {
 	        return console.log(jwres);
 	      }
@@ -973,6 +1044,7 @@
 	  pass = function() {
 	    var csrfToken;
 	    csrfToken = document.getElementsByName('csrf-token')[0].content;
+	    globalVariables.meStatusText.text = '不要';
 	    return io.socket.post('/pass', {
 	      _csrf: csrfToken,
 	      userId: globalVariables.userId,
@@ -981,8 +1053,7 @@
 	      roomName: globalVariables.roomName
 	    }, function(resData, jwres) {
 	      if (jwres.statusCode === 200) {
-	        globalVariables.callScoreStage.destroy(true, false);
-	        return globalVariables.meStatusText.text = '不要';
+	        return globalVariables.callScoreStage.destroy(true, false);
 	      }
 	    });
 	  };
@@ -998,7 +1069,7 @@
 	  };
 
 	  settleCoveredCards = function() {
-	    var coveredCardsIcon, i, index, j, k, ref, ref1, valuesOfSelectedCoveredCards;
+	    var coveredCardsIcon, csrfToken, i, index, j, k, ref, ref1, valuesOfSelectedCoveredCards;
 	    valuesOfSelectedCoveredCards = [];
 	    for (i = j = 0, ref = globalVariables.cardsAtHand.children.length; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
 	      if (globalVariables.cardsAtHand.children[i].isSelected) {
@@ -1017,10 +1088,147 @@
 	    coveredCardsIcon.scale.setTo(globalVariables.scaleWidthRatio, globalVariables.scaleHeightRatio);
 	    coveredCardsIcon.inputEnabled = true;
 	    globalVariables.coveredCards.indexes = valuesOfSelectedCoveredCards;
-	    return coveredCardsIcon.events.onInputDown.add(showCoveredCards, this);
+	    coveredCardsIcon.events.onInputDown.add(showCoveredCards, this);
+	    globalVariables.settleCoveredCardsButton.visible = false;
+	    globalVariables.settleCoveredCardsButton.inputEnabled = false;
+	    globalVariables.settleCoveredCardsButton.setFrames(2, 2, 2);
+	    csrfToken = document.getElementsByName('csrf-token')[0].content;
+	    return io.socket.post('/settleCoveredCards', {
+	      _csrf: csrfToken,
+	      userId: globalVariables.userId,
+	      loginToken: globalVariables.loginToken,
+	      roomName: globalVariables.roomName,
+	      coveredCards: globalVariables.coveredCards.indexes,
+	      maker: globalVariables.username,
+	      cardsAtHand: globalVariables.cardsAtHand.indexes
+	    }, function(resData, jwres) {
+	      if (jwres.statusCode === 200) {
+	        return showSelectSuitPanel();
+	      }
+	    });
+	  };
+
+	  showSelectSuitPanel = function() {
+	    var background, clubIcon, diamondIcon, heartIcon, rectangle, spadeIcon, stageHeight, stageWidth;
+	    globalVariables.gameStatus = constants.GAME_STATUS_DECIDING_SUIT;
+	    globalVariables.selectSuitButton.visible = true;
+	    globalVariables.selectSuitButton.inputEnabled = false;
+	    globalVariables.selectSuitButton.setFrames(2, 2, 2);
+	    stageWidth = 4 * constants.SUIT_ICON_SIZE + 8 * constants.MARGIN;
+	    stageHeight = 2 * constants.MARGIN + constants.SUIT_ICON_SIZE;
+	    background = globalVariables.selectSuitStage.create(globalVariables.screenWidth / 2 - stageWidth / 2, globalVariables.screenHeight / 2 - stageHeight / 2, 'stageBackground');
+	    background.alpha = 0.3;
+	    background.width = stageWidth;
+	    background.height = stageHeight;
+	    spadeIcon = globalVariables.selectSuitStage.create(background.x + constants.MARGIN, background.y + constants.MARGIN, 'spade');
+	    spadeIcon.width = constants.SUIT_ICON_SIZE;
+	    spadeIcon.height = constants.SUIT_ICON_SIZE;
+	    heartIcon = globalVariables.selectSuitStage.create(background.x + 3 * constants.MARGIN + constants.SUIT_ICON_SIZE, background.y + constants.MARGIN, 'heart');
+	    heartIcon.width = constants.SUIT_ICON_SIZE;
+	    heartIcon.height = constants.SUIT_ICON_SIZE;
+	    clubIcon = globalVariables.selectSuitStage.create(background.x + 5 * constants.MARGIN + 2 * constants.SUIT_ICON_SIZE, background.y + constants.MARGIN, 'club');
+	    clubIcon.width = constants.SUIT_ICON_SIZE;
+	    clubIcon.height = constants.SUIT_ICON_SIZE;
+	    diamondIcon = globalVariables.selectSuitStage.create(background.x + 7 * constants.MARGIN + 3 * constants.SUIT_ICON_SIZE, background.y + constants.MARGIN, 'diamond');
+	    diamondIcon.width = constants.SUIT_ICON_SIZE;
+	    diamondIcon.height = constants.SUIT_ICON_SIZE;
+	    spadeIcon.inputEnabled = true;
+	    spadeIcon.input.useHandCursor = true;
+	    spadeIcon.events.onInputDown.add(spadeTapped, this);
+	    heartIcon.inputEnabled = true;
+	    heartIcon.input.useHandCursor = true;
+	    heartIcon.events.onInputDown.add(heartTapped, this);
+	    clubIcon.inputEnabled = true;
+	    clubIcon.input.useHandCursor = true;
+	    clubIcon.events.onInputDown.add(clubTapped, this);
+	    diamondIcon.inputEnabled = true;
+	    diamondIcon.input.useHandCursor = true;
+	    diamondIcon.events.onInputDown.add(diamondTapped, this);
+	    rectangle = globalVariables.selectSuitStage.create(spadeIcon.x, spadeIcon.y, 'rectangle');
+	    rectangle.width = constants.SUIT_ICON_SIZE;
+	    rectangle.height = constants.SUIT_ICON_SIZE;
+	    rectangle.visible = false;
+	    globalVariables.selectSuitStage.add(background);
+	    globalVariables.selectSuitStage.add(spadeIcon);
+	    globalVariables.selectSuitStage.add(heartIcon);
+	    globalVariables.selectSuitStage.add(clubIcon);
+	    globalVariables.selectSuitStage.add(diamondIcon);
+	    return globalVariables.selectSuitStage.add(rectangle);
+	  };
+
+	  spadeTapped = function() {
+	    var rectangle, spadeIcon;
+	    globalVariables.mainSuit = constants.SUIT_SPADE;
+	    rectangle = globalVariables.selectSuitStage.children[globalVariables.selectSuitStage.children.length - 1];
+	    spadeIcon = globalVariables.selectSuitStage.children[1];
+	    rectangle.x = spadeIcon.x;
+	    rectangle.visible = true;
+	    globalVariables.selectSuitButton.inputEnabled = true;
+	    return globalVariables.selectSuitButton.setFrames(1, 0, 1);
+	  };
+
+	  heartTapped = function() {
+	    var heartIcon, rectangle;
+	    globalVariables.mainSuit = constants.SUIT_HEART;
+	    rectangle = globalVariables.selectSuitStage.children[globalVariables.selectSuitStage.children.length - 1];
+	    heartIcon = globalVariables.selectSuitStage.children[2];
+	    rectangle.x = heartIcon.x;
+	    rectangle.visible = true;
+	    globalVariables.selectSuitButton.inputEnabled = true;
+	    return globalVariables.selectSuitButton.setFrames(1, 0, 1);
+	  };
+
+	  clubTapped = function() {
+	    var clubIcon, rectangle;
+	    globalVariables.mainSuit = constants.SUIT_CLUB;
+	    rectangle = globalVariables.selectSuitStage.children[globalVariables.selectSuitStage.children.length - 1];
+	    clubIcon = globalVariables.selectSuitStage.children[3];
+	    rectangle.x = clubIcon.x;
+	    rectangle.visible = true;
+	    globalVariables.selectSuitButton.inputEnabled = true;
+	    return globalVariables.selectSuitButton.setFrames(1, 0, 1);
+	  };
+
+	  diamondTapped = function() {
+	    var diamondIcon, rectangle;
+	    globalVariables.mainSuit = constants.SUIT_DIAMOND;
+	    rectangle = globalVariables.selectSuitStage.children[globalVariables.selectSuitStage.children.length - 1];
+	    diamondIcon = globalVariables.selectSuitStage.children[4];
+	    rectangle.x = diamondIcon.x;
+	    rectangle.visible = true;
+	    globalVariables.selectSuitButton.inputEnabled = true;
+	    return globalVariables.selectSuitButton.setFrames(1, 0, 1);
+	  };
+
+	  selectSuit = function() {
+	    var csrfToken;
+	    csrfToken = document.getElementsByName('csrf-token')[0].content;
+	    return io.socket.post('/chooseMainSuit', {
+	      _csrf: csrfToken,
+	      userId: globalVariables.userId,
+	      loginToken: globalVariables.loginToken,
+	      roomName: globalVariables.roomName,
+	      maker: globalVariables.username,
+	      mainSuit: globalVariables.mainSuit
+	    }, function(resData, jwres) {
+	      var i, j, k, ref, ref1, spritesShouldBeRemoved;
+	      if (jwres.statusCode === 200) {
+	        globalVariables.surrenderButton.visible = false;
+	        globalVariables.selectSuitButton.visible = false;
+	        spritesShouldBeRemoved = [];
+	        for (i = j = 0, ref = globalVariables.selectSuitStage.children.length; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
+	          spritesShouldBeRemoved.push(globalVariables.selectSuitStage.children[i]);
+	        }
+	        for (i = k = 0, ref1 = spritesShouldBeRemoved.length; 0 <= ref1 ? k < ref1 : k > ref1; i = 0 <= ref1 ? ++k : --k) {
+	          globalVariables.selectSuitStage.remove(spritesShouldBeRemoved[i]);
+	        }
+	        return globalVariables.iconOfMainSuit.frame = globalVariables.mainSuit;
+	      }
+	    });
 	  };
 
 	  module.exports = {
+	    getRoomInfo: getRoomInfo,
 	    displayCards: displayCards,
 	    showCoveredCards: showCoveredCards,
 	    tapUp: tapUp,
@@ -1039,7 +1247,9 @@
 	    setScore: setScore,
 	    pass: pass,
 	    surrender: surrender,
-	    settleCoveredCards: settleCoveredCards
+	    settleCoveredCards: settleCoveredCards,
+	    showSelectSuitPanel: showSelectSuitPanel,
+	    selectSuit: selectSuit
 	  };
 
 	}).call(this);
