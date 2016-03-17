@@ -72,6 +72,7 @@ preload = () ->
 
     game.load.spritesheet 'suites', 'images/suites.png', constants.MAIN_SUIT_ICON_SIZE, constants.MAIN_SUIT_ICON_SIZE
     game.load.image 'rectangle', 'images/rectangle.png'
+    game.load.image 'makerIcon', 'images/makerIcon.png'
 
 create = () ->
     globalVariables.background = game.add.sprite 0, 0, 'background'
@@ -218,9 +219,9 @@ socketCommunication = () ->
         aimedScore = data.aimedScore
         makerUsername = data.makerUsername
         globalVariables.textOfAimedScores.text = aimedScore + '分'
-        if makerUsername is globalVariables.player1Username.text then globalVariables.player1IsMakerText.text = '庄'
-        else if makerUsername is globalVariables.player2Username.text then globalVariables.player2IsMakerText.text = '庄'
-        else if makerUsername is globalVariables.player3Username.text then globalVariables.player3IsMakerText.text = '庄'
+        if makerUsername is globalVariables.player1Username.text then globalVariables.player1IsMakerIcon.visible = true
+        else if makerUsername is globalVariables.player2Username.text then globalVariables.player2IsMakerIcon.visible = true
+        else if makerUsername is globalVariables.player3Username.text then globalVariables.player3IsMakerIcon.visible = true
         if makerUsername is globalVariables.username
             coveredCards = data.coveredCards
             globalVariables.cardsAtHand.indexes = globalVariables.cardsAtHand.indexes.concat coveredCards

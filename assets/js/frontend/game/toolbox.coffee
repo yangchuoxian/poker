@@ -9,98 +9,52 @@ sortCards = (array) ->
 getCardName = (n) ->
     cardName = ''
     switch n
-        when 1
-            cardName = 'bigJoker'
-        when 2
-            cardName = 'smallJoker'
-        when 3
-            cardName = 'sevenOfSpades'
-        when 4
-            cardName = 'sevenOfHearts'
-        when 5
-            cardName = 'sevenOfClubs'
-        when 6
-            cardName = 'sevenOfDiamonds'
-        when 7
-            cardName = 'twoOfSpades'
-        when 8
-            cardName = 'twoOfHearts'
-        when 9
-            cardName = 'twoOfClubs'
-        when 10
-            cardName = 'twoOfDiamonds'
-        when 11
-            cardName = 'aceOfSpades'
-        when 12
-            cardName = 'kingOfSpades'
-        when 13
-            cardName = 'queenOfSpades'
-        when 14
-            cardName = 'jackOfSpades'
-        when 15
-            cardName = 'tenOfSpades'
-        when 16
-            cardName = 'nineOfSpades'
-        when 17
-            cardName = 'eightOfSpades'
-        when 18
-            cardName = 'sixOfSpades'
-        when 19
-            cardName = 'fiveOfSpades'
-        when 20
-            cardName = 'aceOfHearts'
-        when 21
-            cardName = 'kingOfHearts'
-        when 22
-            cardName = 'queenOfHearts'
-        when 23
-            cardName = 'jackOfHearts'
-        when 24
-            cardName = 'tenOfHearts'
-        when 25
-            cardName = 'nineOfHearts'
-        when 26
-            cardName = 'eightOfHearts'
-        when 27
-            cardName = 'sixOfHearts'
-        when 28
-            cardName = 'fiveOfHearts'
-        when 29
-            cardName = 'aceOfClubs'
-        when 30
-            cardName = 'kingOfClubs'
-        when 31
-            cardName = 'queenOfClubs'
-        when 32
-            cardName = 'jackOfClubs'
-        when 33
-            cardName = 'tenOfClubs'
-        when 34
-            cardName = 'nineOfClubs'
-        when 35
-            cardName = 'eightOfClubs'
-        when 36
-            cardName = 'sixOfClubs'
-        when 37
-            cardName = 'fiveOfClubs'
-        when 38
-            cardName = 'aceOfDiamonds'
-        when 39
-            cardName = 'kingOfDiamonds'
-        when 40
-            cardName = 'queenOfDiamonds'
-        when 41
-            cardName = 'jackOfDiamonds'
-        when 42
-            cardName = 'tenOfDiamonds'
-        when 43
-            cardName = 'nineOfDiamonds'
-        when 44
-            cardName = 'eightOfDiamonds'
-        when 45
-            cardName = 'sixOfDiamonds'
-        when 46
-            cardName = 'fiveOfDiamonds'
+        when 1 then cardName = 'bigJoker'
+        when 2 then cardName = 'smallJoker'
+        when 3 then cardName = 'sevenOfSpades'
+        when 4 then cardName = 'sevenOfHearts'
+        when 5 then cardName = 'sevenOfClubs'
+        when 6 then cardName = 'sevenOfDiamonds'
+        when 7 then cardName = 'twoOfSpades'
+        when 8 then cardName = 'twoOfHearts'
+        when 9 then cardName = 'twoOfClubs'
+        when 10 then cardName = 'twoOfDiamonds'
+        when 11 then cardName = 'aceOfSpades'
+        when 12 then cardName = 'kingOfSpades'
+        when 13 then cardName = 'queenOfSpades'
+        when 14 then cardName = 'jackOfSpades'
+        when 15 then cardName = 'tenOfSpades'
+        when 16 then cardName = 'nineOfSpades'
+        when 17 then cardName = 'eightOfSpades'
+        when 18 then cardName = 'sixOfSpades'
+        when 19 then cardName = 'fiveOfSpades'
+        when 20 then cardName = 'aceOfHearts'
+        when 21 then cardName = 'kingOfHearts'
+        when 22 then cardName = 'queenOfHearts'
+        when 23 then cardName = 'jackOfHearts'
+        when 24 then cardName = 'tenOfHearts'
+        when 25 then cardName = 'nineOfHearts'
+        when 26 then cardName = 'eightOfHearts'
+        when 27 then cardName = 'sixOfHearts'
+        when 28 then cardName = 'fiveOfHearts'
+        when 29 then cardName = 'aceOfClubs'
+        when 30 then cardName = 'kingOfClubs'
+        when 31 then cardName = 'queenOfClubs'
+        when 32 then cardName = 'jackOfClubs'
+        when 33 then cardName = 'tenOfClubs'
+        when 34 then cardName = 'nineOfClubs'
+        when 35 then cardName = 'eightOfClubs'
+        when 36 then cardName = 'sixOfClubs'
+        when 37 then cardName = 'fiveOfClubs'
+        when 38 then cardName = 'aceOfDiamonds'
+        when 39 then cardName = 'kingOfDiamonds'
+        when 40 then cardName = 'queenOfDiamonds'
+        when 41 then cardName = 'jackOfDiamonds'
+        when 42 then cardName = 'tenOfDiamonds'
+        when 43 then cardName = 'nineOfDiamonds'
+        when 44 then cardName = 'eightOfDiamonds'
+        when 45 then cardName = 'sixOfDiamonds'
+        when 46 then cardName = 'fiveOfDiamonds'
     cardName
 
 showPlayedCardsForUser = (n, valuesOfPlayedCards) ->
@@ -140,8 +94,15 @@ toggleCardSelection = (sprite) ->
     else sprite.y = sprite.y + constants.SELECTED_CARD_Y_OFFSET
     sprite.isSelected = !sprite.isSelected
 
+validateSelectedCardsForPlay: (selectedCardValues, cardValuesAtHand, firstlyPlayedCardValues) ->
+    if selectedCardValues.length is 0 then return false
+    selectedCardValues = sortCards selectedCardValues
+    cardValuesAtHand = sortCards cardValuesAtHand
+    firstlyPlayedCardValues = sortCards firstlyPlayedCardValues
+
 module.exports =
     sortCards: sortCards
     getCardName: getCardName
     toggleCardSelection: toggleCardSelection
     showPlayedCardsForUser: showPlayedCardsForUser
+    validateSelectedCardsForPlay: validateSelectedCardsForPlay

@@ -76,7 +76,8 @@
     game.load.image('club', 'images/club.png');
     game.load.image('diamond', 'images/diamond.png');
     game.load.spritesheet('suites', 'images/suites.png', constants.MAIN_SUIT_ICON_SIZE, constants.MAIN_SUIT_ICON_SIZE);
-    return game.load.image('rectangle', 'images/rectangle.png');
+    game.load.image('rectangle', 'images/rectangle.png');
+    return game.load.image('makerIcon', 'images/makerIcon.png');
   };
 
   create = function() {
@@ -250,11 +251,11 @@
       makerUsername = data.makerUsername;
       globalVariables.textOfAimedScores.text = aimedScore + '分';
       if (makerUsername === globalVariables.player1Username.text) {
-        globalVariables.player1IsMakerText.text = '庄';
+        globalVariables.player1IsMakerIcon.visible = true;
       } else if (makerUsername === globalVariables.player2Username.text) {
-        globalVariables.player2IsMakerText.text = '庄';
+        globalVariables.player2IsMakerIcon.visible = true;
       } else if (makerUsername === globalVariables.player3Username.text) {
-        globalVariables.player3IsMakerText.text = '庄';
+        globalVariables.player3IsMakerIcon.visible = true;
       }
       if (makerUsername === globalVariables.username) {
         coveredCards = data.coveredCards;
@@ -288,7 +289,6 @@
     });
     io.socket.on('finishedSettlingCoveredCards', function(data) {
       var makerUsername;
-      console.log('received finishedSettlingCoveredCards');
       makerUsername = data.maker;
       if (makerUsername === globalVariables.player1Username.text) {
         return globalVariables.player1StatusText.text = '庄家选主中...';
@@ -300,10 +300,10 @@
     });
     return io.socket.on('mainSuitChosen', function(data) {
       var mainSuit;
-      console.log('received mainSuitChosen');
       mainSuit = data.mainSuit;
       globalVariables.mainSuit = mainSuit;
       globalVariables.iconOfMainSuit.frame = globalVariables.mainSuit;
+      globalVariables.meStatusText.text = '';
       globalVariables.player1StatusText.text = '';
       globalVariables.player2StatusText.text = '';
       return globalVariables.player3StatusText.text = '';

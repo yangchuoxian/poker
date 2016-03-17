@@ -37,9 +37,9 @@ module.exports =
     user2Avatar: null
     user3Avatar: null
     meStatusText: null
-    player1IsMakerText: null
-    player2IsMakerText: null
-    player3IsMakerText: null
+    player1IsMakerIcon: null
+    player2IsMakerIcon: null
+    player3IsMakerIcon: null
     player1StatusText: null
     player2StatusText: null
     player3StatusText: null

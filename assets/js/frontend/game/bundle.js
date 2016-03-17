@@ -122,7 +122,8 @@
 	    game.load.image('club', 'images/club.png');
 	    game.load.image('diamond', 'images/diamond.png');
 	    game.load.spritesheet('suites', 'images/suites.png', constants.MAIN_SUIT_ICON_SIZE, constants.MAIN_SUIT_ICON_SIZE);
-	    return game.load.image('rectangle', 'images/rectangle.png');
+	    game.load.image('rectangle', 'images/rectangle.png');
+	    return game.load.image('makerIcon', 'images/makerIcon.png');
 	  };
 
 	  create = function() {
@@ -296,11 +297,11 @@
 	      makerUsername = data.makerUsername;
 	      globalVariables.textOfAimedScores.text = aimedScore + '分';
 	      if (makerUsername === globalVariables.player1Username.text) {
-	        globalVariables.player1IsMakerText.text = '庄';
+	        globalVariables.player1IsMakerIcon.visible = true;
 	      } else if (makerUsername === globalVariables.player2Username.text) {
-	        globalVariables.player2IsMakerText.text = '庄';
+	        globalVariables.player2IsMakerIcon.visible = true;
 	      } else if (makerUsername === globalVariables.player3Username.text) {
-	        globalVariables.player3IsMakerText.text = '庄';
+	        globalVariables.player3IsMakerIcon.visible = true;
 	      }
 	      if (makerUsername === globalVariables.username) {
 	        coveredCards = data.coveredCards;
@@ -334,7 +335,6 @@
 	    });
 	    io.socket.on('finishedSettlingCoveredCards', function(data) {
 	      var makerUsername;
-	      console.log('received finishedSettlingCoveredCards');
 	      makerUsername = data.maker;
 	      if (makerUsername === globalVariables.player1Username.text) {
 	        return globalVariables.player1StatusText.text = '庄家选主中...';
@@ -346,10 +346,10 @@
 	    });
 	    return io.socket.on('mainSuitChosen', function(data) {
 	      var mainSuit;
-	      console.log('received mainSuitChosen');
 	      mainSuit = data.mainSuit;
 	      globalVariables.mainSuit = mainSuit;
 	      globalVariables.iconOfMainSuit.frame = globalVariables.mainSuit;
+	      globalVariables.meStatusText.text = '';
 	      globalVariables.player1StatusText.text = '';
 	      globalVariables.player2StatusText.text = '';
 	      return globalVariables.player3StatusText.text = '';
@@ -373,6 +373,7 @@
 	(function() {
 	  module.exports = {
 	    BACKGROUND_IMAGE_SIZE: 200,
+	    MAKER_ICON_SIZE: 30,
 	    CARD_WIDTH: 180,
 	    CARD_HEIGHT: 251,
 	    SELECTED_CARD_Y_OFFSET: 40,
@@ -460,9 +461,9 @@
 	    user2Avatar: null,
 	    user3Avatar: null,
 	    meStatusText: null,
-	    player1IsMakerText: null,
-	    player2IsMakerText: null,
-	    player3IsMakerText: null,
+	    player1IsMakerIcon: null,
+	    player2IsMakerIcon: null,
+	    player3IsMakerIcon: null,
 	    player1StatusText: null,
 	    player2StatusText: null,
 	    player3StatusText: null,
@@ -693,6 +694,17 @@
 	    return sprite.isSelected = !sprite.isSelected;
 	  };
 
+	  ({
+	    validateSelectedCardsForPlay: function(selectedCardValues, cardValuesAtHand, firstlyPlayedCardValues) {
+	      if (selectedCardValues.length === 0) {
+	        return false;
+	      }
+	      selectedCardValues = sortCards(selectedCardValues);
+	      cardValuesAtHand = sortCards(cardValuesAtHand);
+	      return firstlyPlayedCardValues = sortCards(firstlyPlayedCardValues);
+	    }
+	  });
+
 	  module.exports = {
 	    sortCards: sortCards,
 	    getCardName: getCardName,
@@ -814,7 +826,7 @@
 	  };
 
 	  tapUp = function(sprite, pointer) {
-	    var i, j, k, l, m, numberOfSelectedCards, ref, ref1, ref2, ref3, ref4, ref5;
+	    var i, j, k, l, m, ref, ref1, ref2, ref3, ref4, ref5, selectedCardValues;
 	    if (pointer.x >= globalVariables.cardsAtHand.children[0].x && pointer.x <= (globalVariables.cardsAtHand.children[globalVariables.cardsAtHand.children.length - 1].x + globalVariables.cardsAtHand.children[globalVariables.cardsAtHand.children.length - 1].width) && pointer.y >= globalVariables.cardsAtHand.children[0].y && pointer.y <= (globalVariables.cardsAtHand.children[0].y + globalVariables.cardsAtHand.children[0].height)) {
 	      globalVariables.endSwipeCardIndex = -1;
 	      for (i = j = 0, ref = globalVariables.cardsAtHand.children.length - 1; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
@@ -835,19 +847,27 @@
 	          toolbox.toggleCardSelection(globalVariables.cardsAtHand.children[i]);
 	        }
 	      }
-	      if (globalVariables.gameStatus === constants.GAME_STATUS_SETTLING_COVERED_CARDS) {
-	        numberOfSelectedCards = 0;
-	        for (i = m = 0, ref5 = globalVariables.cardsAtHand.children.length; 0 <= ref5 ? m < ref5 : m > ref5; i = 0 <= ref5 ? ++m : --m) {
-	          if (globalVariables.cardsAtHand.children[i].isSelected) {
-	            numberOfSelectedCards += 1;
-	          }
+	      selectedCardValues = [];
+	      for (i = m = 0, ref5 = globalVariables.cardsAtHand.children.length; 0 <= ref5 ? m < ref5 : m > ref5; i = 0 <= ref5 ? ++m : --m) {
+	        if (globalVariables.cardsAtHand.children[i].isSelected) {
+	          selectedCardValues.push(globalVariables.cardsAtHand.children[i].value);
 	        }
-	        if (numberOfSelectedCards === 8) {
+	      }
+	      if (globalVariables.gameStatus === constants.GAME_STATUS_SETTLING_COVERED_CARDS) {
+	        if (selectedCardValues.length === 8) {
 	          globalVariables.settleCoveredCardsButton.inputEnabled = true;
 	          return globalVariables.settleCoveredCardsButton.setFrames(1, 0, 1);
 	        } else {
 	          globalVariables.settleCoveredCardsButton.inputEnabled = false;
 	          return globalVariables.settleCoveredCardsButton.setFrames(2, 2, 2);
+	        }
+	      } else if (globalVariables.gameStatus === constants.GAME_STATUS_PLAYING) {
+	        if (toolbox.validateSelectedCardsForPlay(selectedCardValues)) {
+	          globalVariables.playCardsButton.inputEnabled = true;
+	          return globalVariables.playCardsButton.setFrames(1, 0, 1);
+	        } else {
+	          globalVariables.playCardsButton.inputEnabled = false;
+	          return globalVariables.playCardsButton.setFrames(2, 2, 2);
 	        }
 	      }
 	    }
@@ -861,15 +881,15 @@
 	    if (username === globalVariables.player1Username.text) {
 	      globalVariables.user1Avatar.destroy();
 	      globalVariables.player1Username.destroy();
-	      return globalVariables.player1IsMakerText.destroy();
+	      return globalVariables.player1IsMakerIcon.destroy();
 	    } else if (username === globalVariables.player2Username.text) {
 	      globalVariables.user2Avatar.destroy();
 	      globalVariables.player2Username.destroy();
-	      return globalVariables.player2IsMakerText.destroy();
+	      return globalVariables.player2IsMakerIcon.destroy();
 	    } else if (username === globalVariables.player3Username.text) {
 	      globalVariables.user3Avatar.destroy();
 	      globalVariables.player3Username.destroy();
-	      return globalVariables.player3IsMakerText.destroy();
+	      return globalVariables.player3IsMakerIcon.destroy();
 	    }
 	  };
 
@@ -926,7 +946,10 @@
 	    globalVariables.user1Avatar = game.add.sprite(globalVariables.screenWidth - constants.AVATAR_SIZE - constants.MARGIN, game.world.centerY - constants.AVATAR_SIZE / 2, 'avatar');
 	    globalVariables.user1Avatar.width /= 2;
 	    globalVariables.user1Avatar.height /= 2;
-	    globalVariables.player1IsMakerText = game.add.text(globalVariables.screenWidth - constants.AVATAR_SIZE - constants.MARGIN, game.world.centerY - constants.AVATAR_SIZE / 2, '', constants.RED_TEXT_STYLE);
+	    globalVariables.player1IsMakerIcon = game.add.sprite(globalVariables.screenWidth - constants.AVATAR_SIZE - constants.MARGIN, game.world.centerY - constants.AVATAR_SIZE / 2, 'makerIcon');
+	    globalVariables.player1IsMakerIcon.width = constants.MAKER_ICON_SIZE;
+	    globalVariables.player1IsMakerIcon.height = constants.MAKER_ICON_SIZE;
+	    globalVariables.player1IsMakerIcon.visible = false;
 	    globalVariables.player1Username = game.add.text(globalVariables.screenWidth - constants.AVATAR_SIZE - constants.MARGIN, game.world.centerY + constants.AVATAR_SIZE / 2 + constants.MARGIN, username, constants.TEXT_STYLE);
 	    return globalVariables.player1Username.setTextBounds(0, 0, constants.AVATAR_SIZE, 25);
 	  };
@@ -934,8 +957,11 @@
 	  showPlayer2Info = function(game, username) {
 	    globalVariables.user2Avatar = game.add.sprite(game.world.centerX - constants.AVATAR_SIZE / 2, constants.MARGIN, 'avatar');
 	    globalVariables.user2Avatar.width /= 2;
-	    globalVariables.player2IsMakerText = game.add.text(game.world.centerX - constants.AVATAR_SIZE / 2, constants.MARGIN, '', constants.RED_TEXT_STYLE);
 	    globalVariables.user2Avatar.height /= 2;
+	    globalVariables.player2IsMakerIcon = game.add.sprite(game.world.centerX - constants.AVATAR_SIZE / 2, constants.MARGIN, 'makerIcon');
+	    globalVariables.player2IsMakerIcon.width = constants.MAKER_ICON_SIZE;
+	    globalVariables.player2IsMakerIcon.height = constants.MAKER_ICON_SIZE;
+	    globalVariables.player2IsMakerIcon.visible = false;
 	    globalVariables.player2Username = game.add.text(game.world.centerX - constants.AVATAR_SIZE / 2, constants.AVATAR_SIZE + 2 * constants.MARGIN, username, constants.TEXT_STYLE);
 	    return globalVariables.player2Username.setTextBounds(0, 0, constants.AVATAR_SIZE, 25);
 	  };
@@ -944,7 +970,10 @@
 	    globalVariables.user3Avatar = game.add.sprite(constants.MARGIN, game.world.centerY - constants.AVATAR_SIZE / 2, 'avatar');
 	    globalVariables.user3Avatar.width /= 2;
 	    globalVariables.user3Avatar.height /= 2;
-	    globalVariables.player3IsMakerText = game.add.text(constants.MARGIN, game.world.centerY - constants.AVATAR_SIZE / 2, '', constants.RED_TEXT_STYLE);
+	    globalVariables.player3IsMakerIcon = game.add.sprite(constants.MARGIN, game.world.centerY - constants.AVATAR_SIZE / 2, 'makerIcon');
+	    globalVariables.player3IsMakerIcon.width = constants.MAKER_ICON_SIZE;
+	    globalVariables.player3IsMakerIcon.height = constants.MAKER_ICON_SIZE;
+	    globalVariables.player3IsMakerIcon.visible = false;
 	    globalVariables.player3Username = game.add.text(constants.MARGIN, game.world.centerY + constants.AVATAR_SIZE / 2 + constants.MARGIN, username, constants.TEXT_STYLE);
 	    return globalVariables.player3Username.setTextBounds(0, 0, constants.AVATAR_SIZE, 25);
 	  };
@@ -1145,8 +1174,8 @@
 	    diamondIcon.input.useHandCursor = true;
 	    diamondIcon.events.onInputDown.add(diamondTapped, this);
 	    rectangle = globalVariables.selectSuitStage.create(spadeIcon.x, spadeIcon.y, 'rectangle');
-	    rectangle.width = constants.SUIT_ICON_SIZE;
-	    rectangle.height = constants.SUIT_ICON_SIZE;
+	    rectangle.width = constants.SUIT_ICON_SIZE + 10;
+	    rectangle.height = constants.SUIT_ICON_SIZE + 10;
 	    rectangle.visible = false;
 	    globalVariables.selectSuitStage.add(background);
 	    globalVariables.selectSuitStage.add(spadeIcon);
@@ -1222,7 +1251,11 @@
 	        for (i = k = 0, ref1 = spritesShouldBeRemoved.length; 0 <= ref1 ? k < ref1 : k > ref1; i = 0 <= ref1 ? ++k : --k) {
 	          globalVariables.selectSuitStage.remove(spritesShouldBeRemoved[i]);
 	        }
-	        return globalVariables.iconOfMainSuit.frame = globalVariables.mainSuit;
+	        globalVariables.iconOfMainSuit.frame = globalVariables.mainSuit;
+	        globalVariables.playCardsButton.visible = true;
+	        globalVariables.playCardsButton.inputEnabled = false;
+	        globalVariables.playCardsButton.setFrames(2, 2, 2);
+	        return globalVariables.gameStatus = constants.GAME_STATUS_PLAYING;
 	      }
 	    });
 	  };

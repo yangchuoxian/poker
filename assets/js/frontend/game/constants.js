@@ -2,6 +2,7 @@
 (function() {
   module.exports = {
     BACKGROUND_IMAGE_SIZE: 200,
+    MAKER_ICON_SIZE: 30,
     CARD_WIDTH: 180,
     CARD_HEIGHT: 251,
     SELECTED_CARD_Y_OFFSET: 40,

@@ -210,6 +210,17 @@
     return sprite.isSelected = !sprite.isSelected;
   };
 
+  ({
+    validateSelectedCardsForPlay: function(selectedCardValues, cardValuesAtHand, firstlyPlayedCardValues) {
+      if (selectedCardValues.length === 0) {
+        return false;
+      }
+      selectedCardValues = sortCards(selectedCardValues);
+      cardValuesAtHand = sortCards(cardValuesAtHand);
+      return firstlyPlayedCardValues = sortCards(firstlyPlayedCardValues);
+    }
+  });
+
   module.exports = {
     sortCards: sortCards,
     getCardName: getCardName,
