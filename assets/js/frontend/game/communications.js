@@ -10,8 +10,6 @@
 
   globalVariables = require('./globalVariables.js');
 
-  actions = require('./actions.js');
-
   getRoomInfo = function(game) {
     return io.socket.get('/get_room_info', {
       userId: globalVariables.userId,
@@ -74,7 +72,6 @@
       seatIndexOfCurrentUser = seats.indexOf(globalVariables.username);
       seatIndexOfNewPlayer = seats.indexOf(newPlayerUsername);
       diff = seatIndexOfNewPlayer - seatIndexOfCurrentUser;
-      console.log('diff: ' + diff);
       if (diff === 1 || diff === -3) {
         actions.showPlayer1Info(game, newPlayerUsername);
       }

@@ -22,6 +22,19 @@ displayCards = (array) ->
         cardSprite.events.onInputDown.add tapDownOnSprite, this
         cardSprite.events.onInputUp.add tapUp, this
 
+sendGetReadyMessage = () ->
+    csrfToken = document.getElementsByName('csrf-token')[0].content
+    globalVariables.meStatusText.text = 'Ready'
+    io.socket.post '/get_ready',
+        _csrf: csrfToken
+        userId: globalVariables.userId
+        loginToken: globalVariables.loginToken
+    , (resData, jwres) ->
+        if jwres.statusCode is 200
+            globalVariables.prepareButton.visible = false
+            globalVariables.leaveButton.visible = false
+        else console.log jwres
+
 showCoveredCards = () ->
     if not globalVariables.isShowingCoveredCards
         stageWidth = 11 * globalVariables.scaledCardWidth / 4 + 2 * constants.MARGIN
@@ -132,7 +145,6 @@ playSelectedCards = () ->
     toolbox.showPlayedCardsForUser 0, valuesOfCurrentUserPlayedCards
 
 showPlayer1Info = (game, username) ->
-    console.log 'should showing player 1 info'
     globalVariables.user1Avatar = game.add.sprite(globalVariables.screenWidth - constants.AVATAR_SIZE - constants.MARGIN, game.world.centerY - constants.AVATAR_SIZE / 2, 'avatar')
     globalVariables.user1Avatar.width /= 2
     globalVariables.user1Avatar.height /= 2
@@ -144,7 +156,6 @@ showPlayer1Info = (game, username) ->
     globalVariables.player1Username.setTextBounds 0, 0, constants.AVATAR_SIZE, 25
 
 showPlayer2Info = (game, username) ->
-    console.log 'should showing player 2 info'
     globalVariables.user2Avatar = game.add.sprite(game.world.centerX - constants.AVATAR_SIZE / 2, constants.MARGIN, 'avatar')
     globalVariables.user2Avatar.width /= 2
     globalVariables.user2Avatar.height /= 2
@@ -156,7 +167,6 @@ showPlayer2Info = (game, username) ->
     globalVariables.player2Username.setTextBounds 0, 0, constants.AVATAR_SIZE, 25
 
 showPlayer3Info = (game, username) ->
-    console.log 'should showing player 3 info'
     globalVariables.user3Avatar = game.add.sprite(constants.MARGIN, game.world.centerY - constants.AVATAR_SIZE / 2, 'avatar')
     globalVariables.user3Avatar.width /= 2
     globalVariables.user3Avatar.height /= 2
@@ -167,27 +177,6 @@ showPlayer3Info = (game, username) ->
     globalVariables.player3Username = game.add.text(constants.MARGIN, game.world.centerY + constants.AVATAR_SIZE / 2 + constants.MARGIN, username, constants.TEXT_STYLE)
     globalVariables.player3Username.setTextBounds 0, 0, constants.AVATAR_SIZE, 25
 
-sendGetReadyMessage = () ->
-    csrfToken = document.getElementsByName('csrf-token')[0].content
-    globalVariables.meStatusText.text = 'Ready'
-    io.socket.post '/get_ready',
-        _csrf: csrfToken
-        userId: globalVariables.userId
-        loginToken: globalVariables.loginToken
-    , (resData, jwres) ->
-        if jwres.statusCode is 200
-            globalVariables.prepareButton.visible = false
-            globalVariables.leaveButton.visible = false
-        else console.log jwres
-
-leaveRoom = () ->
-    csrfToken = document.getElementsByName('csrf-token')[0].content
-    io.socket.post '/leave_room',
-        _csrf: csrfToken
-        userId: globalVariables.userId
-        loginToken: globalVariables.loginToken
-    , (resData, jwres) ->
-        if jwres.statusCode is 200 then window.location.href = '/'
 
 raiseScore = () ->
     aimedScores = parseInt globalVariables.textOfAimedScores.text
@@ -212,21 +201,14 @@ showCallScorePanel = (game, currentScore) ->
     currentScoreText.setTextBounds(0, 0, constants.ROUND_BUTTON_SIZE, constants.ROUND_BUTTON_SIZE)
     globalVariables.callScoreStage.add currentScoreText
 
-    lowerScoreButton = game.add.button(game.world.centerX + constants.ROUND_BUTTON_SIZE / 2 + constants.MARGIN, game.world.centerY - stageHeight / 2 + constants.MARGIN, 'lowerScoreButton', lowerScore, this, 1, 0, 1, 0)
+    lowerScoreButton = game.add.button game.world.centerX + constants.ROUND_BUTTON_SIZE / 2 + constants.MARGIN, game.world.centerY - stageHeight / 2 + constants.MARGIN, 'lowerScoreButton', lowerScore, this, 1, 0, 1
     globalVariables.callScoreStage.add lowerScoreButton
 
-    setScoreButton = game.add.button(game.world.centerX - constants.BUTTON_WIDTH - constants.MARGIN / 2, game.world.centerY + constants.ROUND_BUTTON_SIZE / 2, 'setScoreButton', setScore, this, 1, 0, 1, 0)
+    setScoreButton = game.add.button game.world.centerX - constants.BUTTON_WIDTH - constants.MARGIN / 2, game.world.centerY + constants.ROUND_BUTTON_SIZE / 2, 'setScoreButton', setScore, this, 1, 0, 1
     globalVariables.callScoreStage.add setScoreButton
 
     passButton = game.add.button(game.world.centerX + constants.MARGIN / 2, game.world.centerY + constants.ROUND_BUTTON_SIZE / 2, 'passButton', pass, this, 1, 0, 1, 0)
     globalVariables.callScoreStage.add passButton
-
-lowerScore = () ->
-    aimedScores = parseInt globalVariables.textOfAimedScores.text
-    currentSetScores = parseInt globalVariables.callScoreStage.children[2].text
-    if currentSetScores > 5
-        currentSetScores -= 5
-        globalVariables.callScoreStage.children[2].text = '' + currentSetScores
 
 setScore = () ->
     csrfToken = document.getElementsByName('csrf-token')[0].content
@@ -241,6 +223,13 @@ setScore = () ->
         if jwres.statusCode is 200
             globalVariables.callScoreStage.destroy true, false
             globalVariables.meStatusText.text = '' + aimedScore
+
+lowerScore = () ->
+    aimedScores = parseInt globalVariables.textOfAimedScores.text
+    currentSetScores = parseInt globalVariables.callScoreStage.children[2].text
+    if currentSetScores > 5
+        currentSetScores -= 5
+        globalVariables.callScoreStage.children[2].text = '' + currentSetScores
 
 pass = () ->
     csrfToken = document.getElementsByName('csrf-token')[0].content
@@ -298,16 +287,13 @@ showSelectSuitPanel = () ->
     globalVariables.selectSuitButton.visible = true
     globalVariables.selectSuitButton.inputEnabled = false
     globalVariables.selectSuitButton.setFrames 2, 2, 2
-
     stageWidth = 4 * constants.SUIT_ICON_SIZE + 8 * constants.MARGIN
     stageHeight = 2 * constants.MARGIN + constants.SUIT_ICON_SIZE
     background = globalVariables.selectSuitStage.create globalVariables.screenWidth / 2 - stageWidth / 2, globalVariables.screenHeight / 2 - stageHeight / 2, 'stageBackground'
     background.alpha = 0.3
     background.width = stageWidth
     background.height = stageHeight
-
     globalVariables.selectSuitStage.add background
-
     suitIconNames = ['spade', 'heart', 'club', 'diamond']
     suitIcon = null
     for i in [0...4]
@@ -326,16 +312,6 @@ showSelectSuitPanel = () ->
     rectangle.height = constants.SUIT_ICON_SIZE + 10
     rectangle.visible = false
     globalVariables.selectSuitStage.add rectangle
-
-suitTapEffect = (suitIndex) ->
-    globalVariables.mainSuit = suitIndex
-    rectangle = globalVariables.selectSuitStage.children[globalVariables.selectSuitStage.children.length - 1]
-    suitIcon = globalVariables.selectSuitStage.children[suitIndex]
-    rectangle.x = suitIcon.x - 5
-    rectangle.y = suitIcon.y - 5
-    rectangle.visible = true
-    globalVariables.selectSuitButton.inputEnabled = true
-    globalVariables.selectSuitButton.setFrames 1, 0, 1
 
 selectSuit = () ->
     csrfToken = document.getElementsByName('csrf-token')[0].content
@@ -361,6 +337,24 @@ selectSuit = () ->
             globalVariables.playCardsButton.setFrames 2, 2, 2
             globalVariables.gameStatus = constants.GAME_STATUS_PLAYING
 
+suitTapEffect = (suitIndex) ->
+    globalVariables.mainSuit = suitIndex
+    rectangle = globalVariables.selectSuitStage.children[globalVariables.selectSuitStage.children.length - 1]
+    suitIcon = globalVariables.selectSuitStage.children[suitIndex]
+    rectangle.x = suitIcon.x - 5
+    rectangle.y = suitIcon.y - 5
+    rectangle.visible = true
+    globalVariables.selectSuitButton.inputEnabled = true
+    globalVariables.selectSuitButton.setFrames 1, 0, 1
+
+leaveRoom = () ->
+    csrfToken = document.getElementsByName('csrf-token')[0].content
+    io.socket.post '/leave_room',
+        _csrf: csrfToken
+        userId: globalVariables.userId
+        loginToken: globalVariables.loginToken
+    , (resData, jwres) ->
+        if jwres.statusCode is 200 then window.location.href = '/'
 
 module.exports =
     displayCards: displayCards
@@ -373,14 +367,14 @@ module.exports =
     showPlayer2Info: showPlayer2Info
     showPlayer3Info: showPlayer3Info
     hideLeftPlayer: hideLeftPlayer
-    sendGetReadyMessage: sendGetReadyMessage
-    leaveRoom: leaveRoom
     showCallScorePanel: showCallScorePanel
     raiseScore: raiseScore
     lowerScore: lowerScore
-    setScore: setScore
     pass: pass
     surrender: surrender
     settleCoveredCards: settleCoveredCards
     showSelectSuitPanel: showSelectSuitPanel
+    setScore: setScore
     selectSuit: selectSuit
+    leaveRoom: leaveRoom
+    sendGetReadyMessage: sendGetReadyMessage

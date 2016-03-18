@@ -2,7 +2,6 @@ constants = require './constants.js'
 actions = require './actions.js'
 toolbox = require './toolbox.js'
 globalVariables = require './globalVariables.js'
-actions = require './actions.js'
 
 getRoomInfo = (game) ->
     io.socket.get '/get_room_info',

@@ -564,8 +564,6 @@
 
 	  globalVariables = __webpack_require__(2);
 
-	  actions = __webpack_require__(5);
-
 	  getRoomInfo = function(game) {
 	    return io.socket.get('/get_room_info', {
 	      userId: globalVariables.userId,
@@ -628,7 +626,6 @@
 	      seatIndexOfCurrentUser = seats.indexOf(globalVariables.username);
 	      seatIndexOfNewPlayer = seats.indexOf(newPlayerUsername);
 	      diff = seatIndexOfNewPlayer - seatIndexOfCurrentUser;
-	      console.log('diff: ' + diff);
 	      if (diff === 1 || diff === -3) {
 	        actions.showPlayer1Info(game, newPlayerUsername);
 	      }
@@ -843,6 +840,24 @@
 	    return results;
 	  };
 
+	  sendGetReadyMessage = function() {
+	    var csrfToken;
+	    csrfToken = document.getElementsByName('csrf-token')[0].content;
+	    globalVariables.meStatusText.text = 'Ready';
+	    return io.socket.post('/get_ready', {
+	      _csrf: csrfToken,
+	      userId: globalVariables.userId,
+	      loginToken: globalVariables.loginToken
+	    }, function(resData, jwres) {
+	      if (jwres.statusCode === 200) {
+	        globalVariables.prepareButton.visible = false;
+	        return globalVariables.leaveButton.visible = false;
+	      } else {
+	        return console.log(jwres);
+	      }
+	    });
+	  };
+
 	  showCoveredCards = function() {
 	    var cardName, coveredCard, coveredCardsStage, i, j, ref, stageHeight, stageWidth;
 	    if (!globalVariables.isShowingCoveredCards) {
@@ -990,7 +1005,6 @@
 	  };
 
 	  showPlayer1Info = function(game, username) {
-	    console.log('should showing player 1 info');
 	    globalVariables.user1Avatar = game.add.sprite(globalVariables.screenWidth - constants.AVATAR_SIZE - constants.MARGIN, game.world.centerY - constants.AVATAR_SIZE / 2, 'avatar');
 	    globalVariables.user1Avatar.width /= 2;
 	    globalVariables.user1Avatar.height /= 2;
@@ -1003,7 +1017,6 @@
 	  };
 
 	  showPlayer2Info = function(game, username) {
-	    console.log('should showing player 2 info');
 	    globalVariables.user2Avatar = game.add.sprite(game.world.centerX - constants.AVATAR_SIZE / 2, constants.MARGIN, 'avatar');
 	    globalVariables.user2Avatar.width /= 2;
 	    globalVariables.user2Avatar.height /= 2;
@@ -1016,7 +1029,6 @@
 	  };
 
 	  showPlayer3Info = function(game, username) {
-	    console.log('should showing player 3 info');
 	    globalVariables.user3Avatar = game.add.sprite(constants.MARGIN, game.world.centerY - constants.AVATAR_SIZE / 2, 'avatar');
 	    globalVariables.user3Avatar.width /= 2;
 	    globalVariables.user3Avatar.height /= 2;
@@ -1026,38 +1038,6 @@
 	    globalVariables.player3IsMakerIcon.visible = false;
 	    globalVariables.player3Username = game.add.text(constants.MARGIN, game.world.centerY + constants.AVATAR_SIZE / 2 + constants.MARGIN, username, constants.TEXT_STYLE);
 	    return globalVariables.player3Username.setTextBounds(0, 0, constants.AVATAR_SIZE, 25);
-	  };
-
-	  sendGetReadyMessage = function() {
-	    var csrfToken;
-	    csrfToken = document.getElementsByName('csrf-token')[0].content;
-	    globalVariables.meStatusText.text = 'Ready';
-	    return io.socket.post('/get_ready', {
-	      _csrf: csrfToken,
-	      userId: globalVariables.userId,
-	      loginToken: globalVariables.loginToken
-	    }, function(resData, jwres) {
-	      if (jwres.statusCode === 200) {
-	        globalVariables.prepareButton.visible = false;
-	        return globalVariables.leaveButton.visible = false;
-	      } else {
-	        return console.log(jwres);
-	      }
-	    });
-	  };
-
-	  leaveRoom = function() {
-	    var csrfToken;
-	    csrfToken = document.getElementsByName('csrf-token')[0].content;
-	    return io.socket.post('/leave_room', {
-	      _csrf: csrfToken,
-	      userId: globalVariables.userId,
-	      loginToken: globalVariables.loginToken
-	    }, function(resData, jwres) {
-	      if (jwres.statusCode === 200) {
-	        return window.location.href = '/';
-	      }
-	    });
 	  };
 
 	  raiseScore = function() {
@@ -1084,22 +1064,12 @@
 	    currentScoreText = game.add.text(game.world.centerX - constants.ROUND_BUTTON_SIZE / 2, game.world.centerY - stageHeight / 2 + constants.MARGIN, '' + currentScore - 5, constants.LARGE_TEXT_STYLE);
 	    currentScoreText.setTextBounds(0, 0, constants.ROUND_BUTTON_SIZE, constants.ROUND_BUTTON_SIZE);
 	    globalVariables.callScoreStage.add(currentScoreText);
-	    lowerScoreButton = game.add.button(game.world.centerX + constants.ROUND_BUTTON_SIZE / 2 + constants.MARGIN, game.world.centerY - stageHeight / 2 + constants.MARGIN, 'lowerScoreButton', lowerScore, this, 1, 0, 1, 0);
+	    lowerScoreButton = game.add.button(game.world.centerX + constants.ROUND_BUTTON_SIZE / 2 + constants.MARGIN, game.world.centerY - stageHeight / 2 + constants.MARGIN, 'lowerScoreButton', lowerScore, this, 1, 0, 1);
 	    globalVariables.callScoreStage.add(lowerScoreButton);
-	    setScoreButton = game.add.button(game.world.centerX - constants.BUTTON_WIDTH - constants.MARGIN / 2, game.world.centerY + constants.ROUND_BUTTON_SIZE / 2, 'setScoreButton', setScore, this, 1, 0, 1, 0);
+	    setScoreButton = game.add.button(game.world.centerX - constants.BUTTON_WIDTH - constants.MARGIN / 2, game.world.centerY + constants.ROUND_BUTTON_SIZE / 2, 'setScoreButton', setScore, this, 1, 0, 1);
 	    globalVariables.callScoreStage.add(setScoreButton);
 	    passButton = game.add.button(game.world.centerX + constants.MARGIN / 2, game.world.centerY + constants.ROUND_BUTTON_SIZE / 2, 'passButton', pass, this, 1, 0, 1, 0);
 	    return globalVariables.callScoreStage.add(passButton);
-	  };
-
-	  lowerScore = function() {
-	    var aimedScores, currentSetScores;
-	    aimedScores = parseInt(globalVariables.textOfAimedScores.text);
-	    currentSetScores = parseInt(globalVariables.callScoreStage.children[2].text);
-	    if (currentSetScores > 5) {
-	      currentSetScores -= 5;
-	      return globalVariables.callScoreStage.children[2].text = '' + currentSetScores;
-	    }
 	  };
 
 	  setScore = function() {
@@ -1118,6 +1088,16 @@
 	        return globalVariables.meStatusText.text = '' + aimedScore;
 	      }
 	    });
+	  };
+
+	  lowerScore = function() {
+	    var aimedScores, currentSetScores;
+	    aimedScores = parseInt(globalVariables.textOfAimedScores.text);
+	    currentSetScores = parseInt(globalVariables.callScoreStage.children[2].text);
+	    if (currentSetScores > 5) {
+	      currentSetScores -= 5;
+	      return globalVariables.callScoreStage.children[2].text = '' + currentSetScores;
+	    }
 	  };
 
 	  pass = function() {
@@ -1221,18 +1201,6 @@
 	    return globalVariables.selectSuitStage.add(rectangle);
 	  };
 
-	  suitTapEffect = function(suitIndex) {
-	    var rectangle, suitIcon;
-	    globalVariables.mainSuit = suitIndex;
-	    rectangle = globalVariables.selectSuitStage.children[globalVariables.selectSuitStage.children.length - 1];
-	    suitIcon = globalVariables.selectSuitStage.children[suitIndex];
-	    rectangle.x = suitIcon.x - 5;
-	    rectangle.y = suitIcon.y - 5;
-	    rectangle.visible = true;
-	    globalVariables.selectSuitButton.inputEnabled = true;
-	    return globalVariables.selectSuitButton.setFrames(1, 0, 1);
-	  };
-
 	  selectSuit = function() {
 	    var csrfToken;
 	    csrfToken = document.getElementsByName('csrf-token')[0].content;
@@ -1264,6 +1232,32 @@
 	    });
 	  };
 
+	  suitTapEffect = function(suitIndex) {
+	    var rectangle, suitIcon;
+	    globalVariables.mainSuit = suitIndex;
+	    rectangle = globalVariables.selectSuitStage.children[globalVariables.selectSuitStage.children.length - 1];
+	    suitIcon = globalVariables.selectSuitStage.children[suitIndex];
+	    rectangle.x = suitIcon.x - 5;
+	    rectangle.y = suitIcon.y - 5;
+	    rectangle.visible = true;
+	    globalVariables.selectSuitButton.inputEnabled = true;
+	    return globalVariables.selectSuitButton.setFrames(1, 0, 1);
+	  };
+
+	  leaveRoom = function() {
+	    var csrfToken;
+	    csrfToken = document.getElementsByName('csrf-token')[0].content;
+	    return io.socket.post('/leave_room', {
+	      _csrf: csrfToken,
+	      userId: globalVariables.userId,
+	      loginToken: globalVariables.loginToken
+	    }, function(resData, jwres) {
+	      if (jwres.statusCode === 200) {
+	        return window.location.href = '/';
+	      }
+	    });
+	  };
+
 	  module.exports = {
 	    displayCards: displayCards,
 	    showCoveredCards: showCoveredCards,
@@ -1275,17 +1269,17 @@
 	    showPlayer2Info: showPlayer2Info,
 	    showPlayer3Info: showPlayer3Info,
 	    hideLeftPlayer: hideLeftPlayer,
-	    sendGetReadyMessage: sendGetReadyMessage,
-	    leaveRoom: leaveRoom,
 	    showCallScorePanel: showCallScorePanel,
 	    raiseScore: raiseScore,
 	    lowerScore: lowerScore,
-	    setScore: setScore,
 	    pass: pass,
 	    surrender: surrender,
 	    settleCoveredCards: settleCoveredCards,
 	    showSelectSuitPanel: showSelectSuitPanel,
-	    selectSuit: selectSuit
+	    setScore: setScore,
+	    selectSuit: selectSuit,
+	    leaveRoom: leaveRoom,
+	    sendGetReadyMessage: sendGetReadyMessage
 	  };
 
 	}).call(this);
