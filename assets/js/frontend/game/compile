@@ -1,8 +1,4 @@
 #!/bin/sh
-coffee -c constants.coffee
-coffee -c globalVariables.coffee
-coffee -c toolbox.coffee
-coffee -c actions.coffee
-coffee -c game.coffee
+coffee -o . -c coffee/
 
 webpack

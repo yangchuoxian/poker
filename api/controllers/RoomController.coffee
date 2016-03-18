@@ -40,6 +40,11 @@ module.exports =
                 password: hash
                 socketIds: [socketId]
                 usernames: [currentUserObject.username]
+                seats:
+                    one: currentUserObject.username
+                    two: ''
+                    three: ''
+                    four: ''
         .then (createdRoom) ->
             User.update id: currentUserObject.id,
                 socketId: socketId
@@ -79,18 +84,23 @@ module.exports =
             sails.sockets.join = Promise.promisify sails.sockets.join
             sails.sockets.join socketId, roomName
         .then () ->
+            dispatchedSeats = RoomService.dispatchSeatForJoinedPlayer roomObject, currentUserObject.username
             roomObject.usernames.push currentUserObject.username
             socketIds = roomObject.socketIds
             socketIds.push socketId
             Room.update id: roomObject.id,
                 socketIds: socketIds
                 usernames: roomObject.usernames
+                seats: dispatchedSeats
         .then (updatedRooms) ->
+            roomObject = updatedRooms[0]
             User.update id: currentUserObject.id,
                 socketId: socketId
                 roomName: roomName
         .then () ->
-            sails.sockets.broadcast roomName, 'newPlayerJoined', {newPlayer: currentUserObject.username}
+            sails.sockets.broadcast roomName, 'newPlayerJoined',
+                newPlayer: currentUserObject.username
+                seats: roomObject.seats
             res.json {roomName: roomName}
         .catch (err) -> res.send 400, err
 
@@ -112,8 +122,8 @@ module.exports =
         .then (updatedUsers) ->
             res.send
                 roomName: roomObject.name
-                usernames: roomObject.usernames
                 readyPlayers: roomObject.readyPlayers
+                seats: roomObject.seats
         .catch (err) -> res.send 400, err
 
     leaveRoom: (req, res) ->

@@ -31,6 +31,13 @@ module.exports =
             type: 'array'
             array: true
             defaultsTo: []
+        seats:
+            type: 'json'
+            defaultsTo:
+                one: ''
+                two: ''
+                three: ''
+                four: ''
         currentGameStatus:
             type: 'integer'
         aimedScore:

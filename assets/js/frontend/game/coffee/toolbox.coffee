@@ -94,7 +94,7 @@ toggleCardSelection = (sprite) ->
     else sprite.y = sprite.y + constants.SELECTED_CARD_Y_OFFSET
     sprite.isSelected = !sprite.isSelected
 
-validateSelectedCardsForPlay: (selectedCardValues, cardValuesAtHand, firstlyPlayedCardValues) ->
+validateSelectedCardsForPlay = (selectedCardValues, cardValuesAtHand, firstlyPlayedCardValues) ->
     if selectedCardValues.length is 0 then return false
     selectedCardValues = sortCards selectedCardValues
     cardValuesAtHand = sortCards cardValuesAtHand

@@ -14,11 +14,16 @@ module.exports =
             .then () ->
                 sails.sockets.broadcast foundRoomWithName.name, 'playerLeavedRoom', {username: currentUserObject.username}
                 index = foundRoomWithName.socketIds.indexOf currentUserObject.socketId
-                foundRoomWithName.socketIds.splice index, 1
+                if index isnt -1 then foundRoomWithName.socketIds.splice index, 1
                 index = foundRoomWithName.usernames.indexOf currentUserObject.username
-                foundRoomWithName.usernames.splice index, 1
+                if index isnt -1 then foundRoomWithName.usernames.splice index, 1
                 index = foundRoomWithName.readyPlayers.indexOf currentUserObject.username
-                foundRoomWithName.readyPlayers.splice index, 1
+                if index isnt -1 then foundRoomWithName.readyPlayers.splice index, 1
+                # Decide which seat is vacant now since that user left
+                if currentUserObject.username is foundRoomWithName.seats.one then foundRoomWithName.seats.one = ''
+                else if currentUserObject.username is foundRoomWithName.seats.two then foundRoomWithName.seats.two = ''
+                else if currentUserObject.username is foundRoomWithName.seats.three then foundRoomWithName.seats.three = ''
+                else if currentUserObject.username is foundRoomWithName.seats.four then foundRoomWithName.seats.four = ''
                 # If there is no more player in this room, delete this room
                 if foundRoomWithName.usernames.length is 0 then Room.destroy().where id: foundRoomWithName.id
                 else
@@ -26,6 +31,7 @@ module.exports =
                         socketIds: foundRoomWithName.socketIds
                         usernames: foundRoomWithName.usernames
                         readyPlayers: foundRoomWithName.readyPlayers
+                        seats: foundRoomWithName.seats
         .then () -> User.update id: userId, {roomName: ''}
         .catch (err) -> Promise.reject err
 
@@ -39,3 +45,10 @@ module.exports =
                 nextUsernameToCallScore = room.usernames[nextIndex]
                 break
         nextUsernameToCallScore
+
+    dispatchSeatForJoinedPlayer: (room, newPlayerUsername) ->
+        if room.seats.one is '' then room.seats.one = newPlayerUsername
+        else if room.seats.two is '' then room.seats.two = newPlayerUsername
+        else if room.seats.three is '' then room.seats.three = newPlayerUsername
+        else if room.seats.four is '' then room.seats.four = newPlayerUsername
+        room.seats

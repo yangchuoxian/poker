@@ -29,7 +29,6 @@ module.exports =
     textOfAimedScores: null
     textOfChipsWon: null
     textOfRoomName: null
-    numberOfPlayersInRoom: 1
     player1Username: null
     player2Username: null
     player3Username: null

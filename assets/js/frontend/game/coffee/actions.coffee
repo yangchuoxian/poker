@@ -2,33 +2,6 @@ constants = require './constants.js'
 globalVariables = require './globalVariables.js'
 toolbox = require './toolbox.js'
 
-getRoomInfo = (game) ->
-    io.socket.get '/get_room_info',
-        userId: globalVariables.userId
-        loginToken: globalVariables.loginToken
-    , (resData, jwres) ->
-        if jwres.statusCode is 200
-            globalVariables.textOfRoomName.text = resData.roomName
-            usernames = resData.usernames
-            switch usernames.length
-                when 2
-                    showPlayer3Info game, usernames[0]
-                when 3
-                    showPlayer3Info game, usernames[1]
-                    showPlayer2Info game, usernames[0]
-                when 4
-                    showPlayer3Info game, usernames[2]
-                    showPlayer2Info game, usernames[1]
-                    showPlayer1Info game, usernames[0]
-            readyPlayers = resData.readyPlayers
-            for i in [0...readyPlayers.length]
-                if globalVariables.player1Username
-                    if readyPlayers[i] is globalVariables.player1Username.text then globalVariables.player1StatusText.text = 'Ready'
-                if globalVariables.player2Username
-                    if readyPlayers[i] is globalVariables.player2Username.text then globalVariables.player2StatusText.text = 'Ready'
-                if globalVariables.player3Username
-                    if readyPlayers[i] is globalVariables.player3Username.text then globalVariables.player3StatusText.text = 'Ready'
-
 displayCards = (array) ->
     leftMargin = (globalVariables.screenWidth - (Math.floor(globalVariables.scaledCardWidth / 4) * array.length + Math.floor(3 * globalVariables.scaledCardWidth / 4))) / 2
     spritesShouldBeRemoved = []
@@ -102,18 +75,24 @@ tapDownOnSprite = (sprite, pointer) ->
     globalVariables.startSwipeCardIndex = sprite.index
 
 hideLeftPlayer = (username) ->
-    if  username == globalVariables.player1Username.text
-        globalVariables.user1Avatar.destroy()
-        globalVariables.player1Username.destroy()
-        globalVariables.player1IsMakerIcon.destroy()
-    else if username is globalVariables.player2Username.text
-        globalVariables.user2Avatar.destroy()
-        globalVariables.player2Username.destroy()
-        globalVariables.player2IsMakerIcon.destroy()
-    else if username is globalVariables.player3Username.text
-        globalVariables.user3Avatar.destroy()
-        globalVariables.player3Username.destroy()
-        globalVariables.player3IsMakerIcon.destroy()
+    if globalVariables.player1Username
+        if  username is globalVariables.player1Username.text
+            globalVariables.user1Avatar.destroy()
+            globalVariables.player1Username.destroy()
+            globalVariables.player1IsMakerIcon.destroy()
+            globalVariables.player1StatusText.destroy()
+    if globalVariables.player2Username
+        if username is globalVariables.player2Username.text
+            globalVariables.user2Avatar.destroy()
+            globalVariables.player2Username.destroy()
+            globalVariables.player2IsMakerIcon.destroy()
+            globalVariables.player2StatusText.destroy()
+    if globalVariables.player3Username
+        if username is globalVariables.player3Username.text
+            globalVariables.user3Avatar.destroy()
+            globalVariables.player3Username.destroy()
+            globalVariables.player3IsMakerIcon.destroy()
+            globalVariables.player3StatusText.destroy()
 
 backgroundTapped = () ->
     if globalVariables.isShowingCoveredCards
@@ -153,6 +132,7 @@ playSelectedCards = () ->
     toolbox.showPlayedCardsForUser 0, valuesOfCurrentUserPlayedCards
 
 showPlayer1Info = (game, username) ->
+    console.log 'should showing player 1 info'
     globalVariables.user1Avatar = game.add.sprite(globalVariables.screenWidth - constants.AVATAR_SIZE - constants.MARGIN, game.world.centerY - constants.AVATAR_SIZE / 2, 'avatar')
     globalVariables.user1Avatar.width /= 2
     globalVariables.user1Avatar.height /= 2
@@ -164,6 +144,7 @@ showPlayer1Info = (game, username) ->
     globalVariables.player1Username.setTextBounds 0, 0, constants.AVATAR_SIZE, 25
 
 showPlayer2Info = (game, username) ->
+    console.log 'should showing player 2 info'
     globalVariables.user2Avatar = game.add.sprite(game.world.centerX - constants.AVATAR_SIZE / 2, constants.MARGIN, 'avatar')
     globalVariables.user2Avatar.width /= 2
     globalVariables.user2Avatar.height /= 2
@@ -175,6 +156,7 @@ showPlayer2Info = (game, username) ->
     globalVariables.player2Username.setTextBounds 0, 0, constants.AVATAR_SIZE, 25
 
 showPlayer3Info = (game, username) ->
+    console.log 'should showing player 3 info'
     globalVariables.user3Avatar = game.add.sprite(constants.MARGIN, game.world.centerY - constants.AVATAR_SIZE / 2, 'avatar')
     globalVariables.user3Avatar.width /= 2
     globalVariables.user3Avatar.height /= 2
@@ -324,79 +306,33 @@ showSelectSuitPanel = () ->
     background.width = stageWidth
     background.height = stageHeight
 
-    spadeIcon = globalVariables.selectSuitStage.create background.x + constants.MARGIN, background.y + constants.MARGIN, 'spade'
-    spadeIcon.width = constants.SUIT_ICON_SIZE
-    spadeIcon.height = constants.SUIT_ICON_SIZE
-    heartIcon = globalVariables.selectSuitStage.create background.x + 3 * constants.MARGIN + constants.SUIT_ICON_SIZE, background.y + constants.MARGIN, 'heart'
-    heartIcon.width = constants.SUIT_ICON_SIZE
-    heartIcon.height = constants.SUIT_ICON_SIZE
-    clubIcon = globalVariables.selectSuitStage.create background.x + 5 * constants.MARGIN + 2 * constants.SUIT_ICON_SIZE, background.y + constants.MARGIN, 'club'
-    clubIcon.width = constants.SUIT_ICON_SIZE
-    clubIcon.height = constants.SUIT_ICON_SIZE
-    diamondIcon = globalVariables.selectSuitStage.create background.x + 7 * constants.MARGIN + 3 * constants.SUIT_ICON_SIZE, background.y + constants.MARGIN, 'diamond'
-    diamondIcon.width = constants.SUIT_ICON_SIZE
-    diamondIcon.height = constants.SUIT_ICON_SIZE
+    globalVariables.selectSuitStage.add background
 
-    spadeIcon.inputEnabled = true
-    spadeIcon.input.useHandCursor = true
-    spadeIcon.events.onInputDown.add spadeTapped, this
-
-    heartIcon.inputEnabled = true
-    heartIcon.input.useHandCursor = true
-    heartIcon.events.onInputDown.add heartTapped, this
-
-    clubIcon.inputEnabled = true
-    clubIcon.input.useHandCursor = true
-    clubIcon.events.onInputDown.add clubTapped, this
-
-    diamondIcon.inputEnabled = true
-    diamondIcon.input.useHandCursor = true
-    diamondIcon.events.onInputDown.add diamondTapped, this
+    suitIconNames = ['spade', 'heart', 'club', 'diamond']
+    suitIcon = null
+    for i in [0...4]
+        suitIcon = globalVariables.selectSuitStage.create background.x + (1 + 2 * i) * constants.MARGIN, background.y + constants.MARGIN, suitIconNames[i]
+        suitIcon.width = constants.SUIT_ICON_SIZE
+        suitIcon.height = constants.SUIT_ICON_SIZE
+        suitIcon.inputEnabled = true
+        suitIcon.input.useHandCursor = true
+        suitIcon.events.onInputDown.add () ->
+            suitTapEffect(i + 1)
+        this
+        globalVariables.selectSuitStage.add suitIcon
 
     rectangle = globalVariables.selectSuitStage.create spadeIcon.x, spadeIcon.y, 'rectangle'
     rectangle.width = constants.SUIT_ICON_SIZE + 10
     rectangle.height = constants.SUIT_ICON_SIZE + 10
     rectangle.visible = false
-
-    globalVariables.selectSuitStage.add background
-    globalVariables.selectSuitStage.add spadeIcon
-    globalVariables.selectSuitStage.add heartIcon
-    globalVariables.selectSuitStage.add clubIcon
-    globalVariables.selectSuitStage.add diamondIcon
     globalVariables.selectSuitStage.add rectangle
 
-spadeTapped = () ->
-    globalVariables.mainSuit = constants.SUIT_SPADE
+suitTapEffect = (suitIndex) ->
+    globalVariables.mainSuit = suitIndex
     rectangle = globalVariables.selectSuitStage.children[globalVariables.selectSuitStage.children.length - 1]
-    spadeIcon = globalVariables.selectSuitStage.children[1]
-    rectangle.x = spadeIcon.x - 10
-    rectangle.visible = true
-    globalVariables.selectSuitButton.inputEnabled = true
-    globalVariables.selectSuitButton.setFrames 1, 0, 1
-
-heartTapped = () ->
-    globalVariables.mainSuit = constants.SUIT_HEART
-    rectangle = globalVariables.selectSuitStage.children[globalVariables.selectSuitStage.children.length - 1]
-    heartIcon = globalVariables.selectSuitStage.children[2]
-    rectangle.x = heartIcon.x - 10
-    rectangle.visible = true
-    globalVariables.selectSuitButton.inputEnabled = true
-    globalVariables.selectSuitButton.setFrames 1, 0, 1
-
-clubTapped = () ->
-    globalVariables.mainSuit = constants.SUIT_CLUB
-    rectangle = globalVariables.selectSuitStage.children[globalVariables.selectSuitStage.children.length - 1]
-    clubIcon = globalVariables.selectSuitStage.children[3]
-    rectangle.x = clubIcon.x - 10
-    rectangle.visible = true
-    globalVariables.selectSuitButton.inputEnabled = true
-    globalVariables.selectSuitButton.setFrames 1, 0, 1
-
-diamondTapped = () ->
-    globalVariables.mainSuit = constants.SUIT_DIAMOND
-    rectangle = globalVariables.selectSuitStage.children[globalVariables.selectSuitStage.children.length - 1]
-    diamondIcon = globalVariables.selectSuitStage.children[4]
-    rectangle.x = diamondIcon.x - 10
+    suitIcon = globalVariables.selectSuitStage.children[suitIndex]
+    rectangle.x = suitIcon.x - 5
+    rectangle.y = suitIcon.y - 5
     rectangle.visible = true
     globalVariables.selectSuitButton.inputEnabled = true
     globalVariables.selectSuitButton.setFrames 1, 0, 1
@@ -427,7 +363,6 @@ selectSuit = () ->
 
 
 module.exports =
-    getRoomInfo: getRoomInfo
     displayCards: displayCards
     showCoveredCards: showCoveredCards
     tapUp: tapUp
