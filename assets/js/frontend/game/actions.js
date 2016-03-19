@@ -49,7 +49,7 @@
         globalVariables.prepareButton.visible = false;
         return globalVariables.leaveButton.visible = false;
       } else {
-        return console.log(jwres);
+        return alert(resData);
       }
     });
   };
@@ -103,21 +103,20 @@
       if (globalVariables.gameStatus === constants.GAME_STATUS_SETTLING_COVERED_CARDS) {
         if (selectedCardValues.length === 8) {
           globalVariables.settleCoveredCardsButton.inputEnabled = true;
-          globalVariables.settleCoveredCardsButton.setFrames(1, 0, 1);
+          return globalVariables.settleCoveredCardsButton.setFrames(1, 0, 1);
         } else {
           globalVariables.settleCoveredCardsButton.inputEnabled = false;
-          globalVariables.settleCoveredCardsButton.setFrames(2, 2, 2);
+          return globalVariables.settleCoveredCardsButton.setFrames(2, 2, 2);
         }
       } else if (globalVariables.gameStatus === constants.GAME_STATUS_PLAYING) {
         if (toolbox.validateSelectedCardsForPlay(selectedCardValues)) {
           globalVariables.playCardsButton.inputEnabled = true;
-          globalVariables.playCardsButton.setFrames(1, 0, 1);
+          return globalVariables.playCardsButton.setFrames(1, 0, 1);
         } else {
           globalVariables.playCardsButton.inputEnabled = false;
-          globalVariables.playCardsButton.setFrames(2, 2, 2);
+          return globalVariables.playCardsButton.setFrames(2, 2, 2);
         }
       }
-      return toolbox.validateSelectedCardsForPlay(selectedCardValues);
     }
   };
 
@@ -285,6 +284,8 @@
       if (jwres.statusCode === 200) {
         globalVariables.callScoreStage.destroy(true, false);
         return globalVariables.meStatusText.text = '' + aimedScore;
+      } else {
+        return alert(resData);
       }
     });
   };
@@ -312,6 +313,8 @@
     }, function(resData, jwres) {
       if (jwres.statusCode === 200) {
         return globalVariables.callScoreStage.destroy(true, false);
+      } else {
+        return alert(resData);
       }
     });
   };
@@ -362,6 +365,8 @@
     }, function(resData, jwres) {
       if (jwres.statusCode === 200) {
         return showSelectSuitPanel();
+      } else {
+        return alert(resData);
       }
     });
   };
@@ -427,6 +432,8 @@
         globalVariables.playCardsButton.inputEnabled = false;
         globalVariables.playCardsButton.setFrames(2, 2, 2);
         return globalVariables.gameStatus = constants.GAME_STATUS_PLAYING;
+      } else {
+        return alert(resData);
       }
     });
   };
@@ -453,6 +460,8 @@
     }, function(resData, jwres) {
       if (jwres.statusCode === 200) {
         return window.location.href = '/';
+      } else {
+        return alert(resData);
       }
     });
   };

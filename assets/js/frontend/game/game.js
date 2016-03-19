@@ -83,7 +83,7 @@
   };
 
   create = function() {
-    var deck1, titleOfAimedScores, titleOfChipsWon, titleOfCurrentScores, titleOfMainSuit, titleOfRoomName;
+    var titleOfAimedScores, titleOfChipsWon, titleOfCurrentScores, titleOfMainSuit, titleOfRoomName;
     globalVariables.background = game.add.sprite(0, 0, 'background');
     globalVariables.background.inputEnabled = true;
     globalVariables.background.events.onInputDown.add(actions.backgroundTapped, this);
@@ -140,24 +140,7 @@
     globalVariables.player2StatusText = game.add.text(game.world.centerX - constants.MARGIN, constants.AVATAR_SIZE + 4 * constants.MARGIN, '', constants.TEXT_STYLE);
     globalVariables.player3StatusText = game.add.text(constants.AVATAR_SIZE + 2 * constants.MARGIN, game.world.centerY, '', constants.TEXT_STYLE);
     communications.getRoomInfo(game);
-    communications.socketEventHandler(game);
-    deck1 = [1, 1, 2, 2, 4, 4, 6, 6, 7, 7, 9, 9, 34, 34, 35, 35, 38, 38];
-    actions.displayCards(deck1);
-    if (toolbox.haveTractorForSuit(constants.INDEX_SUIT_MAIN, 2, deck1)) {
-      console.log('主牌有拖拉机');
-    }
-    if (toolbox.haveTractorForSuit(constants.INDEX_SUIT_SPADE, 2, deck1)) {
-      console.log('黑桃有拖拉机');
-    }
-    if (toolbox.haveTractorForSuit(constants.INDEX_SUIT_HEART, 2, deck1)) {
-      console.log('红桃有拖拉机');
-    }
-    if (toolbox.haveTractorForSuit(constants.INDEX_SUIT_CLUB, 2, deck1)) {
-      console.log('梅花有拖拉机');
-    }
-    if (toolbox.haveTractorForSuit(constants.INDEX_SUIT_DIAMOND, 2, deck1)) {
-      return console.log('方块有拖拉机');
-    }
+    return communications.socketEventHandler(game);
   };
 
   update = function() {};

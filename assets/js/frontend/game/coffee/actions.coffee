@@ -33,7 +33,7 @@ sendGetReadyMessage = () ->
         if jwres.statusCode is 200
             globalVariables.prepareButton.visible = false
             globalVariables.leaveButton.visible = false
-        else console.log jwres
+        else alert resData
 
 showCoveredCards = () ->
     if not globalVariables.isShowingCoveredCards
@@ -225,6 +225,7 @@ setScore = () ->
         if jwres.statusCode is 200
             globalVariables.callScoreStage.destroy true, false
             globalVariables.meStatusText.text = '' + aimedScore
+        else alert resData
 
 lowerScore = () ->
     aimedScores = parseInt globalVariables.textOfAimedScores.text
@@ -244,6 +245,7 @@ pass = () ->
         roomName: globalVariables.roomName
     , (resData, jwres) ->
         if jwres.statusCode is 200 then globalVariables.callScoreStage.destroy true, false
+        else alert resData
 
 surrender = () ->
     csrfToken = document.getElementsByName('csrf-token')[0].content
@@ -283,6 +285,7 @@ settleCoveredCards = () ->
         cardsAtHand: globalVariables.cardsAtHand.values
     , (resData, jwres) ->
         if jwres.statusCode is 200 then showSelectSuitPanel()
+        else alert resData
 
 showSelectSuitPanel = () ->
     globalVariables.gameStatus = constants.GAME_STATUS_DECIDING_SUIT
@@ -338,6 +341,7 @@ selectSuit = () ->
             globalVariables.playCardsButton.inputEnabled = false
             globalVariables.playCardsButton.setFrames 2, 2, 2
             globalVariables.gameStatus = constants.GAME_STATUS_PLAYING
+        else alert resData
 
 suitTapEffect = (suitIndex) ->
     globalVariables.mainSuit = suitIndex
@@ -357,6 +361,7 @@ leaveRoom = () ->
         loginToken: globalVariables.loginToken
     , (resData, jwres) ->
         if jwres.statusCode is 200 then window.location.href = '/'
+        else alert resData
 
 module.exports =
     displayCards: displayCards
