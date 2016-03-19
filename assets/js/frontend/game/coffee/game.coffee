@@ -145,10 +145,36 @@ create = () ->
     globalVariables.player1StatusText = game.add.text globalVariables.screenWidth - 2 * constants.AVATAR_SIZE - 3 * constants.MARGIN, game.world.centerY, '', constants.TEXT_STYLE
     globalVariables.player2StatusText = game.add.text game.world.centerX - constants.MARGIN, constants.AVATAR_SIZE + 4 * constants.MARGIN, '', constants.TEXT_STYLE
     globalVariables.player3StatusText = game.add.text constants.AVATAR_SIZE + 2 * constants.MARGIN, game.world.centerY, '', constants.TEXT_STYLE
-
     communications.getRoomInfo game
-
     communications.socketEventHandler game
+
+
+
+    ####################### for test #######################
+    shuffledCards = toolbox.shuffleCards()
+    deck1 = toolbox.sortCards shuffledCards.slice 0, 21
+    actions.displayCards deck1
+
+    if toolbox.haveSingleForSuit constants.INDEX_SUIT_MAIN, deck1 then console.log 'have main'
+    if toolbox.havePairForSuit constants.INDEX_SUIT_MAIN, deck1 then console.log 'have pair for main'
+
+    pairsOfSpade = toolbox.getAllPairValuesAtHandForSuit constants.INDEX_SUIT_SPADE, deck1
+    if pairsOfSpade.length > 0 then console.log 'pairs of spade: '
+    for i in [0...pairsOfSpade.length]
+        console.log toolbox.getCardName pairsOfSpade[i]
+    pairsOfHeart = toolbox.getAllPairValuesAtHandForSuit constants.INDEX_SUIT_HEART, deck1
+    if pairsOfHeart.length > 0 then console.log 'pairs of heart: '
+    for i in [0...pairsOfHeart.length]
+        console.log toolbox.getCardName pairsOfHeart[i]
+    pairsOfClub = toolbox.getAllPairValuesAtHandForSuit constants.INDEX_SUIT_CLUB, deck1
+    if pairsOfClub.length > 0 then console.log 'pairs of club: '
+    for i in [0...pairsOfClub.length]
+        console.log toolbox.getCardName pairsOfClub[i]
+    pairsOfDiamond = toolbox.getAllPairValuesAtHandForSuit constants.INDEX_SUIT_DIAMOND, deck1
+    if pairsOfDiamond.length > 0 then console.log 'pairs of diamond: '
+    for i in [0...pairsOfDiamond.length]
+        console.log toolbox.getCardName pairsOfDiamond[i]
+    ####################### end test #######################
 
 update = () ->
 

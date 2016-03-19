@@ -1,6 +1,23 @@
 constants = require './constants.js'
 globalVariables = require './globalVariables.js'
 
+####################### for test #######################
+shuffleCards = () ->
+    array = []
+    for j in [0...2]
+        for i in [1...47]
+            array.push i
+    copy = []
+    n = array.length
+    numOfIterations = n
+    for i in [0...numOfIterations]
+        j = Math.floor(Math.random() * n)
+        copy.push array[j]
+        array.splice j, 1
+        n -= 1
+    return copy
+####################### end test #######################
+
 sortCards = (array) ->
     sortNumber = (a, b) ->
         return a - b
@@ -98,16 +115,19 @@ getCardValuesAtHandForSuit = (suitIndex, cardValuesAtHand) ->
     startCardValueForSuit = 0
     endCardValueForSuit = 0
     switch suitIndex
-        when constants.SUIT_SPADE
+        when constants.INDEX_SUIT_MAIN
+            startCardValueForSuit = constants.START_VALUE_FOR_MAIN
+            endCardValueForSuit = constants.END_VALUE_FOR_MAIN
+        when constants.INDEX_SUIT_SPADE
             startCardValueForSuit = constants.START_VALUE_FOR_SPADE
             endCardValueForSuit = constants.END_VALUE_FOR_SPADE
-        when constants.SUIT_HEART
+        when constants.INDEX_SUIT_HEART
             startCardValueForSuit = constants.START_VALUE_FOR_HEART
             endCardValueForSuit = constants.END_VALUE_FOR_HEART
-        when constants.SUIT_CLUB
+        when constants.INDEX_SUIT_CLUB
             startCardValueForSuit = constants.START_VALUE_FOR_CLUB
             endCardValueForSuit = constants.END_VALUE_FOR_CLUB
-        when constants.SUIT_DIAMOND
+        when constants.INDEX_SUIT_DIAMOND
             startCardValueForSuit = constants.START_VALUE_FOR_DIAMOND
             endCardValueForSuit = constants.END_VALUE_FOR_DIAMOND
     cardValuesAtHandOfSuit = []
@@ -126,7 +146,7 @@ haveSingleForSuit = (suitIndex, cardValuesAtHand) ->
     if cardValuesAtHandOfSuit.length > 0 then return true
     else return false
 
-getAllPairValuesAtHandForSuit = (suitIndex) ->
+getAllPairValuesAtHandForSuit = (suitIndex, cardValuesAtHand) ->
     cardValuesAtHandOfSuit = getCardValuesAtHandForSuit suitIndex, cardValuesAtHand
     pairValues = []
     for i in [0...cardValuesAtHandOfSuit.length - 1]
@@ -134,7 +154,7 @@ getAllPairValuesAtHandForSuit = (suitIndex) ->
     return pairValues
 
 haveTractorForSuit = (suitIndex, tractorLength, cardValuesAtHand) ->
-    pairValuesAtHandOfSuit = getAllPairValuesAtHandForSuit suitIndex
+    pairValuesAtHandOfSuit = getAllPairValuesAtHandForSuit suitIndex, cardValuesAtHand
     if pairValuesAtHandOfSuit.length < tractorLength then return false
     numOfConsecutivePairs = 0
     for i in [0...pairValuesAtHandOfSuit.length]
@@ -157,3 +177,14 @@ module.exports =
     toggleCardSelection: toggleCardSelection
     showPlayedCardsForUser: showPlayedCardsForUser
     validateSelectedCardsForPlay: validateSelectedCardsForPlay
+    getCardValuesAtHandForSuit: getCardValuesAtHandForSuit
+    havePairForSuit: havePairForSuit
+    haveSingleForSuit: haveSingleForSuit
+    getAllPairValuesAtHandForSuit: getAllPairValuesAtHandForSuit
+    haveTractorForSuit: haveTractorForSuit
+
+
+    ####################### for test #######################
+    shuffleCards: shuffleCards
+    ####################### end test #######################
+
