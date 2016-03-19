@@ -136,6 +136,8 @@ playSelectedCards = () ->
         return
     for i in [0...selectedCards.length]
         globalVariables.cardsAtHand.remove selectedCards[i]
+        index = globalVariables.cardsAtHand.values.indexOf selectedCards[i].value
+        globalVariables.cardsAtHand.values.splice index, 1
     # reposition the remaining cards
     numOfCardsLeft = globalVariables.cardsAtHand.children.length
     leftMargin = (globalVariables.screenWidth - (Math.floor(globalVariables.scaledCardWidth / 4) * numOfCardsLeft + Math.floor(3 * globalVariables.scaledCardWidth / 4))) / 2
@@ -258,9 +260,9 @@ settleCoveredCards = () ->
     if valuesOfSelectedCoveredCards.length isnt 8
         return
     for i in [0...valuesOfSelectedCoveredCards.length]
-        index = globalVariables.cardsAtHand.indexes.indexOf valuesOfSelectedCoveredCards[i]
-        globalVariables.cardsAtHand.indexes.splice index, 1
-    displayCards globalVariables.cardsAtHand.indexes
+        index = globalVariables.cardsAtHand.values.indexOf valuesOfSelectedCoveredCards[i]
+        globalVariables.cardsAtHand.values.splice index, 1
+    displayCards globalVariables.cardsAtHand.values
     coveredCardsIcon = globalVariables.coveredCards.create constants.MARGIN, constants.MARGIN, 'back'
     coveredCardsIcon.scale.setTo globalVariables.scaleWidthRatio, globalVariables.scaleHeightRatio
     coveredCardsIcon.inputEnabled = true
@@ -278,7 +280,7 @@ settleCoveredCards = () ->
         roomName: globalVariables.roomName
         coveredCards: globalVariables.coveredCards.indexes
         maker: globalVariables.username
-        cardsAtHand: globalVariables.cardsAtHand.indexes
+        cardsAtHand: globalVariables.cardsAtHand.values
     , (resData, jwres) ->
         if jwres.statusCode is 200 then showSelectSuitPanel()
 

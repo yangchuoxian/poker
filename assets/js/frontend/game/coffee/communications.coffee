@@ -55,11 +55,11 @@ socketEventHandler = (game) ->
             if readyUsername is globalVariables.player3Username.text then globalVariables.player3StatusText.text = 'Ready'
 
     io.socket.on 'cardsSent', (data) ->
-        globalVariables.cardsAtHand.indexes = data.cards
-        globalVariables.cardsAtHand.indexes = data.cards
+        globalVariables.cardsAtHand.values = data.cards
+        globalVariables.cardsAtHand.values = data.cards
         usernameToCallScore = data.usernameToCallScore
-        globalVariables.cardsAtHand.indexes = toolbox.sortCards globalVariables.cardsAtHand.indexes
-        actions.displayCards globalVariables.cardsAtHand.indexes
+        globalVariables.cardsAtHand.values = toolbox.sortCards globalVariables.cardsAtHand.values
+        actions.displayCards globalVariables.cardsAtHand.values
         globalVariables.meStatusText.text = ''
         globalVariables.player1StatusText.text = ''
         globalVariables.player2StatusText.text = ''
@@ -107,9 +107,9 @@ socketEventHandler = (game) ->
         else if makerUsername is globalVariables.player3Username.text then globalVariables.player3IsMakerIcon.visible = true
         if makerUsername is globalVariables.username
             coveredCards = data.coveredCards
-            globalVariables.cardsAtHand.indexes = globalVariables.cardsAtHand.indexes.concat coveredCards
-            globalVariables.cardsAtHand.indexes = toolbox.sortCards globalVariables.cardsAtHand.indexes
-            actions.displayCards globalVariables.cardsAtHand.indexes
+            globalVariables.cardsAtHand.values = globalVariables.cardsAtHand.values.concat coveredCards
+            globalVariables.cardsAtHand.values = toolbox.sortCards globalVariables.cardsAtHand.values
+            actions.displayCards globalVariables.cardsAtHand.values
             globalVariables.surrenderButton.visible = true
             globalVariables.settleCoveredCardsButton.visible = true
             globalVariables.settleCoveredCardsButton.inputEnabled = false

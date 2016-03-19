@@ -103,20 +103,21 @@
       if (globalVariables.gameStatus === constants.GAME_STATUS_SETTLING_COVERED_CARDS) {
         if (selectedCardValues.length === 8) {
           globalVariables.settleCoveredCardsButton.inputEnabled = true;
-          return globalVariables.settleCoveredCardsButton.setFrames(1, 0, 1);
+          globalVariables.settleCoveredCardsButton.setFrames(1, 0, 1);
         } else {
           globalVariables.settleCoveredCardsButton.inputEnabled = false;
-          return globalVariables.settleCoveredCardsButton.setFrames(2, 2, 2);
+          globalVariables.settleCoveredCardsButton.setFrames(2, 2, 2);
         }
       } else if (globalVariables.gameStatus === constants.GAME_STATUS_PLAYING) {
         if (toolbox.validateSelectedCardsForPlay(selectedCardValues)) {
           globalVariables.playCardsButton.inputEnabled = true;
-          return globalVariables.playCardsButton.setFrames(1, 0, 1);
+          globalVariables.playCardsButton.setFrames(1, 0, 1);
         } else {
           globalVariables.playCardsButton.inputEnabled = false;
-          return globalVariables.playCardsButton.setFrames(2, 2, 2);
+          globalVariables.playCardsButton.setFrames(2, 2, 2);
         }
       }
+      return toolbox.validateSelectedCardsForPlay(selectedCardValues);
     }
   };
 
@@ -176,7 +177,7 @@
   };
 
   playSelectedCards = function() {
-    var i, j, k, l, leftMargin, numOfCardsLeft, ref, ref1, ref2, selectedCards, valuesOfCurrentUserPlayedCards;
+    var i, index, j, k, l, leftMargin, numOfCardsLeft, ref, ref1, ref2, selectedCards, valuesOfCurrentUserPlayedCards;
     selectedCards = [];
     valuesOfCurrentUserPlayedCards = [];
     for (i = j = 0, ref = globalVariables.cardsAtHand.children.length; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
@@ -190,6 +191,8 @@
     }
     for (i = k = 0, ref1 = selectedCards.length; 0 <= ref1 ? k < ref1 : k > ref1; i = 0 <= ref1 ? ++k : --k) {
       globalVariables.cardsAtHand.remove(selectedCards[i]);
+      index = globalVariables.cardsAtHand.values.indexOf(selectedCards[i].value);
+      globalVariables.cardsAtHand.values.splice(index, 1);
     }
     numOfCardsLeft = globalVariables.cardsAtHand.children.length;
     leftMargin = (globalVariables.screenWidth - (Math.floor(globalVariables.scaledCardWidth / 4) * numOfCardsLeft + Math.floor(3 * globalVariables.scaledCardWidth / 4))) / 2;
@@ -335,10 +338,10 @@
       return;
     }
     for (i = k = 0, ref1 = valuesOfSelectedCoveredCards.length; 0 <= ref1 ? k < ref1 : k > ref1; i = 0 <= ref1 ? ++k : --k) {
-      index = globalVariables.cardsAtHand.indexes.indexOf(valuesOfSelectedCoveredCards[i]);
-      globalVariables.cardsAtHand.indexes.splice(index, 1);
+      index = globalVariables.cardsAtHand.values.indexOf(valuesOfSelectedCoveredCards[i]);
+      globalVariables.cardsAtHand.values.splice(index, 1);
     }
-    displayCards(globalVariables.cardsAtHand.indexes);
+    displayCards(globalVariables.cardsAtHand.values);
     coveredCardsIcon = globalVariables.coveredCards.create(constants.MARGIN, constants.MARGIN, 'back');
     coveredCardsIcon.scale.setTo(globalVariables.scaleWidthRatio, globalVariables.scaleHeightRatio);
     coveredCardsIcon.inputEnabled = true;
@@ -355,7 +358,7 @@
       roomName: globalVariables.roomName,
       coveredCards: globalVariables.coveredCards.indexes,
       maker: globalVariables.username,
-      cardsAtHand: globalVariables.cardsAtHand.indexes
+      cardsAtHand: globalVariables.cardsAtHand.values
     }, function(resData, jwres) {
       if (jwres.statusCode === 200) {
         return showSelectSuitPanel();

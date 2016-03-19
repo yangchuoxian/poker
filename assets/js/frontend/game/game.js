@@ -83,7 +83,7 @@
   };
 
   create = function() {
-    var deck1, i, j, k, l, m, pairsOfClub, pairsOfDiamond, pairsOfHeart, pairsOfSpade, ref, ref1, ref2, ref3, results, shuffledCards, titleOfAimedScores, titleOfChipsWon, titleOfCurrentScores, titleOfMainSuit, titleOfRoomName;
+    var deck1, titleOfAimedScores, titleOfChipsWon, titleOfCurrentScores, titleOfMainSuit, titleOfRoomName;
     globalVariables.background = game.add.sprite(0, 0, 'background');
     globalVariables.background.inputEnabled = true;
     globalVariables.background.events.onInputDown.add(actions.backgroundTapped, this);
@@ -141,45 +141,23 @@
     globalVariables.player3StatusText = game.add.text(constants.AVATAR_SIZE + 2 * constants.MARGIN, game.world.centerY, '', constants.TEXT_STYLE);
     communications.getRoomInfo(game);
     communications.socketEventHandler(game);
-    shuffledCards = toolbox.shuffleCards();
-    deck1 = toolbox.sortCards(shuffledCards.slice(0, 21));
+    deck1 = [1, 1, 2, 2, 4, 4, 6, 6, 7, 7, 9, 9, 34, 34, 35, 35, 38, 38];
     actions.displayCards(deck1);
-    if (toolbox.haveSingleForSuit(constants.INDEX_SUIT_MAIN, deck1)) {
-      console.log('have main');
+    if (toolbox.haveTractorForSuit(constants.INDEX_SUIT_MAIN, 2, deck1)) {
+      console.log('主牌有拖拉机');
     }
-    if (toolbox.havePairForSuit(constants.INDEX_SUIT_MAIN, deck1)) {
-      console.log('have pair for main');
+    if (toolbox.haveTractorForSuit(constants.INDEX_SUIT_SPADE, 2, deck1)) {
+      console.log('黑桃有拖拉机');
     }
-    pairsOfSpade = toolbox.getAllPairValuesAtHandForSuit(constants.INDEX_SUIT_SPADE, deck1);
-    if (pairsOfSpade.length > 0) {
-      console.log('pairs of spade: ');
+    if (toolbox.haveTractorForSuit(constants.INDEX_SUIT_HEART, 2, deck1)) {
+      console.log('红桃有拖拉机');
     }
-    for (i = j = 0, ref = pairsOfSpade.length; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
-      console.log(toolbox.getCardName(pairsOfSpade[i]));
+    if (toolbox.haveTractorForSuit(constants.INDEX_SUIT_CLUB, 2, deck1)) {
+      console.log('梅花有拖拉机');
     }
-    pairsOfHeart = toolbox.getAllPairValuesAtHandForSuit(constants.INDEX_SUIT_HEART, deck1);
-    if (pairsOfHeart.length > 0) {
-      console.log('pairs of heart: ');
+    if (toolbox.haveTractorForSuit(constants.INDEX_SUIT_DIAMOND, 2, deck1)) {
+      return console.log('方块有拖拉机');
     }
-    for (i = k = 0, ref1 = pairsOfHeart.length; 0 <= ref1 ? k < ref1 : k > ref1; i = 0 <= ref1 ? ++k : --k) {
-      console.log(toolbox.getCardName(pairsOfHeart[i]));
-    }
-    pairsOfClub = toolbox.getAllPairValuesAtHandForSuit(constants.INDEX_SUIT_CLUB, deck1);
-    if (pairsOfClub.length > 0) {
-      console.log('pairs of club: ');
-    }
-    for (i = l = 0, ref2 = pairsOfClub.length; 0 <= ref2 ? l < ref2 : l > ref2; i = 0 <= ref2 ? ++l : --l) {
-      console.log(toolbox.getCardName(pairsOfClub[i]));
-    }
-    pairsOfDiamond = toolbox.getAllPairValuesAtHandForSuit(constants.INDEX_SUIT_DIAMOND, deck1);
-    if (pairsOfDiamond.length > 0) {
-      console.log('pairs of diamond: ');
-    }
-    results = [];
-    for (i = m = 0, ref3 = pairsOfDiamond.length; 0 <= ref3 ? m < ref3 : m > ref3; i = 0 <= ref3 ? ++m : --m) {
-      results.push(console.log(toolbox.getCardName(pairsOfDiamond[i])));
-    }
-    return results;
   };
 
   update = function() {};

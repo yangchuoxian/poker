@@ -1,23 +1,5 @@
 constants = require './constants.js'
 globalVariables = require './globalVariables.js'
-
-####################### for test #######################
-shuffleCards = () ->
-    array = []
-    for j in [0...2]
-        for i in [1...47]
-            array.push i
-    copy = []
-    n = array.length
-    numOfIterations = n
-    for i in [0...numOfIterations]
-        j = Math.floor(Math.random() * n)
-        copy.push array[j]
-        array.splice j, 1
-        n -= 1
-    return copy
-####################### end test #######################
-
 sortCards = (array) ->
     sortNumber = (a, b) ->
         return a - b
@@ -111,7 +93,7 @@ toggleCardSelection = (sprite) ->
     else sprite.y = sprite.y + constants.SELECTED_CARD_Y_OFFSET
     sprite.isSelected = !sprite.isSelected
 
-getCardValuesAtHandForSuit = (suitIndex, cardValuesAtHand) ->
+getStartAndEndValueForSuit = (suitIndex) ->
     startCardValueForSuit = 0
     endCardValueForSuit = 0
     switch suitIndex
@@ -130,9 +112,13 @@ getCardValuesAtHandForSuit = (suitIndex, cardValuesAtHand) ->
         when constants.INDEX_SUIT_DIAMOND
             startCardValueForSuit = constants.START_VALUE_FOR_DIAMOND
             endCardValueForSuit = constants.END_VALUE_FOR_DIAMOND
+    return [startCardValueForSuit, endCardValueForSuit]
+
+getCardValuesAtHandForSuit = (suitIndex, cardValuesAtHand) ->
+    startAndEndValuesForSuit = getStartAndEndValueForSuit suitIndex
     cardValuesAtHandOfSuit = []
     for i in [0...cardValuesAtHand.length]
-        if cardValuesAtHand[i] >= startCardValueForSuit and cardValuesAtHand[i] <= endCardValueForSuit then cardValuesAtHandOfSuit.push cardValuesAtHand[i]
+        if cardValuesAtHand[i] >= startAndEndValuesForSuit[0] and cardValuesAtHand[i] <= startAndEndValuesForSuit[1] then cardValuesAtHandOfSuit.push cardValuesAtHand[i]
     return cardValuesAtHandOfSuit
 
 havePairForSuit = (suitIndex, cardValuesAtHand) ->
@@ -159,17 +145,138 @@ haveTractorForSuit = (suitIndex, tractorLength, cardValuesAtHand) ->
     numOfConsecutivePairs = 0
     for i in [0...pairValuesAtHandOfSuit.length]
         if (pairValuesAtHandOfSuit.length - i) < tractorLength then return false
-        if (pairValuesAtHandOfSuit[i] + 1) is pairValuesAtHandOfSuit[i]
+        if (pairValuesAtHandOfSuit[i] + 1) is pairValuesAtHandOfSuit[i + 1]
             numOfConsecutivePairs += 1
             if numOfConsecutivePairs is tractorLength then return true
         else numOfConsecutivePairs = 0
     return false
 
-validateSelectedCardsForPlay = (selectedCardValues, cardValuesAtHand, firstlyPlayedCardValues) ->
+getRelativeMainSuitValues = (mainSuit) ->
+    mainSuitValues = {}
+    switch mainSuit
+        when constants.INDEX_SUIT_SPADE
+            mainSuitValues.valueOfMainSuitOfSeven = 3
+            mainSuitValues.valuesOfRestSuitsOfSeven = [4, 5, 6]
+            mainSuitValues.valueOfMainSuitOfTwo = 7
+            mainSuitValues.valuesOfRestSuitsOfTwo = [8, 9, 10]
+            mainSuitValues.valueOfMainSuitOfAce = 11
+        when constants.INDEX_SUIT_HEART
+            mainSuitValues.valueOfMainSuitOfSeven = 4
+            mainSuitValues.valuesOfRestSuitsOfSeven = [3, 5, 6]
+            mainSuitValues.valueOfMainSuitOfTwo = 8
+            mainSuitValues.valuesOfRestSuitsOfTwo = [7, 9, 10]
+            mainSuitValues.valueOfMainSuitOfAce = 20
+        when constants.INDEX_SUIT_CLUB
+            mainSuitValues.valueOfMainSuitOfSeven = 5
+            mainSuitValues.valuesOfRestSuitsOfSeven = [3, 4, 6]
+            mainSuitValues.valueOfMainSuitOfTwo = 9
+            mainSuitValues.valuesOfRestSuitsOfTwo = [7, 8, 10]
+            mainSuitValues.valueOfMainSuitOfAce = 29
+        when constants.INDEX_SUIT_DIAMOND
+            mainSuitValues.valueOfMainSuitOfSeven = 6
+            mainSuitValues.valuesOfRestSuitsOfSeven = [3, 4, 5]
+            mainSuitValues.valueOfMainSuitOfTwo = 10
+            mainSuitValues.valuesOfRestSuitsOfTwo = [7, 8, 9]
+            mainSuitValues.valueOfMainSuitOfAce = 38
+    return mainSuitValues
+
+haveTractorForMainSuit = (tractorLength, cardValuesAtHand, mainSuit) ->
+    pairValuesAtHandOfMain = getAllPairValuesAtHandForSuit constants.INDEX_SUIT_MAIN, cardValuesAtHand
+    pairValuesAtHandOfSuit = getAllPairValuesAtHandForSuit mainSuit, cardValuesAtHand
+    pairs = pairValuesAtHandOfMain.concat pairValuesAtHandOfSuit
+    numOfConsecutivePairs = 0
+    mainSuitValues = getRelativeMainSuitValues mainSuit
+    for i in [0...pairs.length]
+        if (pairs.length - i) < tractorLength then return false
+        # big joker and small joker
+        if (pairs[i] is 1 and pairs[i + 1] is 2) or
+        # small joker and main seven
+        (pairs[i] is 2 and pairs[i + 1] is mainSuitValues.valueOfMainSuitOfSeven) or
+        # main seven and rest seven
+        (pairs[i] is mainSuitValues.valueOfMainSuitOfSeven and pairs[i + 1] in mainSuitValues.valuesOfRestSuitsOfSeven) or
+        # rest seven and main seven
+        (pairs[i] in mainSuitValues.valuesOfRestSuitsOfSeven and pairs[i + 1] is mainSuitValues.valueOfMainSuitOfSeven) or
+        # rest seven and main two
+        (pairs[i] in mainSuitValues.valuesOfRestSuitsOfSeven and pairs[i + 1] is mainSuitValues.valueOfMainSuitOfTwo) or
+        # main two and rest two
+        (pairs[i] is mainSuitValues.valueOfMainSuitOfTwo and pairs[i + 1] in mainSuitValues.valuesOfRestSuitsOfTwo) or
+        # rest two and main two
+        (pairs[i] in mainSuitValues.valuesOfRestSuitsOfTwo and pairs[i + 1] is mainSuitValues.valueOfMainSuitOfTwo) or
+        # rest two and main ace
+        (pairs[i] in mainSuitValues.valuesOfRestSuitsOfTwo and pairs[i + 1] is mainSuitValues.valueOfMainSuitOfAce) or
+        # regular suit tractor
+        (pairs[i] >= mainSuitValues.valueOfMainSuitOfAce and (pairs[i] + 1) is pairs[i + 1])
+            numOfConsecutivePairs += 1
+            if numOfConsecutivePairs is tractorLength then return true
+        else numOfConsecutivePairs = 0
+    return false
+
+isSingleForSuit = (suitIndex, cardValues) ->
+    startAndEndValuesForSuit = getStartAndEndValueForSuit suitIndex
+    if cardValues.length is 1 and
+    cardValues[0] >= startAndEndValuesForSuit[0] and
+    cardValues[0] <= startAndEndValuesForSuit[1] then return true
+    else return false
+
+isPairForSuit = (suitIndex, cardValues) ->
+    startAndEndValuesForSuit = getStartAndEndValueForSuit suitIndex
+    if cardValues.length is 2 and
+    cardValues[0] is cardValues[1] and
+    cardValues[0] >= startAndEndValuesForSuit[0] and
+    cardValues[1] <= startAndEndValuesForSuit[1] then return true
+    else return false
+
+isTractorForSuit = (suitIndex, cardValues) ->
+    if cardValues.length < 4 or cardValues.length % 2 isnt 0 then return false
+    startAndEndValuesForSuit = getStartAndEndValueForSuit suitIndex
+    if cardValues[0] < startAndEndValuesForSuit[0] or cardValues[cardValues.length - 1] > startAndEndValuesForSuit[1] then return false
+    i = 0
+    while i < (cardValues.length - 2)
+        if cardValues[i] isnt cardValues[i + 1] or
+        (cardValues[i] + 1) isnt cardValues[i + 2] then return false
+        i += 2
+    return true
+
+isTractorForMainSuit = (mainSuit, cardValues) ->
+    if cardValues.length < 4 or cardValues.length % 2 isnt 0 then return false
+    mainSuitValues = getRelativeMainSuitValues mainSuit
+    startAndEndValuesForMain = getStartAndEndValueForSuit constants.INDEX_SUIT_MAIN
+    startAndEndValuesForMainSuit = getStartAndEndValueForSuit mainSuit
+    valuesOfMainAndMainSuit = []
+    for i in [startAndEndValuesForMain[0]...startAndEndValuesForMain[1] + 1]
+        valuesOfMainAndMainSuit.push i
+    for i in [startAndEndValuesForMainSuit[0]...startAndEndValuesForMainSuit[1] + 1]
+        valuesOfMainAndMainSuit.push i
+    # if the selected cards contains any card that is NEITHER main NOR main suit, then should return false
+    for i in [0...cardValues.length]
+        if cardValues[i] not in valuesOfMainAndMainSuit then return false
+    i = 0
+    while i < (cardValues.length - 2)
+        # starting with even index, if the consecutive two cards is NOT the same, quit with false
+        if cardValues[i] isnt cardValues[i + 1] then return false
+        # for 2 consecutive pairs, if the first pair is big joker and the second pair is NOT small joker, quit with false
+        else if cardValues[i] is 1 and cardValues[i + 2] isnt 2 then return false
+        # for 2 consecutive pairs, if the first pair is small joker and the second pair is NOT main seven, quit with false
+        else if cardValues[i] is 2 and cardValues[i + 2] isnt mainSuitValues.valueOfMainSuitOfSeven then return false
+        # for 2 consecutive pairs, if the first pair is main seven and the second pair is NOT one of the rest suit of sevens, quit with false
+        else if cardValues[i] is mainSuitValues.valueOfMainSuitOfSeven and cardValues[i + 2] not in mainSuitValues.valuesOfRestSuitsOfSeven then return false
+        # for 2 consecutive pairs, if the first pair is one of rest suit of sevens and the second pair is NEITHER main seven NOR main two, quit with false
+        else if cardValues[i] in mainSuitValues.valuesOfRestSuitsOfSeven and
+        (cardValues[i + 2] isnt mainSuitValues.valueOfMainSuitOfSeven and cardValues[i + 2] isnt mainSuitValues.valueOfMainSuitOfTwo) then return false
+        # for 2 consecutive pairs, if the first pair is main two and the second pair is NOT one of the rest of twos, quit with false
+        else if cardValues[i] is mainSuitValues.valueOfMainSuitOfTwo and cardValues[i + 2] not in mainSuitValues.valuesOfRestSuitsOfTwo then return false
+        # for 2 consecutive pairs, if the first pair is one of the rest of twos and the second pair is NEITHER main two NOR main ace, quit with false
+        else if cardValues[i] in mainSuitValues.valuesOfRestSuitsOfTwo and
+        (cardValues[i + 2] isnt mainSuitValues.valueOfMainSuitOfTwo and cardValues[i + 2] isnt mainSuitValues.valueOfMainSuitOfAce) then return false
+        # whether regular consecutive pairs for main suit
+        else if cardValues[i] >= mainSuitValues.valueOfMainSuitOfAce and (cardValues[i] + 1) isnt cardValues[i + 2] then return false
+        i += 2
+    return true
+
+validateSelectedCardsForPlay = (selectedCardValues, firstlyPlayedCardValues) ->
     if selectedCardValues.length is 0 then return false
-    selectedCardValues = sortCards selectedCardValues
-    cardValuesAtHand = sortCards cardValuesAtHand
-    firstlyPlayedCardValues = sortCards firstlyPlayedCardValues
+
+    return false
 
 module.exports =
     sortCards: sortCards
@@ -182,9 +289,3 @@ module.exports =
     haveSingleForSuit: haveSingleForSuit
     getAllPairValuesAtHandForSuit: getAllPairValuesAtHandForSuit
     haveTractorForSuit: haveTractorForSuit
-
-
-    ####################### for test #######################
-    shuffleCards: shuffleCards
-    ####################### end test #######################
-
