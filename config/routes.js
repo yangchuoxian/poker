@@ -46,4 +46,5 @@ module.exports.routes = {
   'post /pass': 'RoomController.pass',
   'post /settleCoveredCards': 'RoomController.settleCoveredCards',
   'post /chooseMainSuit': 'RoomController.chooseMainSuit',
+  'post /play_cards': 'RoomController.playCards',
 };

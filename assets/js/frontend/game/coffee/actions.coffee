@@ -2,6 +2,11 @@ constants = require './constants.js'
 globalVariables = require './globalVariables.js'
 toolbox = require './toolbox.js'
 
+toggleCardSelection = (sprite) ->
+    if not sprite.isSelected then sprite.y = sprite.y - constants.SELECTED_CARD_Y_OFFSET
+    else sprite.y = sprite.y + constants.SELECTED_CARD_Y_OFFSET
+    sprite.isSelected = !sprite.isSelected
+
 displayCards = (array) ->
     leftMargin = (globalVariables.screenWidth - (Math.floor(globalVariables.scaledCardWidth / 4) * array.length + Math.floor(3 * globalVariables.scaledCardWidth / 4))) / 2
     spritesShouldBeRemoved = []
@@ -21,6 +26,38 @@ displayCards = (array) ->
         cardSprite.input.useHandCursor = true
         cardSprite.events.onInputDown.add tapDownOnSprite, this
         cardSprite.events.onInputUp.add tapUp, this
+
+showPlayedCardsForUser = (n, valuesOfPlayedCards) ->
+    startX = null
+    startY = null
+    userPlayedCards = null
+    switch n
+        when 0         # current user
+            startX = globalVariables.screenWidth / 2 - (valuesOfPlayedCards.length + 3) * globalVariables.scaledCardWidth / 8
+            startY = globalVariables.screenHeight - 2 * globalVariables.scaledCardHeight - 2 * constants.MARGIN
+            userPlayedCards = globalVariables.currentUserPlayedCards
+        when 1         # the 1st user
+            startX = globalVariables.screenWidth - (valuesOfPlayedCards.length + 3) * globalVariables.scaledCardWidth / 4 - constants.MARGIN
+            startY = globalVariables.screenHeight / 2 - globalVariables.scaledCardHeight / 2
+            userPlayedCards = globalVariables.user1PlayedCards
+        when 2         # the 2nd user
+            startX = globalVariables.screenWidth / 2 - (valuesOfPlayedCards.length + 3) * globalVariables.scaledCardWidth / 8
+            startY = constants.MARGIN
+            userPlayedCards = globalVariables.user2PlayedCards
+        when 3         # the 3rd user
+            startX = constants.MARGIN
+            startY = globalVariables.screenHeight / 2 - globalVariables.scaledCardHeight / 2
+            userPlayedCards = globalVariables.user3PlayedCards
+    # remove played cards
+    cardsToRemove = []
+    for i in [0...userPlayedCards.children.length]
+        cardsToRemove.push userPlayedCards.children[i]
+    for i in [0...cardsToRemove.length]
+        userPlayedCards.remove cardsToRemove[i]
+    for i in [0...valuesOfPlayedCards.length]
+        playedCard = userPlayedCards.create startX + i * globalVariables.scaledCardWidth / 4, startY, getCardName(valuesOfPlayedCards[i])
+        playedCard.width = globalVariables.scaledCardWidth
+        playedCard.height = globalVariables.scaledCardHeight
 
 sendGetReadyMessage = () ->
     csrfToken = document.getElementsByName('csrf-token')[0].content
@@ -61,10 +98,10 @@ tapUp = (sprite, pointer) ->
             globalVariables.endSwipeCardIndex = globalVariables.cardsAtHand.children.length - 1
         if globalVariables.startSwipeCardIndex <= globalVariables.endSwipeCardIndex
             for i in [globalVariables.startSwipeCardIndex...globalVariables.endSwipeCardIndex + 1]
-                toolbox.toggleCardSelection globalVariables.cardsAtHand.children[i]
+                toggleCardSelection globalVariables.cardsAtHand.children[i]
         else
             for i in [globalVariables.endSwipeCardIndex...globalVariables.startSwipeCardIndex + 1]
-                toolbox.toggleCardSelection globalVariables.cardsAtHand.children[i]
+                toggleCardSelection globalVariables.cardsAtHand.children[i]
 
         selectedCardValues = []
         for i in [0...globalVariables.cardsAtHand.children.length]
@@ -120,7 +157,7 @@ backgroundTapped = () ->
         # cancel card selections
         for i in [0...globalVariables.cardsAtHand.children.length]
             if globalVariables.cardsAtHand.children[i].isSelected
-                toolbox.toggleCardSelection globalVariables.cardsAtHand.children[i]
+                toggleCardSelection globalVariables.cardsAtHand.children[i]
     if globalVariables.gameStatus is constants.GAME_STATUS_SETTLING_COVERED_CARDS
         globalVariables.settleCoveredCardsButton.inputEnabled = false
         globalVariables.settleCoveredCardsButton.setFrames 2, 2, 2
@@ -132,8 +169,23 @@ playSelectedCards = () ->
         if globalVariables.cardsAtHand.children[i].isSelected
             selectedCards.push globalVariables.cardsAtHand.children[i]
             valuesOfCurrentUserPlayedCards.push globalVariables.cardsAtHand.children[i].value
-    if selectedCards.length is 0
-        return
+
+
+    ############################ to be tested ############################
+    csrfToken = document.getElementsByName('csrf-token')[0].content
+    io.socket.post '/play_cards',
+        playedCardValues: valuesOfCurrentUserPlayedCards
+        roomName: globalVariables.roomName
+        _csrf: csrfToken
+        userId: globalVariables.userId
+        loginToken: globalVariables.loginToken
+    , (resData, jwres) ->
+        if jwres.statusCode is 200
+            globalVariables.callScoreStage.destroy true, false
+            globalVariables.meStatusText.text = '' + aimedScore
+        else alert resData
+    ############################ end of to be ############################
+
     for i in [0...selectedCards.length]
         globalVariables.cardsAtHand.remove selectedCards[i]
         index = globalVariables.cardsAtHand.values.indexOf selectedCards[i].value
@@ -144,7 +196,7 @@ playSelectedCards = () ->
     for i in [0...globalVariables.cardsAtHand.children.length]
         globalVariables.cardsAtHand.children[i].x = leftMargin + i * Math.floor(globalVariables.scaledCardWidth / 4)
         globalVariables.cardsAtHand.children[i].index = i
-    toolbox.showPlayedCardsForUser 0, valuesOfCurrentUserPlayedCards
+    showPlayedCardsForUser 0, valuesOfCurrentUserPlayedCards
 
 showPlayer1Info = (game, username) ->
     globalVariables.user1Avatar = game.add.sprite(globalVariables.screenWidth - constants.AVATAR_SIZE - constants.MARGIN, game.world.centerY - constants.AVATAR_SIZE / 2, 'avatar')
@@ -364,8 +416,10 @@ leaveRoom = () ->
         else alert resData
 
 module.exports =
+    toggleCardSelection: toggleCardSelection
     displayCards: displayCards
     showCoveredCards: showCoveredCards
+    showPlayedCardsForUser: showPlayedCardsForUser
     tapUp: tapUp
     tapDownOnSprite: tapDownOnSprite
     backgroundTapped: backgroundTapped

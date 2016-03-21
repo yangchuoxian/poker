@@ -56,10 +56,12 @@ module.exports =
         mainSuit:
             type: 'integer'
         decks:
+            type: 'json'
+        coveredCards:
             type: 'array'
             array: true
             defaultsTo: []
-        coveredCards:
+        playedCardValuesForCurrentRound:
             type: 'array'
             array: true
             defaultsTo: []
