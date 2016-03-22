@@ -79,7 +79,8 @@
     game.load.image('diamond', 'images/diamond.png');
     game.load.spritesheet('suites', 'images/suites.png', constants.MAIN_SUIT_ICON_SIZE, constants.MAIN_SUIT_ICON_SIZE);
     game.load.image('rectangle', 'images/rectangle.png');
-    return game.load.image('makerIcon', 'images/makerIcon.png');
+    game.load.image('makerIcon', 'images/makerIcon.png');
+    return game.load.image('big', 'images/big.png');
   };
 
   create = function() {

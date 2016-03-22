@@ -74,6 +74,7 @@ preload = () ->
     game.load.spritesheet 'suites', 'images/suites.png', constants.MAIN_SUIT_ICON_SIZE, constants.MAIN_SUIT_ICON_SIZE
     game.load.image 'rectangle', 'images/rectangle.png'
     game.load.image 'makerIcon', 'images/makerIcon.png'
+    game.load.image 'big', 'images/big.png'
 
 create = () ->
     globalVariables.background = game.add.sprite 0, 0, 'background'

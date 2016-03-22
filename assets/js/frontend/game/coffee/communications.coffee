@@ -150,6 +150,29 @@ socketEventHandler = (game) ->
         globalVariables.player2StatusText.text = ''
         globalVariables.player3StatusText.text = ''
 
+    io.socket.on 'cardPlayed', (data) ->
+        usernamePlayedCards = data.playerName
+        playedCardValues = data.playedCardValues
+        firstlyPlayedCardValues = data.firstlyPlayedCardValues
+        globalVariables.firstlyPlayedCardValuesForCurrentRound = firstlyPlayedCardValues
+        n = -1
+        if usernamePlayedCards is globalVariables.player1Username.text then n = 1
+        else if usernamePlayedCards is globalVariables.player2Username.text then n = 2
+        else if usernamePlayedCards is globalVariables.player3Username.text then n = 3
+        actions.showPlayedCardsForUser n, playedCardValues
+
+    io.socket.on 'roundFinished', (data) ->
+        usernamePlayedCards = data.lastPlayerName
+        playedCardValues = data.playedCardValues
+        scoresEarned = data.scoresEarned
+        usernameWithLargestCardsForCurrentRound = data.usernameWithLargestCardsForCurrentRound
+        n = -1
+        if usernamePlayedCards is globalVariables.player1Username.text then n = 1
+        else if usernamePlayedCards is globalVariables.player2Username.text then n = 2
+        else if usernamePlayedCards is globalVariables.player3Username.text then n = 3
+        actions.showPlayedCardsForUser n, playedCardValues
+        actions.showBigStampForTheLargestPlayedCardsCurrentRound playedCardValues.length, usernameWithLargestCardsForCurrentRound, game
+
 module.exports =
     getRoomInfo: getRoomInfo
     socketEventHandler: socketEventHandler

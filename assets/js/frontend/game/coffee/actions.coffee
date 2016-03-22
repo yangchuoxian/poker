@@ -27,6 +27,25 @@ displayCards = (array) ->
         cardSprite.events.onInputDown.add tapDownOnSprite, this
         cardSprite.events.onInputUp.add tapUp, this
 
+showBigStampForTheLargestPlayedCardsCurrentRound = (numOfCardsPlayed, usernameWithLargestCardsForCurrentRound, game) ->
+    x = null
+    y = null
+    if usernameWithLargestCardsForCurrentRound is globalVariables.username
+        startX = globalVariables.screenWidth / 2 - (numOfCardsPlayed + 3) * globalVariables.scaledCardWidth / 8
+        startY = globalVariables.screenHeight - 2 * globalVariables.scaledCardHeight - 2 * constants.MARGIN
+    else if usernameWithLargestCardsForCurrentRound is globalVariables.player1Username.text
+        startX = globalVariables.screenWidth - (numOfCardsPlayed + 3) * globalVariables.scaledCardWidth / 4 - constants.MARGIN
+        startY = globalVariables.screenHeight / 2 - globalVariables.scaledCardHeight / 2
+    else if usernameWithLargestCardsForCurrentRound is globalVariables.player2Username.text
+        startX = globalVariables.screenWidth / 2 - (numOfCardsPlayed + 3) * globalVariables.scaledCardWidth / 8
+        startY = constants.MARGIN
+    else if usernameWithLargestCardsForCurrentRound is globalVariables.player3Username.text
+        startX = constants.MARGIN
+        startY = globalVariables.screenHeight / 2 - globalVariables.scaledCardHeight / 2
+    globalVariables.bigSign = game.add.sprite x, y, 'big'
+    globalVariables.bigSign.width = constants.MAKER_ICON_SIZE
+    globalVariables.bigSign.height = constants.MAKER_ICON_SIZE
+
 showPlayedCardsForUser = (n, valuesOfPlayedCards) ->
     startX = null
     startY = null
@@ -114,7 +133,7 @@ tapUp = (sprite, pointer) ->
                 globalVariables.settleCoveredCardsButton.inputEnabled = false
                 globalVariables.settleCoveredCardsButton.setFrames 2, 2, 2
         else if globalVariables.gameStatus is constants.GAME_STATUS_PLAYING
-            if toolbox.validateSelectedCardsForPlay selectedCardValues
+            if toolbox.validateSelectedCardsForPlay selectedCardValues, globalVariables.firstlyPlayedCardValuesForCurrentRound, globalVariables.cardsAtHand.values, globalVariables.mainSuit
                 globalVariables.playCardsButton.inputEnabled = true
                 globalVariables.playCardsButton.setFrames 1, 0, 1
             else
@@ -158,6 +177,11 @@ backgroundTapped = () ->
         for i in [0...globalVariables.cardsAtHand.children.length]
             if globalVariables.cardsAtHand.children[i].isSelected
                 toggleCardSelection globalVariables.cardsAtHand.children[i]
+    # if player is currently selecting which cards to play, since his/her selections are canceled now should disable the play card button
+    if globalVariables.gameStatus is constants.GAME_STATUS_PLAYING
+        globalVariables.playCardsButton.inputEnabled = false
+        globalVariables.playCardsButton.setFrames 2, 2, 2
+    # if player is a maker and is deciding which cards get to be the new covered cards, since his/her/selections are canceled, now should disable the settle covered card button
     if globalVariables.gameStatus is constants.GAME_STATUS_SETTLING_COVERED_CARDS
         globalVariables.settleCoveredCardsButton.inputEnabled = false
         globalVariables.settleCoveredCardsButton.setFrames 2, 2, 2
@@ -170,7 +194,6 @@ playSelectedCards = () ->
             selectedCards.push globalVariables.cardsAtHand.children[i]
             valuesOfCurrentUserPlayedCards.push globalVariables.cardsAtHand.children[i].value
 
-
     ############################ to be tested ############################
     csrfToken = document.getElementsByName('csrf-token')[0].content
     io.socket.post '/play_cards',
@@ -181,22 +204,19 @@ playSelectedCards = () ->
         loginToken: globalVariables.loginToken
     , (resData, jwres) ->
         if jwres.statusCode is 200
-            globalVariables.callScoreStage.destroy true, false
-            globalVariables.meStatusText.text = '' + aimedScore
+            for i in [0...selectedCards.length]
+                globalVariables.cardsAtHand.remove selectedCards[i]
+                index = globalVariables.cardsAtHand.values.indexOf selectedCards[i].value
+                globalVariables.cardsAtHand.values.splice index, 1
+            # reposition the remaining cards
+            numOfCardsLeft = globalVariables.cardsAtHand.children.length
+            leftMargin = (globalVariables.screenWidth - (Math.floor(globalVariables.scaledCardWidth / 4) * numOfCardsLeft + Math.floor(3 * globalVariables.scaledCardWidth / 4))) / 2
+            for i in [0...globalVariables.cardsAtHand.children.length]
+                globalVariables.cardsAtHand.children[i].x = leftMargin + i * Math.floor(globalVariables.scaledCardWidth / 4)
+                globalVariables.cardsAtHand.children[i].index = i
+            showPlayedCardsForUser 0, valuesOfCurrentUserPlayedCards
         else alert resData
     ############################ end of to be ############################
-
-    for i in [0...selectedCards.length]
-        globalVariables.cardsAtHand.remove selectedCards[i]
-        index = globalVariables.cardsAtHand.values.indexOf selectedCards[i].value
-        globalVariables.cardsAtHand.values.splice index, 1
-    # reposition the remaining cards
-    numOfCardsLeft = globalVariables.cardsAtHand.children.length
-    leftMargin = (globalVariables.screenWidth - (Math.floor(globalVariables.scaledCardWidth / 4) * numOfCardsLeft + Math.floor(3 * globalVariables.scaledCardWidth / 4))) / 2
-    for i in [0...globalVariables.cardsAtHand.children.length]
-        globalVariables.cardsAtHand.children[i].x = leftMargin + i * Math.floor(globalVariables.scaledCardWidth / 4)
-        globalVariables.cardsAtHand.children[i].index = i
-    showPlayedCardsForUser 0, valuesOfCurrentUserPlayedCards
 
 showPlayer1Info = (game, username) ->
     globalVariables.user1Avatar = game.add.sprite(globalVariables.screenWidth - constants.AVATAR_SIZE - constants.MARGIN, game.world.centerY - constants.AVATAR_SIZE / 2, 'avatar')
@@ -230,7 +250,6 @@ showPlayer3Info = (game, username) ->
     globalVariables.player3IsMakerIcon.visible = false
     globalVariables.player3Username = game.add.text(constants.MARGIN, game.world.centerY + constants.AVATAR_SIZE / 2 + constants.MARGIN, username, constants.TEXT_STYLE)
     globalVariables.player3Username.setTextBounds 0, 0, constants.AVATAR_SIZE, 25
-
 
 raiseScore = () ->
     aimedScores = parseInt globalVariables.textOfAimedScores.text
@@ -351,18 +370,46 @@ showSelectSuitPanel = () ->
     background.width = stageWidth
     background.height = stageHeight
     globalVariables.selectSuitStage.add background
-    suitIconNames = ['spade', 'heart', 'club', 'diamond']
-    suitIcon = null
-    for i in [0...4]
-        suitIcon = globalVariables.selectSuitStage.create background.x + (1 + 2 * i) * constants.MARGIN, background.y + constants.MARGIN, suitIconNames[i]
-        suitIcon.width = constants.SUIT_ICON_SIZE
-        suitIcon.height = constants.SUIT_ICON_SIZE
-        suitIcon.inputEnabled = true
-        suitIcon.input.useHandCursor = true
-        suitIcon.events.onInputDown.add () ->
-            suitTapEffect(i + 1)
-        this
-        globalVariables.selectSuitStage.add suitIcon
+    # add spade icon
+    spadeIcon = globalVariables.selectSuitStage.create background.x + (1 + 2 * 0) * constants.MARGIN + 0 * constants.SUIT_ICON_SIZE, background.y + constants.MARGIN, 'spade'
+    spadeIcon.width = constants.SUIT_ICON_SIZE
+    spadeIcon.height = constants.SUIT_ICON_SIZE
+    spadeIcon.inputEnabled = true
+    spadeIcon.input.useHandCursor = true
+    spadeIcon.events.onInputDown.add () ->
+        suitTapEffect(1)
+    , this
+    globalVariables.selectSuitStage.add spadeIcon
+    # add heart icon
+    heartIcon = globalVariables.selectSuitStage.create background.x + (1 + 2 * 1) * constants.MARGIN + 1 * constants.SUIT_ICON_SIZE, background.y + constants.MARGIN, 'heart'
+    heartIcon.width = constants.SUIT_ICON_SIZE
+    heartIcon.height = constants.SUIT_ICON_SIZE
+    heartIcon.inputEnabled = true
+    heartIcon.input.useHandCursor = true
+    heartIcon.events.onInputDown.add () ->
+        suitTapEffect(2)
+    , this
+    globalVariables.selectSuitStage.add heartIcon
+    # add club icon
+    clubIcon = globalVariables.selectSuitStage.create background.x + (1 + 2 * 2) * constants.MARGIN + 2 * constants.SUIT_ICON_SIZE, background.y + constants.MARGIN, 'club'
+    clubIcon.width = constants.SUIT_ICON_SIZE
+    clubIcon.height = constants.SUIT_ICON_SIZE
+    clubIcon.inputEnabled = true
+    clubIcon.input.useHandCursor = true
+    clubIcon.events.onInputDown.add () ->
+        suitTapEffect(3)
+    , this
+    globalVariables.selectSuitStage.add clubIcon
+    # add diamond icon
+    diamondIcon = globalVariables.selectSuitStage.create background.x + (1 + 2 * 3) * constants.MARGIN + 3 * constants.SUIT_ICON_SIZE, background.y + constants.MARGIN, 'diamond'
+    diamondIcon.width = constants.SUIT_ICON_SIZE
+    diamondIcon.height = constants.SUIT_ICON_SIZE
+    diamondIcon.inputEnabled = true
+    diamondIcon.input.useHandCursor = true
+    diamondIcon.events.onInputDown.add () ->
+        suitTapEffect(4)
+    , this
+    globalVariables.selectSuitStage.add diamondIcon
 
     rectangle = globalVariables.selectSuitStage.create spadeIcon.x, spadeIcon.y, 'rectangle'
     rectangle.width = constants.SUIT_ICON_SIZE + 10

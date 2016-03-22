@@ -224,7 +224,7 @@
         return globalVariables.player3StatusText.text = '庄家选主中...';
       }
     });
-    return io.socket.on('mainSuitChosen', function(data) {
+    io.socket.on('mainSuitChosen', function(data) {
       var mainSuit;
       mainSuit = data.mainSuit;
       globalVariables.mainSuit = mainSuit;
@@ -233,6 +233,39 @@
       globalVariables.player1StatusText.text = '';
       globalVariables.player2StatusText.text = '';
       return globalVariables.player3StatusText.text = '';
+    });
+    io.socket.on('cardPlayed', function(data) {
+      var firstlyPlayedCardValues, n, playedCardValues, usernamePlayedCards;
+      usernamePlayedCards = data.playerName;
+      playedCardValues = data.playedCardValues;
+      firstlyPlayedCardValues = data.firstlyPlayedCardValues;
+      globalVariables.firstlyPlayedCardValuesForCurrentRound = firstlyPlayedCardValues;
+      n = -1;
+      if (usernamePlayedCards === globalVariables.player1Username.text) {
+        n = 1;
+      } else if (usernamePlayedCards === globalVariables.player2Username.text) {
+        n = 2;
+      } else if (usernamePlayedCards === globalVariables.player3Username.text) {
+        n = 3;
+      }
+      return actions.showPlayedCardsForUser(n, playedCardValues);
+    });
+    return io.socket.on('roundFinished', function(data) {
+      var n, playedCardValues, scoresEarned, usernamePlayedCards, usernameWithLargestCardsForCurrentRound;
+      usernamePlayedCards = data.lastPlayerName;
+      playedCardValues = data.playedCardValues;
+      scoresEarned = data.scoresEarned;
+      usernameWithLargestCardsForCurrentRound = data.usernameWithLargestCardsForCurrentRound;
+      n = -1;
+      if (usernamePlayedCards === globalVariables.player1Username.text) {
+        n = 1;
+      } else if (usernamePlayedCards === globalVariables.player2Username.text) {
+        n = 2;
+      } else if (usernamePlayedCards === globalVariables.player3Username.text) {
+        n = 3;
+      }
+      actions.showPlayedCardsForUser(n, playedCardValues);
+      return actions.showBigStampForTheLargestPlayedCardsCurrentRound(playedCardValues.length, usernameWithLargestCardsForCurrentRound, game);
     });
   };
 

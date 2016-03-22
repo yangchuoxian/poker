@@ -48,3 +48,5 @@ module.exports =
     selectSuitButton: null
     selectSuitStage: null
     mainSuit: null
+    firstlyPlayedCardValuesForCurrentRound: []
+    bigSign: null

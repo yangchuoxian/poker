@@ -49,7 +49,9 @@
     gameStatus: null,
     selectSuitButton: null,
     selectSuitStage: null,
-    mainSuit: null
+    mainSuit: null,
+    firstlyPlayedCardValuesForCurrentRound: [],
+    bigSign: null
   };
 
 }).call(this);

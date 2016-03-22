@@ -294,13 +294,15 @@ module.exports =
                         currentScore: scoresEarned
                     .then () -> Promise.resolve()
                 sails.sockets.broadcast currentUserObject.roomName, 'roundFinished',
+                    lastPlayerName: currentUserObject.username
+                    playedCardValues: playedCardValues
                     scoresEarned: scoresEarned
                     usernameWithLargestCardsForCurrentRound: usernameWithLargestCardsForCurrentRound
             else
                 sails.sockets.broadcast currentUserObject.roomName, 'cardPlayed',
+                    firstlyPlayedCardValues: updatedRoom.playedCardValuesForCurrentRound[0].playedCardValues
                     playerName: currentUserObject.username
                     playedCardValues: playedCardValues
-                    numberOfUsersPlayed: updatedRoom.playedCardValuesForCurrentRound.length
                 Promise.resolve()
         .then () -> res.send 'OK'
         .catch (err) -> res.send 400, err
