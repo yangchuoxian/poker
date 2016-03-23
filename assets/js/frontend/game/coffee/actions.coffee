@@ -444,6 +444,8 @@ selectSuit = () ->
 
 suitTapEffect = (suitIndex) ->
     globalVariables.mainSuit = suitIndex
+    # after main suit is decided, rank all card values
+    globalVariables.cardValueRanks = toolbox.getRanksForMainSuitCards suitIndex
     rectangle = globalVariables.selectSuitStage.children[globalVariables.selectSuitStage.children.length - 1]
     suitIcon = globalVariables.selectSuitStage.children[suitIndex]
     rectangle.x = suitIcon.x - 5

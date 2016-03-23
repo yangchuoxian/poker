@@ -65,3 +65,6 @@ module.exports =
             type: 'array'
             array: true
             defaultsTo: []
+        cardValueRanks:
+            type: 'json'
+            defaultsTo: {}

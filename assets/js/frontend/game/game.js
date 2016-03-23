@@ -84,7 +84,7 @@
   };
 
   create = function() {
-    var titleOfAimedScores, titleOfChipsWon, titleOfCurrentScores, titleOfMainSuit, titleOfRoomName;
+    var deck1, shuffleCards, shuffledCards, titleOfAimedScores, titleOfChipsWon, titleOfCurrentScores, titleOfMainSuit, titleOfRoomName;
     globalVariables.background = game.add.sprite(0, 0, 'background');
     globalVariables.background.inputEnabled = true;
     globalVariables.background.events.onInputDown.add(actions.backgroundTapped, this);
@@ -141,7 +141,39 @@
     globalVariables.player2StatusText = game.add.text(game.world.centerX - constants.MARGIN, constants.AVATAR_SIZE + 4 * constants.MARGIN, '', constants.TEXT_STYLE);
     globalVariables.player3StatusText = game.add.text(constants.AVATAR_SIZE + 2 * constants.MARGIN, game.world.centerY, '', constants.TEXT_STYLE);
     communications.getRoomInfo(game);
-    return communications.socketEventHandler(game);
+    communications.socketEventHandler(game);
+    globalVariables.gameStatus = constants.GAME_STATUS_PLAYING;
+    globalVariables.mainSuit = constants.INDEX_SUIT_CLUB;
+    globalVariables.cardValueRanks = toolbox.getRanksForMainSuitCards(globalVariables.mainSuit);
+    shuffleCards = function() {
+      var array, copy, i, j, k, l, m, n, numOfIterations, ref;
+      array = [];
+      for (j = k = 0; k < 2; j = ++k) {
+        for (i = l = 1; l < 47; i = ++l) {
+          array.push(i);
+        }
+      }
+      copy = [];
+      n = array.length;
+      numOfIterations = n;
+      for (i = m = 0, ref = numOfIterations; 0 <= ref ? m < ref : m > ref; i = 0 <= ref ? ++m : --m) {
+        j = Math.floor(Math.random() * n);
+        copy.push(array[j]);
+        array.splice(j, 1);
+        n -= 1;
+      }
+      return copy;
+    };
+    shuffledCards = shuffleCards();
+    deck1 = [7, 7, 8, 8, 9, 9, 10, 10, 29, 29];
+    deck1 = toolbox.sortCards(deck1);
+    actions.displayCards(deck1);
+    globalVariables.cardsAtHand.values = deck1;
+    globalVariables.playCardsButton.visible = true;
+    globalVariables.playCardsButton.setFrames(2, 2, 2);
+    globalVariables.playCardsButton.inputEnabled = false;
+    globalVariables.prepareButton.visible = false;
+    return globalVariables.leaveButton.visible = false;
   };
 
   update = function() {};

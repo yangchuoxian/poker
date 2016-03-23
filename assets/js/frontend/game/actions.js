@@ -551,6 +551,7 @@
   suitTapEffect = function(suitIndex) {
     var rectangle, suitIcon;
     globalVariables.mainSuit = suitIndex;
+    globalVariables.cardValueRanks = toolbox.getRanksForMainSuitCards(suitIndex);
     rectangle = globalVariables.selectSuitStage.children[globalVariables.selectSuitStage.children.length - 1];
     suitIcon = globalVariables.selectSuitStage.children[suitIndex];
     rectangle.x = suitIcon.x - 5;

@@ -51,7 +51,8 @@
     selectSuitStage: null,
     mainSuit: null,
     firstlyPlayedCardValuesForCurrentRound: [],
-    bigSign: null
+    bigSign: null,
+    cardValueRanks: null
   };
 
 }).call(this);

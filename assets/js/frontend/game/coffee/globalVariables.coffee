@@ -50,3 +50,4 @@ module.exports =
     mainSuit: null
     firstlyPlayedCardValuesForCurrentRound: []
     bigSign: null
+    cardValueRanks: null

@@ -245,8 +245,10 @@ module.exports =
         roomName = req.param 'roomName'
         maker = req.param 'maker'
         mainSuit = req.param 'mainSuit'
+        cardValueRanks = Toolbox.getRanksForMainSuitCards mainSuit
         Room.update name: roomName,
             mainSuit: mainSuit
+            cardValueRanks: cardValueRanks
         .then (updatedRooms) ->
             return Promise.reject '房间不存在' if not updatedRooms
             sails.sockets.broadcast roomName, 'mainSuitChosen',
@@ -285,7 +287,7 @@ module.exports =
             # current round is finished, all 4 players have played cards
             if updatedRoom.playedCardValuesForCurrentRound.length is 4
                 # get the username that played the largest cards for current round
-                usernameWithLargestCardsForCurrentRound = Toolbox.getPlayerThatPlayedLargestCardsForThisRound updatedRoom.playedCardValuesForCurrentRound, updatedRoom.mainSuit
+                usernameWithLargestCardsForCurrentRound = Toolbox.getPlayerThatPlayedLargestCardsForThisRound updatedRoom.playedCardValuesForCurrentRound, updatedRoom.mainSuit, updatedRoom.cardValueRanks
                 scoresEarned = 0
                 # if the username that played the largest cards is NOT the maker, then we calculate how many scores are earned for this round
                 if usernameWithLargestCardsForCurrentRound isnt updatedRoom.maker
