@@ -253,6 +253,7 @@ module.exports =
             return Promise.reject '房间不存在' if not updatedRooms
             sails.sockets.broadcast roomName, 'mainSuitChosen',
                 mainSuit: mainSuit
+                maker: updatedRooms[0].maker
             res.send 'OK'
         .catch (err) -> res.send 400, err
 
@@ -260,7 +261,6 @@ module.exports =
         userId = req.param 'userId'
         playedCardValues = req.param 'playedCardValues'
         currentUserObject = null
-        roomObject = null
         User.findOne id: userId
         .then (foundUserWithId) ->
             return Promise.reject '用户不存在' if not foundUserWithId
@@ -301,10 +301,12 @@ module.exports =
                     scoresEarned: scoresEarned
                     usernameWithLargestCardsForCurrentRound: usernameWithLargestCardsForCurrentRound
             else
+                nextPlayerUsername = RoomService.findNextPlayerToPlayCard updatedRoom.seats, currentUserObject.username
                 sails.sockets.broadcast currentUserObject.roomName, 'cardPlayed',
                     firstlyPlayedCardValues: updatedRoom.playedCardValuesForCurrentRound[0].playedCardValues
                     playerName: currentUserObject.username
                     playedCardValues: playedCardValues
+                    nextPlayerUsername: nextPlayerUsername
                 Promise.resolve()
         .then () -> res.send 'OK'
         .catch (err) -> res.send 400, err

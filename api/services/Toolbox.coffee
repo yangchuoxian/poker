@@ -32,102 +32,51 @@ calculateTotalScoresForThisRound = (playedCardsInfo) ->
             else if playedCardsInfo[i].playedCardValues[j] in sails.config.constants.indexesOfTenScoreCards then totalScores += 10
     totalScores
 
+###
+Given the selected main suit index and user played cards info for one round, this function returns the username
+that played the largest cards for this round
+@param: playedCardInfo                                  played card info object with such format
+                                                        {
+                                                            username: 'someUsername',
+                                                            playedCardValues: [
+                                                                valueOfCard1,
+                                                                valueOfCard2,
+                                                                ...
+                                                            ]
+                                                        }
+@param: mainSuit                                        the main suit index
+@param: cardValueRanks                                  all card value ranks after the main suit is settled
+@return: String                                         the username that played the largest cards for this round
+###
 getPlayerThatPlayedLargestCardsForThisRound = (playedCardsInfo, mainSuit, cardValueRanks) ->
     playedCardValues = []
     for i in [0...playedCardsInfo.length]
         playedCardValues.push playedCardsInfo[i].playedCardValues
-
     suitForFirstlyPlayedCards = null
-    if isSingleForMainSuit mainSuit, playedCardValues[0][0] then suitForFirstlyPlayedCards = sails.config.constants.INDEX_SUIT_MAIN
-    else if isSingleForSuit sails.config.constants.INDEX_SUIT_SPADE, playedCardValues[0][0] then suitForFirstlyPlayedCards = sails.config.constants.INDEX_SUIT_SPADE
-    else if isSingleForSuit sails.config.constants.INDEX_SUIT_HEART, playedCardValues[0][0] then suitForFirstlyPlayedCards = sails.config.constants.INDEX_SUIT_HEART
-    else if isSingleForSuit sails.config.constants.INDEX_SUIT_CLUB, playedCardValues[0][0] then suitForFirstlyPlayedCards = sails.config.constants.INDEX_SUIT_CLUB
-    else if isSingleForSuit sails.config.constants.INDEX_SUIT_DIAMOND, playedCardValues[0][0] then suitForFirstlyPlayedCards = sails.config.constants.INDEX_SUIT_DIAMOND
+    if isSingleForMainSuit mainSuit, [playedCardValues[0][0]] then suitForFirstlyPlayedCards = sails.config.constants.INDEX_SUIT_MAIN
+    else if isSingleForSuit sails.config.constants.INDEX_SUIT_SPADE, [playedCardValues[0][0]] then suitForFirstlyPlayedCards = sails.config.constants.INDEX_SUIT_SPADE
+    else if isSingleForSuit sails.config.constants.INDEX_SUIT_HEART, [playedCardValues[0][0]] then suitForFirstlyPlayedCards = sails.config.constants.INDEX_SUIT_HEART
+    else if isSingleForSuit sails.config.constants.INDEX_SUIT_CLUB, [playedCardValues[0][0]] then suitForFirstlyPlayedCards = sails.config.constants.INDEX_SUIT_CLUB
+    else if isSingleForSuit sails.config.constants.INDEX_SUIT_DIAMOND, [playedCardValues[0][0]] then suitForFirstlyPlayedCards = sails.config.constants.INDEX_SUIT_DIAMOND
 
     largestIndex = 0
     # 首发牌是单张
     if playedCardValues[0].length is 1
         for i in [1...playedCardValues.length]
-            # 单牌调主
-            if suitForFirstlyPlayedCards is sails.config.constants.INDEX_SUIT_MAIN
-                # 跟牌也是单牌主牌
-                if isSingleForMainSuit mainSuit, playedCardValues[i][0]
-                    if playedCardValues[i][0] > playedCardValues[largestIndex][0] then largestIndex = i
-                # 跟牌是副牌
-                else
-            # 首发牌是单牌副牌
-            else
-                # 跟牌是单牌主牌
-                if isSingleForMainSuit mainSuit, playedCardValues[i][0]
-                    if playedCardValues[i][0] > playedCardValues[largestIndex][0] then largestIndex = i
-                # 跟牌是与先发牌同样花色的副牌单牌
-                else if isSingleForSuit suitForFirstlyPlayedCards, playedCardValues[i][0]
-                    # 本轮最大的牌是主牌单张
-                    if isSingleForMainSuit mainSuit, playedCardValues[largestIndex][0]
-                    # 本轮最大的牌也是与首张牌同样花色的副牌单牌
-                    else
-                        if playedCardValues[i][0] > playedCardValues[largestIndex][0] then largestIndex = i
-                # 跟牌是其他花色的副牌
-                else
+            if cardValueRanks[playedCardValues[i][0]] < cardValueRanks[playedCardValues[largestIndex][0]] then largestIndex = i
     # 首发牌是对子
     else if playedCardValues[0].length is 2
         for i in [1...playedCardValues.length]
-            # 对子调主
-            if suitForFirstlyPlayedCards is sails.config.constants.INDEX_SUIT_MAIN
-                # 跟牌也是主牌对子
-                if isPairForMainSuit mainSuit, playedCardValues[i]
-                    if playedCardValues[i][0] > playedCardValues[largestIndex][0] then largestIndex = i
-                # 跟牌不是主牌对子
-                else
-            # 首发牌是副牌对子
-            else
-                # 跟牌是主牌对子
-                if isPairForMainSuit mainSuit, playedCardValues[i]
-                    # 本轮最大的牌是主牌对子
-                    if isPairForMainSuit mainSuit, playedCardValues[largestIndex]
-                        if playedCardValues[i][0] > playedCardValues[largestIndex][0] then largestIndex = i
-                    # 本轮最大的牌是与首发牌同花色的副牌对子
-                    else
-                        largestIndex = i
-                # 跟牌是同样花色的副牌对子
-                else if isPairForSuit suitForFirstlyPlayedCards, playedCardValues[i]
-                    # 本轮最大的牌是主牌对子
-                    if isPairForMainSuit mainSuit, playedCardValues[largestIndex]
-                    # 本轮最大的牌也是与首发牌同样花色的副牌对子
-                    else
-                        if playedCardValues[i][0] > playedCardValues[largestIndex][0] then largestIndex = i
-                # 跟牌既不是主牌对子也不是同样花色的对子
-                else
+            # 跟牌也是对子
+            if playedCardValues[i][0] is playedCardValues[i][1]
+                if cardValueRanks[playedCardValues[i][0]] < cardValueRanks[playedCardValues[largestIndex][0]] then largestIndex = i
     # 首发牌是拖拉机
     else
         for i in [1...playedCardValues.length]
-            # 主牌拖拉机调主
-            if suitForFirstlyPlayedCards is sails.config.constants.INDEX_SUIT_MAIN
-                # 跟牌也是主牌拖拉机
-                if isTractorForMainSuit playedCardValues[0].length / 2, mainSuit, playedCardValues[i], cardValueRanks
-                    if playedCardValues[i][0] > playedCardValues[largestIndex][0] then largestIndex = i
-                # 跟牌不是主牌拖拉机
-                else
-            # 首发牌是副牌拖拉机
-            else
-                # 跟牌是主牌拖拉机
-                if isTractorForMainSuit playedCardValues[0].length / 2, mainSuit, playedCardValues[i], cardValueRanks
-                    # 本轮最大的牌是主牌拖拉机
-                    if isTractorForMainSuit playedCardValues[0].length / 2, mainSuit, playedCardValues[largestIndex], cardValueRanks
-                        if playedCardValues[i][0] > playedCardValues[largestIndex][0] then largestIndex = i
-                    # 本轮最大的牌是与首发牌同花色的副牌拖拉机
-                    else
-                        largestIndex = i
-                # 跟牌也是同花色的拖拉机
-                else if isTractorForSuit playedCardValues[0].length / 2, suitForFirstlyPlayedCards, playedCardValues[i]
-                    # 本轮最大的牌是主牌拖拉机
-                    if isTractorForMainSuit playedCardValues[0].length / 2, mainSuit, playedCardValues[largestIndex], cardValueRanks
-                    # 本轮最大的牌是与首发牌同花色的副牌拖拉机
-                    else
-                        if playedCardValues[i][0] > playedCardValues[largestIndex][0] then largestIndex = i
-                # 跟牌不是同花色的拖拉机
-                else
-
+            # 跟牌也是拖拉机
+            if isTractorForSuit(playedCardValues[i].length / 2, suitForFirstlyPlayedCards, playedCardValues[i], cardValueRanks) or
+            isTractorForMainSuit(playedCardValues[i].length / 2, mainSuit, playedCardValues[i], cardValueRanks)
+                if cardValueRanks[playedCardValues[i][0]] < cardValueRanks[playedCardValues[largestIndex][0]] then largestIndex = i
     return playedCardsInfo[largestIndex].username
 
 
@@ -190,16 +139,21 @@ isPairForMainSuit = (mainSuit, cardValues) ->
     cardValues[i] in valuesOfMainAndMainSuit then return true
     else return false
 
-isTractorForSuit = (tractorLength, suitIndex, cardValues) ->
+isTractorForSuit = (tractorLength, suitIndex, cardValues, cardValueRanks) ->
+    if tractorLength is 0 or cardValues.length < 4 then return false
     if cardValues.length < tractorLength * 2 or
     cardValues.length % 2 isnt 0 then return false
     startAndEndValuesForSuit = getStartAndEndValueForSuit suitIndex
     if cardValues[0] < startAndEndValuesForSuit[0] or cardValues[cardValues.length - 1] > startAndEndValuesForSuit[1] then return false
     i = 0
-    while i < (cardValues.length - 2)
-        if cardValues[i] isnt cardValues[i + 1] or
-        (cardValues[i] + 1) isnt cardValues[i + 2] then return false
+    pairRanks = []
+    while i <= (cardValues.length - 2)
+        if cardValues[i] isnt cardValues[i + 1] then return false
+        else pairRanks.push cardValueRanks[cardValues[i]]
         i += 2
+    pairRanks = sortCards pairRanks
+    for i in [0...pairRanks.length - 1]
+        if (pairRanks[i] + 1) isnt pairRanks[i + 1] then return false
     return true
 
 isTractorForMainSuit = (tractorLength, mainSuit, cardValues, cardValueRanks) ->

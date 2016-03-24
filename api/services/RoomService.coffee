@@ -38,11 +38,12 @@ module.exports =
     getNextUsernameToCallScore: (room, currentUser) ->
         nextUsernameToCallScore = ''
         if room.passedUsernames.length is 3 then return nextUsernameToCallScore
-        index = room.usernames.indexOf currentUser.username
+        usernamesInSeats = [room.seats.one, room.seats.two, room.seats.three, room.seats.four]
+        index = usernamesInSeats.indexOf currentUser.username
         for i in [1...4]
             nextIndex = (index + i) % 4
-            if room.usernames[nextIndex] not in room.passedUsernames
-                nextUsernameToCallScore = room.usernames[nextIndex]
+            if usernamesInSeats[nextIndex] not in room.passedUsernames
+                nextUsernameToCallScore = usernamesInSeats[nextIndex]
                 break
         nextUsernameToCallScore
 
@@ -52,3 +53,9 @@ module.exports =
         else if room.seats.three is '' then room.seats.three = newPlayerUsername
         else if room.seats.four is '' then room.seats.four = newPlayerUsername
         room.seats
+
+    findNextPlayerToPlayCard: (seats, currentPlayerUsername) ->
+        if seats.one is currentPlayerUsername then return seats.two
+        else if seats.two is currentPlayerUsername then return seats.three
+        else if seats.three is currentPlayerUsername then return seats.four
+        else if seats.four is currentPlayerUsername then return seats.one

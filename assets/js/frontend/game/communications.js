@@ -192,54 +192,30 @@
         globalVariables.settleCoveredCardsButton.visible = true;
         globalVariables.settleCoveredCardsButton.inputEnabled = false;
         globalVariables.settleCoveredCardsButton.setFrames(2, 2, 2);
-        globalVariables.player1StatusText.text = '';
-        globalVariables.player2StatusText.text = '';
-        globalVariables.player3StatusText.text = '';
-      } else if (makerUsername === globalVariables.player1Username.text) {
-        globalVariables.meStatusText.text = '';
-        globalVariables.player1StatusText.text = '庄家埋底中...';
-        globalVariables.player2StatusText.text = '';
-        globalVariables.player3StatusText.text = '';
-      } else if (makerUsername === globalVariables.player2Username.text) {
-        globalVariables.meStatusText.text = '';
-        globalVariables.player1StatusText.text = '';
-        globalVariables.player2StatusText.text = '庄家埋底中...';
-        globalVariables.player3StatusText.text = '';
-      } else if (makerUsername === globalVariables.player3Username.text) {
-        globalVariables.meStatusText.text = '';
-        globalVariables.player1StatusText.text = '';
-        globalVariables.player2StatusText.text = '';
-        globalVariables.player3StatusText.text = '庄家埋底中...';
       }
-      return globalVariables.gameStatus = constants.GAME_STATUS_SETTLING_COVERED_CARDS;
+      globalVariables.gameStatus = constants.GAME_STATUS_SETTLING_COVERED_CARDS;
+      return toolbox.setPlayerStatusTextForOneUserAndClearStatusTextForOthers(makerUsername, '庄家埋底中...');
     });
     io.socket.on('finishedSettlingCoveredCards', function(data) {
       var makerUsername;
       makerUsername = data.maker;
-      if (makerUsername === globalVariables.player1Username.text) {
-        return globalVariables.player1StatusText.text = '庄家选主中...';
-      } else if (makerUsername === globalVariables.player2Username.text) {
-        return globalVariables.player2StatusText.text = '庄家选主中...';
-      } else if (makerUsername === globalVariables.player3Username.text) {
-        return globalVariables.player3StatusText.text = '庄家选主中...';
-      }
+      return toolbox.setPlayerStatusTextForOneUserAndClearStatusTextForOthers(makerUsername, '庄家选主中...');
     });
     io.socket.on('mainSuitChosen', function(data) {
-      var mainSuit;
-      mainSuit = data.mainSuit;
-      globalVariables.mainSuit = mainSuit;
+      var makerUsername;
+      globalVariables.mainSuit = data.mainSuit;
+      makerUsername = data.maker;
       globalVariables.iconOfMainSuit.frame = globalVariables.mainSuit;
-      globalVariables.meStatusText.text = '';
-      globalVariables.player1StatusText.text = '';
-      globalVariables.player2StatusText.text = '';
-      return globalVariables.player3StatusText.text = '';
+      toolbox.setPlayerStatusTextForOneUserAndClearStatusTextForOthers(makerUsername, '出牌中...');
+      globalVariables.cardsAtHand.values = toolbox.sortCardsAfterMainSuitSettled(globalVariables.cardsAtHand.values, globalVariables.mainSuit);
+      return actions.displayCards(globalVariables.cardsAtHand.values);
     });
     io.socket.on('cardPlayed', function(data) {
-      var firstlyPlayedCardValues, n, playedCardValues, usernamePlayedCards;
+      var n, nextPlayerUsername, playedCardValues, usernamePlayedCards;
       usernamePlayedCards = data.playerName;
       playedCardValues = data.playedCardValues;
-      firstlyPlayedCardValues = data.firstlyPlayedCardValues;
-      globalVariables.firstlyPlayedCardValuesForCurrentRound = firstlyPlayedCardValues;
+      globalVariables.firstlyPlayedCardValuesForCurrentRound = data.firstlyPlayedCardValues;
+      nextPlayerUsername = data.nextPlayerUsername;
       n = -1;
       if (usernamePlayedCards === globalVariables.player1Username.text) {
         n = 1;
@@ -248,7 +224,14 @@
       } else if (usernamePlayedCards === globalVariables.player3Username.text) {
         n = 3;
       }
-      return actions.showPlayedCardsForUser(n, playedCardValues);
+      if (n !== -1) {
+        actions.showPlayedCardsForUser(n, playedCardValues);
+      }
+      if (nextPlayerUsername === globalVariables.username) {
+        globalVariables.playCardsButton.setFrames(2, 2, 2);
+        globalVariables.playCardsButton.visible = true;
+      }
+      return toolbox.setPlayerStatusTextForOneUserAndClearStatusTextForOthers(nextPlayerUsername, '出牌中...');
     });
     return io.socket.on('roundFinished', function(data) {
       var n, playedCardValues, scoresEarned, usernamePlayedCards, usernameWithLargestCardsForCurrentRound;
@@ -264,7 +247,9 @@
       } else if (usernamePlayedCards === globalVariables.player3Username.text) {
         n = 3;
       }
-      actions.showPlayedCardsForUser(n, playedCardValues);
+      if (n !== -1) {
+        actions.showPlayedCardsForUser(n, playedCardValues);
+      }
       return actions.showBigStampForTheLargestPlayedCardsCurrentRound(playedCardValues.length, usernameWithLargestCardsForCurrentRound, game);
     });
   };

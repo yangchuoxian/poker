@@ -1,9 +1,80 @@
 constants = require './constants.js'
 globalVariables = require './globalVariables.js'
+binarySearch = (array, x) ->
+    n = array.length
+    begin = 0
+    end = n - 1
+    result = -1
+    while begin <= end
+        mid = Math.floor((begin + end) / 2)
+        if array[mid] <= x
+            begin = mid + 1
+            result = mid
+        else end = mid - 1
+    return result
+
 sortCards = (array) ->
     sortNumber = (a, b) ->
         return a - b
     return array.sort sortNumber
+
+sortCardsAfterMainSuitSettled = (array, mainSuit) ->
+    array = sortCards array
+    cardValuesForMainSuit = getCardValuesForSuit mainSuit, array
+    cardValuesForMain = getCardValuesForSuit constants.INDEX_SUIT_MAIN, array
+
+    if cardValuesForMain.length isnt 0
+        indexesForMainSevens = []
+        indexesForMainTwos = []
+        mainSeven = null
+        mainTwo = null
+        switch mainSuit
+            when constants.INDEX_SUIT_SPADE
+                mainSeven = constants.VALUE_SPADE_SEVEN
+                mainTwo = constants.VALUE_SPADE_TWO
+            when constants.INDEX_SUIT_HEART
+                mainSeven = constants.VALUE_HEART_SEVEN
+                mainTwo = constants.VALUE_HEART_TWO
+            when constants.INDEX_SUIT_CLUB
+                mainSeven = constants.VALUE_CLUB_SEVEN
+                mainTwo = constants.VALUE_CLUB_TWO
+            when constants.INDEX_SUIT_DIAMOND
+                mainSeven = constants.VALUE_DIAMOND_SEVEN
+                mainTwo = constants.VALUE_DIAMOND_TWO
+        for i in [0...cardValuesForMain.length]
+            if cardValuesForMain[i] is mainSeven then indexesForMainSevens.push i
+        if indexesForMainSevens.length is 1
+            cardValuesForMain.splice indexesForMainSevens[0], 1
+            indexForSmallJoker = binarySearch cardValuesForMain, constants.VALUE_SMALL_JOKER
+            cardValuesForMain.splice indexForSmallJoker + 1, 0, mainSeven
+        else if indexesForMainSevens.length is 2
+            cardValuesForMain.splice indexesForMainSevens[0], 2
+            indexForSmallJoker = binarySearch cardValuesForMain, constants.VALUE_SMALL_JOKER
+            cardValuesForMain.splice indexForSmallJoker + 1, 0, mainSeven
+            cardValuesForMain.splice indexForSmallJoker + 1, 0, mainSeven
+        for i in [0...cardValuesForMain.length]
+            if cardValuesForMain[i] is mainTwo then indexesForMainTwos.push i
+        if indexesForMainTwos.length is 1
+            cardValuesForMain.splice indexesForMainTwos[0], 1
+            indexForDiamondSeven = binarySearch cardValuesForMain, constants.VALUE_DIAMOND_SEVEN
+            cardValuesForMain.splice indexForDiamondSeven + 1, 0, mainTwo
+        else if indexesForMainTwos.length is 2
+            cardValuesForMain.splice indexesForMainTwos[0], 2
+            indexForDiamondSeven = binarySearch cardValuesForMain, constants.VALUE_DIAMOND_SEVEN
+            cardValuesForMain.splice indexForDiamondSeven + 1, 0, mainTwo
+            cardValuesForMain.splice indexForDiamondSeven + 1, 0, mainTwo
+        for i in [0...cardValuesForMain.length]
+            index = array.indexOf cardValuesForMain[i]
+            array.splice index, 1
+        array = cardValuesForMain.concat array
+
+    if cardValuesForMainSuit.length isnt 0
+        for i in [0...cardValuesForMainSuit.length]
+            index = array.indexOf cardValuesForMainSuit[i]
+            array.splice index, 1
+        for i in [0...cardValuesForMainSuit.length]
+            array.splice cardValuesForMain.length + i, 0, cardValuesForMainSuit[i]
+    return array
 
 ###
 With the given card value, this function finds out its corresponding card name
@@ -13,53 +84,69 @@ With the given card value, this function finds out its corresponding card name
 getCardName = (n) ->
     cardName = ''
     switch n
-        when 1 then cardName = 'bigJoker'
-        when 2 then cardName = 'smallJoker'
-        when 3 then cardName = 'sevenOfSpades'
-        when 4 then cardName = 'sevenOfHearts'
-        when 5 then cardName = 'sevenOfClubs'
-        when 6 then cardName = 'sevenOfDiamonds'
-        when 7 then cardName = 'twoOfSpades'
-        when 8 then cardName = 'twoOfHearts'
-        when 9 then cardName = 'twoOfClubs'
-        when 10 then cardName = 'twoOfDiamonds'
-        when 11 then cardName = 'aceOfSpades'
-        when 12 then cardName = 'kingOfSpades'
-        when 13 then cardName = 'queenOfSpades'
-        when 14 then cardName = 'jackOfSpades'
-        when 15 then cardName = 'tenOfSpades'
-        when 16 then cardName = 'nineOfSpades'
-        when 17 then cardName = 'eightOfSpades'
-        when 18 then cardName = 'sixOfSpades'
-        when 19 then cardName = 'fiveOfSpades'
-        when 20 then cardName = 'aceOfHearts'
-        when 21 then cardName = 'kingOfHearts'
-        when 22 then cardName = 'queenOfHearts'
-        when 23 then cardName = 'jackOfHearts'
-        when 24 then cardName = 'tenOfHearts'
-        when 25 then cardName = 'nineOfHearts'
-        when 26 then cardName = 'eightOfHearts'
-        when 27 then cardName = 'sixOfHearts'
-        when 28 then cardName = 'fiveOfHearts'
-        when 29 then cardName = 'aceOfClubs'
-        when 30 then cardName = 'kingOfClubs'
-        when 31 then cardName = 'queenOfClubs'
-        when 32 then cardName = 'jackOfClubs'
-        when 33 then cardName = 'tenOfClubs'
-        when 34 then cardName = 'nineOfClubs'
-        when 35 then cardName = 'eightOfClubs'
-        when 36 then cardName = 'sixOfClubs'
-        when 37 then cardName = 'fiveOfClubs'
-        when 38 then cardName = 'aceOfDiamonds'
-        when 39 then cardName = 'kingOfDiamonds'
-        when 40 then cardName = 'queenOfDiamonds'
-        when 41 then cardName = 'jackOfDiamonds'
-        when 42 then cardName = 'tenOfDiamonds'
-        when 43 then cardName = 'nineOfDiamonds'
-        when 44 then cardName = 'eightOfDiamonds'
-        when 45 then cardName = 'sixOfDiamonds'
-        when 46 then cardName = 'fiveOfDiamonds'
+        when constants.VALUE_BIG_JOKER then cardName = 'bigJoker'
+        when constants.VALUE_SMALL_JOKER then cardName = 'smallJoker'
+        when constants.VALUE_SPADE_SEVEN then cardName = 'sevenOfSpades'
+        when constants.VALUE_HEART_SEVEN then cardName = 'sevenOfHearts'
+        when constants.VALUE_CLUB_SEVEN then cardName = 'sevenOfClubs'
+        when constants.VALUE_DIAMOND_SEVEN then cardName = 'sevenOfDiamonds'
+        when constants.VALUE_SPADE_TWO then cardName = 'twoOfSpades'
+        when constants.VALUE_HEART_TWO then cardName = 'twoOfHearts'
+        when constants.VALUE_CLUB_TWO then cardName = 'twoOfClubs'
+        when constants.VALUE_DIAMOND_TWO then cardName = 'twoOfDiamonds'
+        when constants.VALUE_SPADE_ACE then cardName = 'aceOfSpades'
+        when constants.VALUE_SPADE_KING then cardName = 'kingOfSpades'
+        when constants.VALUE_SPADE_QUEEN then cardName = 'queenOfSpades'
+        when constants.VALUE_SPADE_JACK then cardName = 'jackOfSpades'
+        when constants.VALUE_SPADE_TEN then cardName = 'tenOfSpades'
+        when constants.VALUE_SPADE_NINE then cardName = 'nineOfSpades'
+        when constants.VALUE_SPADE_EIGHT then cardName = 'eightOfSpades'
+        when constants.VALUE_SPADE_SIX then cardName = 'sixOfSpades'
+        when constants.VALUE_SPADE_FIVE then cardName = 'fiveOfSpades'
+        when constants.VALUE_HEART_ACE then cardName = 'aceOfHearts'
+        when constants.VALUE_HEART_KING then cardName = 'kingOfHearts'
+        when constants.VALUE_HEART_QUEEN then cardName = 'queenOfHearts'
+        when constants.VALUE_HEART_JACK then cardName = 'jackOfHearts'
+        when constants.VALUE_HEART_TEN then cardName = 'tenOfHearts'
+        when constants.VALUE_HEART_NINE then cardName = 'nineOfHearts'
+        when constants.VALUE_HEART_EIGHT then cardName = 'eightOfHearts'
+        when constants.VALUE_HEART_SIX then cardName = 'sixOfHearts'
+        when constants.VALUE_HEART_FIVE then cardName = 'fiveOfHearts'
+        when constants.VALUE_CLUB_ACE then cardName = 'aceOfClubs'
+        when constants.VALUE_CLUB_KING then cardName = 'kingOfClubs'
+        when constants.VALUE_CLUB_QUEEN then cardName = 'queenOfClubs'
+        when constants.VALUE_CLUB_JACK then cardName = 'jackOfClubs'
+        when constants.VALUE_CLUB_TEN then cardName = 'tenOfClubs'
+        when constants.VALUE_CLUB_NINE then cardName = 'nineOfClubs'
+        when constants.VALUE_CLUB_EIGHT then cardName = 'eightOfClubs'
+        when constants.VALUE_CLUB_SIX then cardName = 'sixOfClubs'
+        when constants.VALUE_CLUB_FIVE then cardName = 'fiveOfClubs'
+        when constants.VALUE_DIAMOND_ACE then cardName = 'aceOfDiamonds'
+        when constants.VALUE_DIAMOND_KING then cardName = 'kingOfDiamonds'
+        when constants.VALUE_DIAMOND_QUEEN then cardName = 'queenOfDiamonds'
+        when constants.VALUE_DIAMOND_JACK then cardName = 'jackOfDiamonds'
+        when constants.VALUE_DIAMOND_TEN then cardName = 'tenOfDiamonds'
+        when constants.VALUE_DIAMOND_NINE then cardName = 'nineOfDiamonds'
+        when constants.VALUE_DIAMOND_EIGHT then cardName = 'eightOfDiamonds'
+        when constants.VALUE_DIAMOND_SIX then cardName = 'sixOfDiamonds'
+        when constants.VALUE_DIAMOND_FIVE then cardName = 'fiveOfDiamonds'
     cardName
+
+###
+Set status text for one player and clear status text for all other players
+@param: username                                player username whose status text needs to be updated
+@param: statusText                              the status text string
+@return: -
+###
+setPlayerStatusTextForOneUserAndClearStatusTextForOthers = (username, statusText) ->
+    globalVariables.meStatusText.text = ''
+    globalVariables.player1StatusText.text = ''
+    globalVariables.player2StatusText.text = ''
+    globalVariables.player3StatusText.text = ''
+    if username is globalVariables.username then globalVariables.meStatusText.text = statusText
+    else if username is globalVariables.player1Username.text then globalVariables.player1StatusText.text = statusText
+    else if username is globalVariables.player2Username.text then globalVariables.player2StatusText.text = statusText
+    else if username is globalVariables.player3Username.text then globalVariables.player3StatusText.text = statusText
 
 ###
 Given a suit index, find out the starting card value and ending card value that belongs to that suit
@@ -184,6 +271,7 @@ Given a suit index and card values at hand, this function finds out all pairs wi
 getAllPairValuesAtHandForSuit = (suitIndex, cardValuesAtHand) ->
     cardValuesAtHandOfSuit = getCardValuesForSuit suitIndex, cardValuesAtHand
     pairValues = []
+    if cardValuesAtHandOfSuit.length is 0 then return pairValues
     for i in [0...cardValuesAtHandOfSuit.length - 1]
         if cardValuesAtHandOfSuit[i] is cardValuesAtHandOfSuit[i + 1] then pairValues.push cardValuesAtHandOfSuit[i]
     return pairValues
@@ -228,70 +316,61 @@ Check whether the card values contain at least 1 card of specific suit
 @param: cardvaluesAtHand                    the given card values in which to search for
 @return: boolean                            true if at least one card of the suit in the array of card values, false otherwise
 ###
-haveSingleForSuit = (suitIndex, cardValuesAtHand) ->
-    cardValuesAtHandOfSuit = getCardValuesForSuit suitIndex, cardValuesAtHand
+haveSingleForSuit = (suitIndex, cardValues) ->
+    cardValuesAtHandOfSuit = getCardValuesForSuit suitIndex, cardValues
     if cardValuesAtHandOfSuit.length > 0 then return true
     else return false
 
-haveSingleForMainSuit = (mainSuit, cardValuesAtHand) ->
-    cardValuesAtHandForMain = getCardValuesForSuit constants.INDEX_SUIT_MAIN, cardValuesAtHand
-    cardValuesAtHandForMainSuit = getCardValuesForSuit mainSuit, cardValuesAtHand
+haveSingleForMainSuit = (mainSuit, cardValues) ->
+    cardValuesAtHandForMain = getCardValuesForSuit constants.INDEX_SUIT_MAIN, cardValues
+    cardValuesAtHandForMainSuit = getCardValuesForSuit mainSuit, cardValues
     if cardValuesAtHandForMain.length > 0 or
     cardValuesAtHandForMainSuit.length > 0 then return true
     else return false
 
-havePairForSuit = (suitIndex, cardValuesAtHand) ->
-    cardValuesAtHandOfSuit = getCardValuesForSuit suitIndex, cardValuesAtHand
+havePairForSuit = (suitIndex, cardValues) ->
+    cardValuesAtHandOfSuit = getCardValuesForSuit suitIndex, cardValues
     for i in [0...cardValuesAtHandOfSuit.length - 1]
         if cardValuesAtHandOfSuit[i] is cardValuesAtHandOfSuit[i + 1] then return true
     return false
 
-havePairForMainSuit = (mainSuit, cardValuesAtHand) ->
-    cardValuesAtHandForMain = getCardValuesForSuit constants.INDEX_SUIT_MAIN, cardValuesAtHand
-    cardValuesAtHandForMainSuit = getCardValuesForSuit mainSuit, cardValuesAtHand
+havePairForMainSuit = (mainSuit, cardValues) ->
+    cardValuesAtHandForMain = getCardValuesForSuit constants.INDEX_SUIT_MAIN, cardValues
+    cardValuesAtHandForMainSuit = getCardValuesForSuit mainSuit, cardValues
     mains = cardValuesAtHandForMain.concat cardValuesAtHandForMainSuit
     for i in [0...mains.length - 1]
         if mains[i] is mains[i + 1] then return true
     return false
 
-haveTractorForSuit = (tractorLength, suitIndex, cardValuesAtHand) ->
-    pairValuesAtHandOfSuit = getAllPairValuesAtHandForSuit suitIndex, cardValuesAtHand
+haveTractorForSuit = (tractorLength, suitIndex, cardValues) ->
+    pairValuesAtHandOfSuit = getAllPairValuesAtHandForSuit suitIndex, cardValues
+    # no pair, thus no tractor
+    if pairValuesAtHandOfSuit.length is 0 then return false
+    # the number of pairs is less than the tractor length
     if pairValuesAtHandOfSuit.length < tractorLength then return false
-    numOfConsecutivePairs = 0
+    numOfConsecutivePairs = 1
     for i in [0...pairValuesAtHandOfSuit.length]
-        if (pairValuesAtHandOfSuit.length - i) < tractorLength then return false
         if (pairValuesAtHandOfSuit[i] + 1) is pairValuesAtHandOfSuit[i + 1]
             numOfConsecutivePairs += 1
             if numOfConsecutivePairs is tractorLength then return true
         else numOfConsecutivePairs = 0
     return false
 
-haveTractorForMainSuit = (tractorLength, mainSuit, cardValuesAtHand) ->
-    pairValuesAtHandOfMain = getAllPairValuesAtHandForSuit constants.INDEX_SUIT_MAIN, cardValuesAtHand
-    pairValuesAtHandOfSuit = getAllPairValuesAtHandForSuit mainSuit, cardValuesAtHand
+haveTractorForMainSuit = (tractorLength, mainSuit, cardValues) ->
+    pairValuesAtHandOfMain = getAllPairValuesAtHandForSuit constants.INDEX_SUIT_MAIN, cardValues
+    pairValuesAtHandOfSuit = getAllPairValuesAtHandForSuit mainSuit, cardValues
     pairs = pairValuesAtHandOfMain.concat pairValuesAtHandOfSuit
-    numOfConsecutivePairs = 0
-    mainSuitValues = getRelativeMainSuitValues mainSuit
+    # no pair for the given card values, thus no tractor for main suit
+    if pairs.length is 0 then return false
+    # the number of pairs is less than the tractor length
+    if pairs.length < tractorLength then return false
+    numOfConsecutivePairs = 1
+    pairRanks = []
     for i in [0...pairs.length]
-        if (pairs.length - i) < tractorLength then return false
-        # big joker and small joker
-        if (pairs[i] is 1 and pairs[i + 1] is 2) or
-        # small joker and main seven
-        (pairs[i] is 2 and pairs[i + 1] is mainSuitValues.valueOfMainSuitOfSeven) or
-        # main seven and rest seven
-        (pairs[i] is mainSuitValues.valueOfMainSuitOfSeven and pairs[i + 1] in mainSuitValues.valuesOfRestSuitsOfSeven) or
-        # rest seven and main seven
-        (pairs[i] in mainSuitValues.valuesOfRestSuitsOfSeven and pairs[i + 1] is mainSuitValues.valueOfMainSuitOfSeven) or
-        # rest seven and main two
-        (pairs[i] in mainSuitValues.valuesOfRestSuitsOfSeven and pairs[i + 1] is mainSuitValues.valueOfMainSuitOfTwo) or
-        # main two and rest two
-        (pairs[i] is mainSuitValues.valueOfMainSuitOfTwo and pairs[i + 1] in mainSuitValues.valuesOfRestSuitsOfTwo) or
-        # rest two and main two
-        (pairs[i] in mainSuitValues.valuesOfRestSuitsOfTwo and pairs[i + 1] is mainSuitValues.valueOfMainSuitOfTwo) or
-        # rest two and main ace
-        (pairs[i] in mainSuitValues.valuesOfRestSuitsOfTwo and pairs[i + 1] is mainSuitValues.valueOfMainSuitOfAce) or
-        # regular suit tractor
-        (pairs[i] >= mainSuitValues.valueOfMainSuitOfAce and (pairs[i] + 1) is pairs[i + 1])
+        pairRanks.push globalVariables.cardValueRanks[pairs[i]]
+    pairRanks = sortCards pairRanks
+    for i in [0...pairRanks.length - 1]
+        if (pairRanks[i] + 1) is pairRanks[i + 1]
             numOfConsecutivePairs += 1
             if numOfConsecutivePairs is tractorLength then return true
         else numOfConsecutivePairs = 0
@@ -322,7 +401,7 @@ isPairForMainSuit = (mainSuit, cardValues) ->
     valuesOfMainAndMainSuit = getAllValuesOfMainAndMainSuit mainSuit
     if cardValues.length is 2 and
     cardValues[0] is cardValues[1] and
-    cardValues[i] in valuesOfMainAndMainSuit then return true
+    cardValues[0] in valuesOfMainAndMainSuit then return true
     else return false
 
 isTractorForSuit = (tractorLength, suitIndex, cardValues) ->
@@ -332,17 +411,20 @@ isTractorForSuit = (tractorLength, suitIndex, cardValues) ->
     startAndEndValuesForSuit = getStartAndEndValueForSuit suitIndex
     if cardValues[0] < startAndEndValuesForSuit[0] or cardValues[cardValues.length - 1] > startAndEndValuesForSuit[1] then return false
     i = 0
-    while i < (cardValues.length - 2)
-        if cardValues[i] isnt cardValues[i + 1] or
-        (cardValues[i] + 1) isnt cardValues[i + 2] then return false
+    pairRanks = []
+    while i <= (cardValues.length - 2)
+        if cardValues[i] isnt cardValues[i + 1] then return false
+        else pairRanks.push globalVariables.cardValueRanks[cardValues[i]]
         i += 2
+    pairRanks = sortCards pairRanks
+    for i in [0...pairRanks.length - 1]
+        if (pairRanks[i] + 1) isnt pairRanks[i + 1] then return false
     return true
 
 isTractorForMainSuit = (tractorLength, mainSuit, cardValues) ->
     if tractorLength is 0 or cardValues.length < 4 then return false
     if cardValues.length < tractorLength * 2 or
     cardValues.length % 2 isnt 0 then return false
-    mainSuitValues = getRelativeMainSuitValues mainSuit
     valuesOfMainAndMainSuit = getAllValuesOfMainAndMainSuit mainSuit
     # if the selected cards contains any card that is NEITHER main NOR main suit, then should return false
     for i in [0...cardValues.length]
@@ -389,43 +471,56 @@ validateSelectedCardsForPlay = (selectedCardValues, firstlyPlayedCardValues, car
             # a. 选定的牌中的该花色牌数量小于首发牌中该花色牌的数量，并且
             # b. 选定的牌中的该花色牌数量并不是手中持有的牌的该花色牌的全部
             # 那么，非法
-            if numberOfCardsInSelectedCardsForSpecificSuit < firstlyPlayedCardValues.length and
-            numberOfCardsInSelectedCardsForSpecificSuit isnt numberOfCardsAtHandForSpecificSuit then return false
+            if (numberOfCardsInSelectedCardsForSpecificSuit < firstlyPlayedCardValues.length) and
+            (numberOfCardsInSelectedCardsForSpecificSuit isnt numberOfCardsAtHandForSpecificSuit) then return false
 
         # 单牌调主，有主牌单牌但是不出，非法
         if isSingleForMainSuit mainSuit, firstlyPlayedCardValues
-            if haveSingleForMainSuit mainSuit, cardValuesAtHand and
-            not isSingleForMainSuit mainSuit, selectedCardValues then return false
+            if haveSingleForMainSuit(mainSuit, cardValuesAtHand) and
+            not isSingleForMainSuit(mainSuit, selectedCardValues) then return false
         # 某花色单牌，有该花色单牌但是不出，非法
-        if isSingleForSuit suitForFirstlyPlayedCards, firstlyPlayedCardValues
-            if haveSingleForSuit suitForFirstlyPlayedCards, cardValuesAtHand and
-            not isSingleForSuit suitForFirstlyPlayedCards, selectedCardValues then return false
+        else if isSingleForSuit suitForFirstlyPlayedCards, firstlyPlayedCardValues
+            if haveSingleForSuit(suitForFirstlyPlayedCards, cardValuesAtHand) and
+            not isSingleForSuit(suitForFirstlyPlayedCards, selectedCardValues) then return false
         # 对子调主，有主牌对子但是不出，非法
-        if isPairForMainSuit mainSuit, firstlyPlayedCardValues
-            if havePairForMainSuit mainSuit, cardValuesAtHand and
-            not isPairForMainSuit mainSuit, selectedCardValues then return false
+        else if isPairForMainSuit mainSuit, firstlyPlayedCardValues
+            if havePairForMainSuit mainSuit, cardValuesAtHand
+                if not isPairForMainSuit mainSuit, selectedCardValues then return false
         # 某花色对子，有该花色对子但是不出，非法
-        if isPairForSuit suitForFirstlyPlayedCards, firstlyPlayedCardValues
-            if havePairForSuit suitForFirstlyPlayedCards, cardValuesAtHand and
-            not isPairForSuit suitForFirstlyPlayedCards, selectedCardValues then return false
+        else if isPairForSuit suitForFirstlyPlayedCards, firstlyPlayedCardValues
+            if havePairForSuit suitForFirstlyPlayedCards, cardValuesAtHand
+                if not isPairForSuit suitForFirstlyPlayedCards, selectedCardValues then return false
 
-        if firstlyPlayedCardValues.length % 2 is 0
-            # 主牌拖拉机调主，有主牌拖拉机但是不出，非法
-            if isTractorForMainSuit firstlyPlayedCardValues.length / 2, mainSuit, firstlyPlayedCardValues
-                if haveTractorForMainSuit firstlyPlayedCardValues.length / 2, mainSuit, cardValuesAtHand and
-                not isTractorForMainSuit selectedCardValues.length / 2, mainSuit, selectedCardValues then return false
-            # 某花色拖拉机先出，有该花色拖拉机但是不出，非法
-            if isTractorForSuit firstlyPlayedCardValues.length / 2, suitForFirstlyPlayedCards, firstlyPlayedCardValues
-                if haveTractorForSuit firstlyPlayedCardValues.length / 2, suitForFirstlyPlayedCards, cardValuesAtHand and
-                not isTractorForSuit selectedCardValues.length / 2, suitForFirstlyPlayedCards, selectedCardValues then return false
+        # 主牌n对拖拉机调主，有主牌拖拉机但是不出，非法
+        else if isTractorForMainSuit firstlyPlayedCardValues.length / 2, mainSuit, firstlyPlayedCardValues
+            if haveTractorForMainSuit firstlyPlayedCardValues.length / 2, mainSuit, cardValuesAtHand
+                if not isTractorForMainSuit selectedCardValues.length / 2, mainSuit, selectedCardValues then return false
+            pairValuesAtHandOfSuit = getAllPairValuesAtHandForSuit constants.INDEX_SUIT_MAIN, cardValuesAtHand
+            pairValuesAtHandOfSuit = pairValuesAtHandOfSuit.concat getAllPairValuesAtHandForSuit mainSuit, cardValuesAtHand
+            selectedPairValuesOfSuit = getAllPairValuesAtHandForSuit constants.INDEX_SUIT_MAIN, selectedCardValues
+            selectedPairValuesOfSuit = selectedPairValuesOfSuit.concat getAllPairValuesAtHandForSuit mainSuit, selectedCardValues
+            # 手上有n对主牌但是选定的牌少于n对，非法
+            if selectedPairValuesOfSuit.length < firstlyPlayedCardValues.length / 2
+                if (selectedPairValuesOfSuit.length isnt pairValuesAtHandOfSuit.length) and
+                (pairValuesAtHandOfSuit.length isnt 0) then return false
+        # 某花色拖拉机先出，有该花色拖拉机但是不出，非法
+        else if isTractorForSuit firstlyPlayedCardValues.length / 2, suitForFirstlyPlayedCards, firstlyPlayedCardValues
+            if haveTractorForSuit firstlyPlayedCardValues.length / 2, suitForFirstlyPlayedCards, cardValuesAtHand
+                if not isTractorForSuit selectedCardValues.length / 2, suitForFirstlyPlayedCards, selectedCardValues then return false
+            # 手上有n对该花色的牌，但是选定的牌少于n对该花色的牌，非法
+            pairValuesAtHandOfSuit = getAllPairValuesAtHandForSuit suitForFirstlyPlayedCards, cardValuesAtHand
+            selectedPairValuesOfSuit = getAllPairValuesAtHandForSuit suitForFirstlyPlayedCards, selectedCardValues
+            if selectedPairValuesOfSuit.length < firstlyPlayedCardValues.length / 2
+                if selectedPairValuesOfSuit.length isnt pairValuesAtHandOfSuit.length and
+                pairValuesAtHandOfSuit.length isnt 0 then return false
     # 第一个出牌
     else
         # 选中的牌数量为大于1的单数，非法
-        if selectedCardValues.length > 1 and
-        selectedCardValues.length % 2 isnt 0 then return false
+        if (selectedCardValues.length > 1) and
+        (selectedCardValues.length % 2 isnt 0) then return false
         # 选中的牌为2张，但是不是对子，非法
-        if selectedCardValues.length is 2 and
-        selectedCardValues[0] isnt selectedCardValues[1] then return false
+        if (selectedCardValues.length is 2) and
+        (selectedCardValues[0] isnt selectedCardValues[1]) then return false
         # 选中的牌数量大于等于4张，但是不是任何花色的拖拉机，非法
         if selectedCardValues.length >= 4
             if isTractorForSuit selectedCardValues.length / 2, constants.INDEX_SUIT_SPADE, selectedCardValues then return true
@@ -446,3 +541,6 @@ module.exports =
     getAllPairValuesAtHandForSuit: getAllPairValuesAtHandForSuit
     haveTractorForSuit: haveTractorForSuit
     getRanksForMainSuitCards: getRanksForMainSuitCards
+    setPlayerStatusTextForOneUserAndClearStatusTextForOthers: setPlayerStatusTextForOneUserAndClearStatusTextForOthers
+    sortCardsAfterMainSuitSettled: sortCardsAfterMainSuitSettled
+    binarySearch: binarySearch

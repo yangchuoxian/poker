@@ -114,52 +114,37 @@ socketEventHandler = (game) ->
             globalVariables.settleCoveredCardsButton.visible = true
             globalVariables.settleCoveredCardsButton.inputEnabled = false
             globalVariables.settleCoveredCardsButton.setFrames 2, 2, 2
-
-            globalVariables.player1StatusText.text = ''
-            globalVariables.player2StatusText.text = ''
-            globalVariables.player3StatusText.text = ''
-        else if makerUsername is globalVariables.player1Username.text
-            globalVariables.meStatusText.text = ''
-            globalVariables.player1StatusText.text = '庄家埋底中...'
-            globalVariables.player2StatusText.text = ''
-            globalVariables.player3StatusText.text = ''
-        else if makerUsername is globalVariables.player2Username.text
-            globalVariables.meStatusText.text = ''
-            globalVariables.player1StatusText.text = ''
-            globalVariables.player2StatusText.text = '庄家埋底中...'
-            globalVariables.player3StatusText.text = ''
-        else if makerUsername is globalVariables.player3Username.text
-            globalVariables.meStatusText.text = ''
-            globalVariables.player1StatusText.text = ''
-            globalVariables.player2StatusText.text = ''
-            globalVariables.player3StatusText.text = '庄家埋底中...'
         globalVariables.gameStatus = constants.GAME_STATUS_SETTLING_COVERED_CARDS
+        toolbox.setPlayerStatusTextForOneUserAndClearStatusTextForOthers makerUsername, '庄家埋底中...'
 
     io.socket.on 'finishedSettlingCoveredCards', (data) ->
         makerUsername = data.maker
-        if makerUsername is globalVariables.player1Username.text then globalVariables.player1StatusText.text = '庄家选主中...'
-        else if makerUsername is globalVariables.player2Username.text then globalVariables.player2StatusText.text = '庄家选主中...'
-        else if makerUsername is globalVariables.player3Username.text then globalVariables.player3StatusText.text = '庄家选主中...'
+        toolbox.setPlayerStatusTextForOneUserAndClearStatusTextForOthers makerUsername, '庄家选主中...'
 
     io.socket.on 'mainSuitChosen', (data) ->
-        mainSuit = data.mainSuit
-        globalVariables.mainSuit = mainSuit
+        globalVariables.mainSuit = data.mainSuit
+        makerUsername = data.maker
         globalVariables.iconOfMainSuit.frame = globalVariables.mainSuit
-        globalVariables.meStatusText.text = ''
-        globalVariables.player1StatusText.text = ''
-        globalVariables.player2StatusText.text = ''
-        globalVariables.player3StatusText.text = ''
+        toolbox.setPlayerStatusTextForOneUserAndClearStatusTextForOthers makerUsername, '出牌中...'
+        globalVariables.cardsAtHand.values = toolbox.sortCardsAfterMainSuitSettled globalVariables.cardsAtHand.values, globalVariables.mainSuit
+        actions.displayCards globalVariables.cardsAtHand.values
 
     io.socket.on 'cardPlayed', (data) ->
         usernamePlayedCards = data.playerName
         playedCardValues = data.playedCardValues
-        firstlyPlayedCardValues = data.firstlyPlayedCardValues
-        globalVariables.firstlyPlayedCardValuesForCurrentRound = firstlyPlayedCardValues
+        globalVariables.firstlyPlayedCardValuesForCurrentRound = data.firstlyPlayedCardValues
+        nextPlayerUsername = data.nextPlayerUsername
         n = -1
         if usernamePlayedCards is globalVariables.player1Username.text then n = 1
         else if usernamePlayedCards is globalVariables.player2Username.text then n = 2
         else if usernamePlayedCards is globalVariables.player3Username.text then n = 3
-        actions.showPlayedCardsForUser n, playedCardValues
+        if n isnt -1 then actions.showPlayedCardsForUser n, playedCardValues
+        # It is the current player's turn to play card
+        if nextPlayerUsername is globalVariables.username
+            globalVariables.playCardsButton.setFrames 2, 2, 2
+            globalVariables.playCardsButton.visible = true
+        toolbox.setPlayerStatusTextForOneUserAndClearStatusTextForOthers nextPlayerUsername, '出牌中...'
+
 
     io.socket.on 'roundFinished', (data) ->
         usernamePlayedCards = data.lastPlayerName
@@ -170,7 +155,7 @@ socketEventHandler = (game) ->
         if usernamePlayedCards is globalVariables.player1Username.text then n = 1
         else if usernamePlayedCards is globalVariables.player2Username.text then n = 2
         else if usernamePlayedCards is globalVariables.player3Username.text then n = 3
-        actions.showPlayedCardsForUser n, playedCardValues
+        if n isnt -1 then actions.showPlayedCardsForUser n, playedCardValues
         actions.showBigStampForTheLargestPlayedCardsCurrentRound playedCardValues.length, usernameWithLargestCardsForCurrentRound, game
 
 module.exports =

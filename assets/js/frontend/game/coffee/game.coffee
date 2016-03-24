@@ -150,36 +150,37 @@ create = () ->
     communications.socketEventHandler game
 
     ################################## TESTING ##################################
-    globalVariables.gameStatus = constants.GAME_STATUS_PLAYING
-    globalVariables.mainSuit = constants.INDEX_SUIT_CLUB
-    globalVariables.cardValueRanks = toolbox.getRanksForMainSuitCards globalVariables.mainSuit
-    shuffleCards = ->
-        array = []
-        for j in [0...2]
-            for i in [1...47]
-                array.push i
-        copy = []
-        n = array.length
-        numOfIterations = n
-        for i in [0...numOfIterations]
-            j = Math.floor(Math.random() * n)
-            copy.push array[j]
-            array.splice j, 1
-            n -= 1
-        return copy
+    # globalVariables.gameStatus = constants.GAME_STATUS_PLAYING
+    # globalVariables.mainSuit = constants.INDEX_SUIT_CLUB
+    # globalVariables.cardValueRanks = toolbox.getRanksForMainSuitCards globalVariables.mainSuit
+    # shuffleCards = ->
+    #     array = []
+    #     for j in [0...2]
+    #         for i in [1...47]
+    #             array.push i
+    #     copy = []
+    #     n = array.length
+    #     numOfIterations = n
+    #     for i in [0...numOfIterations]
+    #         j = Math.floor(Math.random() * n)
+    #         copy.push array[j]
+    #         array.splice j, 1
+    #         n -= 1
+    #     return copy
 
-    shuffledCards = shuffleCards()
+    # shuffledCards = shuffleCards()
     # deck1 = shuffledCards.slice 0, 21
-    deck1 = [7, 7, 8, 8, 9, 9, 10, 10, 29, 29]
-    deck1 = toolbox.sortCards deck1
-    actions.displayCards deck1
-    globalVariables.cardsAtHand.values = deck1
-    globalVariables.playCardsButton.visible = true
-    globalVariables.playCardsButton.setFrames 2, 2, 2
-    globalVariables.playCardsButton.inputEnabled = false
+    # # deck1 = toolbox.sortCards deck1
+    # deck1 = toolbox.sortCardsAfterMainSuitSettled deck1, globalVariables.mainSuit
+    # actions.displayCards deck1
+    # globalVariables.cardsAtHand.values = deck1
+    # globalVariables.playCardsButton.visible = true
+    # globalVariables.playCardsButton.setFrames 2, 2, 2
+    # globalVariables.playCardsButton.inputEnabled = false
 
-    globalVariables.prepareButton.visible = false
-    globalVariables.leaveButton.visible = false
+    # globalVariables.prepareButton.visible = false
+    # globalVariables.leaveButton.visible = false
+
     ################################## TESTING ##################################
 
 update = () ->

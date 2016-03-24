@@ -46,35 +46,36 @@ showBigStampForTheLargestPlayedCardsCurrentRound = (numOfCardsPlayed, usernameWi
     globalVariables.bigSign.width = constants.MAKER_ICON_SIZE
     globalVariables.bigSign.height = constants.MAKER_ICON_SIZE
 
+hideBigStamp = () -> globalVariables.bigSign.destroy()
+
 showPlayedCardsForUser = (n, valuesOfPlayedCards) ->
     startX = null
     startY = null
-    userPlayedCards = null
     switch n
         when 0         # current user
             startX = globalVariables.screenWidth / 2 - (valuesOfPlayedCards.length + 3) * globalVariables.scaledCardWidth / 8
             startY = globalVariables.screenHeight - 2 * globalVariables.scaledCardHeight - 2 * constants.MARGIN
-            userPlayedCards = globalVariables.currentUserPlayedCards
+            globalVariables.currentUserPlayedCards.removeAll()
         when 1         # the 1st user
-            startX = globalVariables.screenWidth - (valuesOfPlayedCards.length + 3) * globalVariables.scaledCardWidth / 4 - constants.MARGIN
+            startX = globalVariables.screenWidth - (valuesOfPlayedCards.length + 3) * globalVariables.scaledCardWidth / 4 - 2 * constants.MARGIN - constants.AVATAR_SIZE
             startY = globalVariables.screenHeight / 2 - globalVariables.scaledCardHeight / 2
-            userPlayedCards = globalVariables.user1PlayedCards
+            globalVariables.user1PlayedCards.removeAll()
         when 2         # the 2nd user
             startX = globalVariables.screenWidth / 2 - (valuesOfPlayedCards.length + 3) * globalVariables.scaledCardWidth / 8
-            startY = constants.MARGIN
-            userPlayedCards = globalVariables.user2PlayedCards
+            startY = 2 * constants.MARGIN + constants.AVATAR_SIZE
+            globalVariables.user2PlayedCards.removeAll()
         when 3         # the 3rd user
-            startX = constants.MARGIN
+            startX = 2 * constants.MARGIN + constants.AVATAR_SIZE
             startY = globalVariables.screenHeight / 2 - globalVariables.scaledCardHeight / 2
-            userPlayedCards = globalVariables.user3PlayedCards
+            globalVariables.user3PlayedCards.removeAll()
     # remove played cards
     cardsToRemove = []
-    for i in [0...userPlayedCards.children.length]
-        cardsToRemove.push userPlayedCards.children[i]
-    for i in [0...cardsToRemove.length]
-        userPlayedCards.remove cardsToRemove[i]
     for i in [0...valuesOfPlayedCards.length]
-        playedCard = userPlayedCards.create startX + i * globalVariables.scaledCardWidth / 4, startY, getCardName(valuesOfPlayedCards[i])
+        playedCard = null
+        if n is 0 then playedCard = globalVariables.currentUserPlayedCards.create startX + i * globalVariables.scaledCardWidth / 4, startY, toolbox.getCardName(valuesOfPlayedCards[i])
+        else if n is 1 then playedCard = globalVariables.user1PlayedCards.create startX + i * globalVariables.scaledCardWidth / 4, startY, toolbox.getCardName(valuesOfPlayedCards[i])
+        else if n is 2 then playedCard = globalVariables.user2PlayedCards.create startX + i * globalVariables.scaledCardWidth / 4, startY, toolbox.getCardName(valuesOfPlayedCards[i])
+        else if n is 3 then playedCard = globalVariables.user3PlayedCards.create startX + i * globalVariables.scaledCardWidth / 4, startY, toolbox.getCardName(valuesOfPlayedCards[i])
         playedCard.width = globalVariables.scaledCardWidth
         playedCard.height = globalVariables.scaledCardHeight
 
@@ -488,3 +489,4 @@ module.exports =
     selectSuit: selectSuit
     leaveRoom: leaveRoom
     sendGetReadyMessage: sendGetReadyMessage
+    showBigStampForTheLargestPlayedCardsCurrentRound: showBigStampForTheLargestPlayedCardsCurrentRound
