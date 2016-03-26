@@ -248,7 +248,6 @@ module.exports =
         Room.findOne name: roomName
         .then (foundRoomWithName) ->
             return Promise.reject '房间不存在' if not foundRoomWithName
-            index = foundRoomWithName.usernames.indexOf maker
             foundRoomWithName.decks[maker] = cardsAtHand
             foundRoomWithName.coveredCards = coveredCards
             Room.update id: foundRoomWithName.id,
@@ -342,3 +341,23 @@ module.exports =
                 Promise.resolve()
         .then () -> res.send 'OK'
         .catch (err) -> res.send 400, err
+
+    surrender: (req, res) ->
+        userId = req.param 'userId'
+        currentUserObject = null
+        currentRoomObject = null
+        User.findOne id: userId
+        .then (foundUserWithId) ->
+            return Promise.reject '用户不存在' if not foundUserWithId
+            currentUserObject = foundUserWithId
+            Room.findOne name: currentUserObject.roomName
+        .then (foundRoomWithName) ->
+            return Promise.reject '房间不存在' if not foundRoomWithName
+            return Promise.reject '闲家不能投降' if foundRoomWithName.maker isnt currentUserObject.username
+            currentRoomObject = foundRoomWithName
+            GameService.calculateGameResult currentRoomObject, true
+        .then (numOfWinningChipsForMaker) ->
+            res.json
+                numOfWinningChipsForMaker: numOfWinningChipsForMaker
+                makerUsername: currentRoomObject.maker
+        # .catch (err) -> res.send 400, err

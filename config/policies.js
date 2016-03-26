@@ -28,6 +28,7 @@ module.exports.policies = {
 		'pass': ['isLoggedIn'],
 		'settleCoveredCards': ['isLoggedIn'],
 		'chooseMainSuit': ['isLoggedIn'],
-		'playCards': ['isLoggedIn']
+		'playCards': ['isLoggedIn'],
+		'surrender': ['isLoggedIn'],
 	}
 };

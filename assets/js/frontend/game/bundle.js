@@ -1955,13 +1955,7 @@
 	  };
 
 	  surrender = function() {
-	    var csrfToken;
-	    csrfToken = document.getElementsByName('csrf-token')[0].content;
-	    globalVariables.prepareButton.visible = true;
-	    globalVariables.leaveButton.visible = true;
-	    globalVariables.meStatusText.text = '你输了';
-	    globalVariables.surrenderButton.visible = false;
-	    return globalVariables.settleCoveredCardsButton.visible = false;
+	    return endGame(true);
 	  };
 
 	  settleCoveredCards = function() {
@@ -2208,8 +2202,22 @@
 	    return showPlayedCardsForUser(3, globalVariables.player3HistoricalPlayedCardValues[globalVariables.historicalRoundIndex], false);
 	  };
 
-	  endGame = function() {
-	    return alert('游戏结束');
+	  endGame = function(isSurrender) {
+	    var csrfToken;
+	    if (isSurrender) {
+	      csrfToken = document.getElementsByName('csrf-token')[0].content;
+	      return io.socket.post('/surrender', {
+	        _csrf: csrfToken,
+	        userId: globalVariables.userId,
+	        loginToken: globalVariables.loginToken
+	      }, function(resData, jwres) {
+	        if (jwres.statusCode === 200) {
+	          return console.log(resData);
+	        } else {
+	          return alert(resData);
+	        }
+	      });
+	    }
 	  };
 
 	  module.exports = {

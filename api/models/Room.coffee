@@ -71,3 +71,10 @@ module.exports =
             defaultsTo: {}
         firstScoreCallerUsername:
             type: 'string'
+        winning:
+            type: 'json'
+            defaultsTo: {}
+        # 投降的水钱
+        waterpool:
+            type: 'integer'
+            defaultsTo: 0

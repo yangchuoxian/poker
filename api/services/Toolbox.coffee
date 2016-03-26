@@ -76,22 +76,35 @@ getPlayerThatPlayedLargestCardsForThisRound = (playedCardsInfo, mainSuit, cardVa
     # 首发牌是单张
     if playedCardValues[0].length is 1
         for i in [1...playedCardValues.length]
-            if cardValueRanks[playedCardValues[i][0]] < cardValueRanks[playedCardValues[largestIndex][0]] then largestIndex = i
+            largestIndex = getLargerIndexOfPlayedCards playedCardValues, mainSuit, largestIndex, i, cardValueRanks, suitForFirstlyPlayedCards
     # 首发牌是对子
     else if playedCardValues[0].length is 2
         for i in [1...playedCardValues.length]
             # 跟牌也是对子
             if playedCardValues[i][0] is playedCardValues[i][1]
-                if cardValueRanks[playedCardValues[i][0]] < cardValueRanks[playedCardValues[largestIndex][0]] then largestIndex = i
+                largestIndex = getLargerIndexOfPlayedCards playedCardValues, mainSuit, largestIndex, i, cardValueRanks, suitForFirstlyPlayedCards
     # 首发牌是拖拉机
     else
         for i in [1...playedCardValues.length]
             # 跟牌也是拖拉机
             if isTractorForSuit(playedCardValues[i].length / 2, suitForFirstlyPlayedCards, playedCardValues[i], cardValueRanks) or
             isTractorForMainSuit(playedCardValues[i].length / 2, mainSuit, playedCardValues[i], cardValueRanks)
-                if cardValueRanks[playedCardValues[i][0]] < cardValueRanks[playedCardValues[largestIndex][0]] then largestIndex = i
+                largestIndex = getLargerIndexOfPlayedCards playedCardValues, mainSuit, largestIndex, i, cardValueRanks, suitForFirstlyPlayedCards
     return playedCardsInfo[largestIndex].username
 
+getLargerIndexOfPlayedCards = (cardValues, mainSuit, index1, index2, cardValueRanks, suitForLargestCard) ->
+    largerIndex = index1
+    # largest card is a main suit pair
+    if isSingleForMainSuit mainSuit, [cardValues[largerIndex][0]]
+        if cardValueRanks[cardValues[index2][0]] < cardValueRanks[cardValues[largerIndex][0]] then largerIndex = index2
+    # largest card is a non main suit pair
+    else
+        # current card is a main suit pair
+        if isSingleForMainSuit mainSuit, [cardValues[index2][0]] then largerIndex = index2
+        # current card is a non main suit pair but has the same suit with the largest card
+        else if isSingleForSuit suitForLargestCard, [cardValues[index2][0]]
+            if cardValueRanks[cardValues[index2][0]] < cardValueRanks[cardValues[largerIndex][0]] then largerIndex = index2
+    return largerIndex
 
 getStartAndEndValueForSuit = (suitIndex) ->
     startCardValueForSuit = 0
