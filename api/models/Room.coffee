@@ -38,8 +38,6 @@ module.exports =
                 two: ''
                 three: ''
                 four: ''
-        currentGameStatus:
-            type: 'integer'
         aimedScore:
             type: 'integer'
             defaultsTo: 80

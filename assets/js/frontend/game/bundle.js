@@ -1482,8 +1482,8 @@
 	      globalVariables.historicalButton.inputEnabled = true;
 	      globalVariables.historicalButton.visible = true;
 	      return setTimeout(function() {
-	        if (data.shouldGameEndInAdvance || globalVariables.cardsAtHand.children.length === 0) {
-	          return actions.endGame();
+	        if (data.shouldGameEnd) {
+	          return actions.endGame(false, data.gameResults);
 	        }
 	        globalVariables.bigSign.destroy();
 	        globalVariables.currentUserPlayedCards.removeAll();
@@ -1955,7 +1955,19 @@
 	  };
 
 	  surrender = function() {
-	    return endGame(true);
+	    var csrfToken;
+	    csrfToken = document.getElementsByName('csrf-token')[0].content;
+	    return io.socket.post('/surrender', {
+	      _csrf: csrfToken,
+	      userId: globalVariables.userId,
+	      loginToken: globalVariables.loginToken
+	    }, function(resData, jwres) {
+	      if (jwres.statusCode === 200) {
+	        return endGame(true, resData.gameResults);
+	      } else {
+	        return alert(resData);
+	      }
+	    });
 	  };
 
 	  settleCoveredCards = function() {
@@ -2202,21 +2214,13 @@
 	    return showPlayedCardsForUser(3, globalVariables.player3HistoricalPlayedCardValues[globalVariables.historicalRoundIndex], false);
 	  };
 
-	  endGame = function(isSurrender) {
-	    var csrfToken;
+	  endGame = function(isSurrender, gameResults) {
 	    if (isSurrender) {
-	      csrfToken = document.getElementsByName('csrf-token')[0].content;
-	      return io.socket.post('/surrender', {
-	        _csrf: csrfToken,
-	        userId: globalVariables.userId,
-	        loginToken: globalVariables.loginToken
-	      }, function(resData, jwres) {
-	        if (jwres.statusCode === 200) {
-	          return console.log(resData);
-	        } else {
-	          return alert(resData);
-	        }
-	      });
+	      console.log('庄家投降了, 输赢：');
+	      return console.log(gameResults);
+	    } else {
+	      console.log('游戏结束, 输赢：');
+	      return console.log(gameResults);
 	    }
 	  };
 

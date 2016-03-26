@@ -332,7 +332,15 @@ pass = () ->
         if jwres.statusCode is 200 then globalVariables.callScoreStage.destroy true, false
         else alert resData
 
-surrender = () -> endGame true
+surrender = () ->
+    csrfToken = document.getElementsByName('csrf-token')[0].content
+    io.socket.post '/surrender',
+        _csrf: csrfToken
+        userId: globalVariables.userId
+        loginToken: globalVariables.loginToken
+    , (resData, jwres) ->
+        if jwres.statusCode is 200 then endGame true, resData.gameResults
+        else alert resData
 
 settleCoveredCards = () ->
     valuesOfSelectedCoveredCards = []
@@ -563,17 +571,15 @@ showNextRoundPlayedCards = () ->
     showPlayedCardsForUser 2, globalVariables.player2HistoricalPlayedCardValues[globalVariables.historicalRoundIndex], false
     showPlayedCardsForUser 3, globalVariables.player3HistoricalPlayedCardValues[globalVariables.historicalRoundIndex], false
 
-endGame = (isSurrender) ->
+endGame = (isSurrender, gameResults) ->
+    # Maker surrendered
     if isSurrender
-        csrfToken = document.getElementsByName('csrf-token')[0].content
-        io.socket.post '/surrender',
-            _csrf: csrfToken
-            userId: globalVariables.userId
-            loginToken: globalVariables.loginToken
-        , (resData, jwres) ->
-            if jwres.statusCode is 200
-                console.log resData
-            else alert resData
+        console.log '庄家投降了, 输赢：'
+        console.log gameResults
+    # Game ended
+    else
+        console.log '游戏结束, 输赢：'
+        console.log gameResults
 
 
 module.exports =

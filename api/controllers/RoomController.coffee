@@ -148,7 +148,7 @@ module.exports =
             Room.update id: foundRoomWithName.id,
                 readyPlayers: foundRoomWithName.readyPlayers
         .then (updatedRooms) ->
-            if updatedRooms[0].readyPlayers.length is 4 then GameService.sendCards updatedRooms[0], updatedRooms[0].firstScoreCallerUsername
+            if updatedRooms[0].readyPlayers.length is 4 then RoomService.sendCards updatedRooms[0], updatedRooms[0].firstScoreCallerUsername
             else
                 sails.sockets.broadcast updatedRooms[0].name, 'playerReady', {username: currentUserObject.username}
                 Promise.resolve()
@@ -313,24 +313,31 @@ module.exports =
                 usernameWithLargestCardsForCurrentRound = Toolbox.getPlayerThatPlayedLargestCardsForThisRound updatedRoom.playedCardValuesForCurrentRound, updatedRoom.mainSuit, updatedRoom.cardValueRanks
                 scoresEarned = 0
                 # if the username that played the largest cards is NOT the maker, then we calculate how many scores are earned for this round
-                shouldGameEndInAdvance = false
-                if usernameWithLargestCardsForCurrentRound isnt updatedRoom.maker
-                    scoresEarned = Toolbox.calculateTotalScoresForThisRound updatedRoom.playedCardValuesForCurrentRound
-                    # earned scores has already reached the triple chip threshold, game should end in advance
-                    if (updatedRoom.currentScore + scoresEarned) >= (updatedRoom.aimedScore + sails.config.constants.THRESHOLD_SCORES_FOR_TRIPLE_CHIPS) then shouldGameEndInAdvance = true
-                    Room.update id: updatedRoom.id,
-                        currentScore: updatedRoom.currentScore + scoresEarned
-                    .then () -> Promise.resolve()
-                sails.sockets.broadcast currentUserObject.roomName, 'roundFinished',
-                    lastPlayerName: currentUserObject.username
-                    playedCardValues: playedCardValues
-                    scoresEarned: scoresEarned
-                    usernameWithLargestCardsForCurrentRound: usernameWithLargestCardsForCurrentRound
-                    shouldGameEndInAdvance: shouldGameEndInAdvance
+                if usernameWithLargestCardsForCurrentRound isnt updatedRoom.maker then scoresEarned = Toolbox.calculateTotalScoresForThisRound updatedRoom.playedCardValuesForCurrentRound
                 # now that current round is finished, we should clear the played card values for current round
                 Room.update id: updatedRoom.id,
+                    currentScore: updatedRoom.currentScore + scoresEarned
                     playedCardValuesForCurrentRound: []
-                .then () -> Promise.resolve()
+                .then (updatedRooms) ->
+                    updatedRoom = updatedRooms[0]
+                    shouldGameEnd = false
+                    # earned scores has already reached the triple chip threshold, game should end in advance
+                    if updatedRoom.currentScore >= (updatedRoom.aimedScore + sails.config.constants.THRESHOLD_SCORES_FOR_TRIPLE_CHIPS) then shouldGameEnd = true
+                    # no more card left, all cards played out
+                    if updatedRoom.decks[updatedRoom.maker].length is 0 then shouldGameEnd = true
+                    roundFinishedInfo =
+                        lastPlayerName: currentUserObject.username
+                        playedCardValues: playedCardValues
+                        scoresEarned: scoresEarned
+                        usernameWithLargestCardsForCurrentRound: usernameWithLargestCardsForCurrentRound
+                        shouldGameEnd: shouldGameEnd
+                    if shouldGameEnd
+                        RoomService.handleGameResult updatedRoom, false
+                        .then (gameResults) ->
+                            roundFinishedInfo.gameResults = gameResults
+                            sails.sockets.broadcast currentUserObject.roomName, 'roundFinished', roundFinishedInfo
+                    else sails.sockets.broadcast currentUserObject.roomName, 'roundFinished', roundFinishedInfo
+            # current round is NOT finished yet
             else
                 nextPlayerUsername = RoomService.findNextPlayerToPlayCard updatedRoom.seats, currentUserObject.username
                 sails.sockets.broadcast currentUserObject.roomName, 'cardPlayed',
@@ -340,7 +347,7 @@ module.exports =
                     nextPlayerUsername: nextPlayerUsername
                 Promise.resolve()
         .then () -> res.send 'OK'
-        .catch (err) -> res.send 400, err
+        # .catch (err) -> res.send 400, err
 
     surrender: (req, res) ->
         userId = req.param 'userId'
@@ -355,9 +362,9 @@ module.exports =
             return Promise.reject '房间不存在' if not foundRoomWithName
             return Promise.reject '闲家不能投降' if foundRoomWithName.maker isnt currentUserObject.username
             currentRoomObject = foundRoomWithName
-            GameService.calculateGameResult currentRoomObject, true
-        .then (numOfWinningChipsForMaker) ->
+            RoomService.handleGameResult currentRoomObject, true
+        .then (gameResults) ->
             res.json
-                numOfWinningChipsForMaker: numOfWinningChipsForMaker
+                gameResults: gameResults
                 makerUsername: currentRoomObject.maker
-        # .catch (err) -> res.send 400, err
+        .catch (err) -> res.send 400, err

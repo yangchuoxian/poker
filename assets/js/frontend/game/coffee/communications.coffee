@@ -204,7 +204,7 @@ socketEventHandler = (game) ->
 
         setTimeout(() ->
             # either already earned enough scores to triple chips or all cards have been played
-            return actions.endGame() if data.shouldGameEndInAdvance or globalVariables.cardsAtHand.children.length is 0
+            return actions.endGame(false, data.gameResults) if data.shouldGameEnd
             globalVariables.bigSign.destroy()
             globalVariables.currentUserPlayedCards.removeAll()
             globalVariables.user1PlayedCards.removeAll()

@@ -296,8 +296,8 @@
       globalVariables.historicalButton.inputEnabled = true;
       globalVariables.historicalButton.visible = true;
       return setTimeout(function() {
-        if (data.shouldGameEndInAdvance || globalVariables.cardsAtHand.children.length === 0) {
-          return actions.endGame();
+        if (data.shouldGameEnd) {
+          return actions.endGame(false, data.gameResults);
         }
         globalVariables.bigSign.destroy();
         globalVariables.currentUserPlayedCards.removeAll();
