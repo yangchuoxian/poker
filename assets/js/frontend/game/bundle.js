@@ -72,6 +72,9 @@
 	    game.load.spritesheet('surrenderButton', 'images/surrenderButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT);
 	    game.load.spritesheet('selectSuitButton', 'images/selectSuitButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT);
 	    game.load.spritesheet('settleCoveredCardsButton', 'images/settleCoveredCardsButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT);
+	    game.load.spritesheet('historical', 'images/historical.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT);
+	    game.load.spritesheet('lastRound', 'images/lastRound.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT);
+	    game.load.spritesheet('nextRound', 'images/nextRound.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT);
 	    game.load.image('back', 'images/back.png');
 	    game.load.image('bigJoker', 'images/bigJoker.png');
 	    game.load.image('smallJoker', 'images/smallJoker.png');
@@ -145,7 +148,13 @@
 	    globalVariables.coveredCards = game.add.group();
 	    globalVariables.selectSuitStage = game.add.group();
 	    globalVariables.playCardsButton = game.add.button(game.world.centerX - constants.BUTTON_WIDTH / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'playButton', actions.playSelectedCards, this, 1, 0, 1);
+	    globalVariables.playCardsButton.inputEnabled = false;
 	    globalVariables.playCardsButton.visible = false;
+	    globalVariables.historicalButton = game.add.button(globalVariables.screenWidth - 2 * constants.MARGIN - constants.BUTTON_WIDTH - constants.AVATAR_SIZE, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'historical', function() {
+	      return actions.showHistoricallyPlayedCards(game);
+	    }, this, 1, 0, 1);
+	    globalVariables.historicalButton.inputEnabled = false;
+	    globalVariables.historicalButton.visible = false;
 	    globalVariables.prepareButton = game.add.button(game.world.centerX - constants.BUTTON_WIDTH - constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'prepareButton', actions.sendGetReadyMessage, this, 1, 0, 1);
 	    globalVariables.leaveButton = game.add.button(game.world.centerX + constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'leaveButton', actions.leaveRoom, this, 1, 0, 1);
 	    globalVariables.surrenderButton = game.add.button(game.world.centerX - constants.BUTTON_WIDTH - constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'surrenderButton', actions.surrender, this, 1, 0, 1);
@@ -161,31 +170,38 @@
 	    globalVariables.user1PlayedCards = game.add.group();
 	    globalVariables.user2PlayedCards = game.add.group();
 	    globalVariables.user3PlayedCards = game.add.group();
-	    titleOfMainSuit = game.add.text(globalVariables.screenWidth - 350, constants.MARGIN, '主牌', constants.TEXT_STYLE);
-	    titleOfMainSuit.setTextBounds(0, 0, 70, 30);
-	    globalVariables.iconOfMainSuit = game.add.sprite(globalVariables.screenWidth - 350 + 20, 2 * constants.MARGIN + 30, 'suites');
-	    globalVariables.iconOfMainSuit.scale.setTo(30 / constants.MAIN_SUIT_ICON_SIZE, 30 / constants.MAIN_SUIT_ICON_SIZE);
+	    titleOfMainSuit = game.add.text(globalVariables.screenWidth - 5 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '主牌', constants.TEXT_STYLE);
+	    titleOfMainSuit.setTextBounds(0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT);
+	    globalVariables.iconOfMainSuit = game.add.sprite(globalVariables.screenWidth - 5 * constants.UPPER_RIGHT_TEXT_WIDTH + constants.MARGIN, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, 'suites');
+	    globalVariables.iconOfMainSuit.scale.setTo(constants.UPPER_RIGHT_TEXT_HEIGHT / constants.MAIN_SUIT_ICON_SIZE, constants.UPPER_RIGHT_TEXT_HEIGHT / constants.MAIN_SUIT_ICON_SIZE);
 	    globalVariables.iconOfMainSuit.frame = 0;
-	    titleOfAimedScores = game.add.text(globalVariables.screenWidth - 280, constants.MARGIN, '叫分', constants.TEXT_STYLE);
-	    titleOfAimedScores.setTextBounds(0, 0, 70, 30);
-	    globalVariables.textOfAimedScores = game.add.text(globalVariables.screenWidth - 280, 2 * constants.MARGIN + 30, '80', constants.TEXT_STYLE);
-	    globalVariables.textOfAimedScores.setTextBounds(0, 0, 70, 30);
-	    titleOfCurrentScores = game.add.text(globalVariables.screenWidth - 210, constants.MARGIN, '得分', constants.TEXT_STYLE);
-	    titleOfCurrentScores.setTextBounds(0, 0, 70, 30);
-	    globalVariables.textOfCurrentScores = game.add.text(globalVariables.screenWidth - 210, 2 * constants.MARGIN + 30, '0', constants.TEXT_STYLE);
-	    globalVariables.textOfCurrentScores.setTextBounds(0, 0, 70, 30);
-	    titleOfChipsWon = game.add.text(globalVariables.screenWidth - 140, constants.MARGIN, '输赢', constants.TEXT_STYLE);
-	    titleOfChipsWon.setTextBounds(0, 0, 70, 30);
-	    globalVariables.textOfChipsWon = game.add.text(globalVariables.screenWidth - 140, 2 * constants.MARGIN + 30, '0', constants.TEXT_STYLE);
-	    globalVariables.textOfChipsWon.setTextBounds(0, 0, 70, 30);
+	    titleOfAimedScores = game.add.text(globalVariables.screenWidth - 4 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '叫分', constants.TEXT_STYLE);
+	    titleOfAimedScores.setTextBounds(0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT);
+	    globalVariables.textOfAimedScores = game.add.text(globalVariables.screenWidth - 4 * constants.UPPER_RIGHT_TEXT_WIDTH, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, '80', constants.TEXT_STYLE);
+	    globalVariables.textOfAimedScores.setTextBounds(0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT);
+	    titleOfCurrentScores = game.add.text(globalVariables.screenWidth - 3 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '得分', constants.TEXT_STYLE);
+	    titleOfCurrentScores.setTextBounds(0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT);
+	    globalVariables.textOfCurrentScores = game.add.text(globalVariables.screenWidth - 3 * constants.UPPER_RIGHT_TEXT_WIDTH, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, '0', constants.TEXT_STYLE);
+	    globalVariables.textOfCurrentScores.setTextBounds(0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT);
+	    globalVariables.textOfEarnedScores = game.add.text(globalVariables.screenWidth - 3 * constants.UPPER_RIGHT_TEXT_WIDTH, 3 * constants.MARGIN + 2 * constants.UPPER_RIGHT_TEXT_HEIGHT, '+ 0', constants.ALERT_TEXT_STYLE);
+	    globalVariables.textOfEarnedScores.setTextBounds(0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT);
+	    globalVariables.textOfEarnedScores.alpha = 0;
+	    titleOfChipsWon = game.add.text(globalVariables.screenWidth - 2 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '输赢', constants.TEXT_STYLE);
+	    titleOfChipsWon.setTextBounds(0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT);
+	    globalVariables.textOfChipsWon = game.add.text(globalVariables.screenWidth - 2 * constants.UPPER_RIGHT_TEXT_WIDTH, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, '0', constants.TEXT_STYLE);
+	    globalVariables.textOfChipsWon.setTextBounds(0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT);
 	    titleOfRoomName = game.add.text(globalVariables.screenWidth - 70, constants.MARGIN, '房间', constants.TEXT_STYLE);
-	    titleOfRoomName.setTextBounds(0, 0, 70, 30);
-	    globalVariables.textOfRoomName = game.add.text(globalVariables.screenWidth - 70, 2 * constants.MARGIN + 30, '', constants.TEXT_STYLE);
-	    globalVariables.textOfRoomName.setTextBounds(0, 0, 70, 30);
+	    titleOfRoomName.setTextBounds(0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT);
+	    globalVariables.textOfRoomName = game.add.text(globalVariables.screenWidth - constants.UPPER_RIGHT_TEXT_WIDTH, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, '', constants.TEXT_STYLE);
+	    globalVariables.textOfRoomName.setTextBounds(0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT);
 	    globalVariables.meStatusText = game.add.text(game.world.centerX - constants.MARGIN, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 3 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET - constants.BUTTON_HEIGHT, '', constants.TEXT_STYLE);
 	    globalVariables.player1StatusText = game.add.text(globalVariables.screenWidth - 2 * constants.AVATAR_SIZE - 3 * constants.MARGIN, game.world.centerY, '', constants.TEXT_STYLE);
 	    globalVariables.player2StatusText = game.add.text(game.world.centerX - constants.MARGIN, constants.AVATAR_SIZE + 4 * constants.MARGIN, '', constants.TEXT_STYLE);
 	    globalVariables.player3StatusText = game.add.text(constants.AVATAR_SIZE + 2 * constants.MARGIN, game.world.centerY, '', constants.TEXT_STYLE);
+	    globalVariables.meHistoricalPlayedCardGroupForOneRound = game.add.group();
+	    globalVariables.player1HistoricalPlayedCardGroupForOneRound = game.add.group();
+	    globalVariables.player2HistoricalPlayedCardGroupForOneRound = game.add.group();
+	    globalVariables.player3HistoricalPlayedCardGroupForOneRound = game.add.group();
 	    communications.getRoomInfo(game);
 	    return communications.socketEventHandler(game);
 	  };
@@ -234,10 +250,18 @@
 	      boundsAlignH: "center",
 	      boundsAlignV: "middle"
 	    },
+	    ALERT_TEXT_STYLE: {
+	      font: "bold 20px Arial",
+	      fill: "#fa6161",
+	      boundsAlignH: "center",
+	      boundsAlignV: "middle"
+	    },
 	    RED_TEXT_STYLE: {
 	      font: "bold 20px Arial",
 	      fill: "#fa6161"
 	    },
+	    UPPER_RIGHT_TEXT_WIDTH: 70,
+	    UPPER_RIGHT_TEXT_HEIGHT: 30,
 	    GAME_STATUS_NOT_STARTED: 0,
 	    GAME_STATUS_SETTLING_COVERED_CARDS: 1,
 	    GAME_STATUS_DECIDING_SUIT: 2,
@@ -335,6 +359,7 @@
 	    coveredCards: null,
 	    background: null,
 	    playCardsButton: null,
+	    historicalButton: null,
 	    prepareButton: null,
 	    leaveButton: null,
 	    surrenderButton: null,
@@ -344,6 +369,7 @@
 	    iconOfMainSuit: null,
 	    textOfCurrentScores: null,
 	    textOfAimedScores: null,
+	    textOfEarnedScores: null,
 	    textOfChipsWon: null,
 	    textOfRoomName: null,
 	    player1Username: null,
@@ -367,7 +393,18 @@
 	    mainSuit: null,
 	    firstlyPlayedCardValuesForCurrentRound: [],
 	    bigSign: null,
-	    cardValueRanks: null
+	    cardValueRanks: null,
+	    meHistoricalPlayedCardValues: [],
+	    player1HistoricalPlayedCardValues: [],
+	    player2HistoricalPlayedCardValues: [],
+	    player3HistoricalPlayedCardValues: [],
+	    meHistoricalPlayedCardGroupForOneRound: null,
+	    player1HistoricalPlayedCardGroupForOneRound: null,
+	    player2HistoricalPlayedCardGroupForOneRound: null,
+	    player3HistoricalPlayedCardGroupForOneRound: null,
+	    historicalRecordStage: null,
+	    historicalRoundIndex: null,
+	    isPlayCardButtonVisibleBeforeShowingHistoricalRecordStage: false
 	  };
 
 	}).call(this);
@@ -379,12 +416,10 @@
 
 	// Generated by CoffeeScript 1.10.0
 	(function() {
-	  var binarySearch, constants, getAllPairValuesAtHandForSuit, getAllValuesOfMainAndMainSuit, getCardName, getCardValuesForSuit, getRanksForMainSuitCards, getRelativeMainSuitValues, getStartAndEndValueForSuit, globalVariables, havePairForMainSuit, havePairForSuit, haveSingleForMainSuit, haveSingleForSuit, haveTractorForMainSuit, haveTractorForSuit, isPairForMainSuit, isPairForSuit, isSingleForMainSuit, isSingleForSuit, isTractorForMainSuit, isTractorForSuit, setPlayerStatusTextForOneUserAndClearStatusTextForOthers, sortCards, sortCardsAfterMainSuitSettled, validateSelectedCardsForPlay,
+	  var binarySearch, constants, getAllValuesOfMainAndMainSuit, getCardName, getCardValuesForSuit, getPairValuesForSuit, getRanksForMainSuitCards, getStartAndEndValueForSuit, havePairForMainSuit, havePairForSuit, haveSingleForMainSuit, haveSingleForSuit, haveTractorForMainSuit, haveTractorForSuit, isPairForMainSuit, isPairForSuit, isSingleForMainSuit, isSingleForSuit, isTractorForMainSuit, isTractorForSuit, sortCards, sortCardsAfterMainSuitSettled, validateSelectedCardsForPlay,
 	    indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 	  constants = __webpack_require__(1);
-
-	  globalVariables = __webpack_require__(2);
 
 	  binarySearch = function(array, x) {
 	    var begin, end, mid, n, result;
@@ -641,30 +676,6 @@
 
 
 	  /*
-	  Set status text for one player and clear status text for all other players
-	  @param: username                                player username whose status text needs to be updated
-	  @param: statusText                              the status text string
-	  @return: -
-	   */
-
-	  setPlayerStatusTextForOneUserAndClearStatusTextForOthers = function(username, statusText) {
-	    globalVariables.meStatusText.text = '';
-	    globalVariables.player1StatusText.text = '';
-	    globalVariables.player2StatusText.text = '';
-	    globalVariables.player3StatusText.text = '';
-	    if (username === globalVariables.username) {
-	      return globalVariables.meStatusText.text = statusText;
-	    } else if (username === globalVariables.player1Username.text) {
-	      return globalVariables.player1StatusText.text = statusText;
-	    } else if (username === globalVariables.player2Username.text) {
-	      return globalVariables.player2StatusText.text = statusText;
-	    } else if (username === globalVariables.player3Username.text) {
-	      return globalVariables.player3StatusText.text = statusText;
-	    }
-	  };
-
-
-	  /*
 	  Given a suit index, find out the starting card value and ending card value that belongs to that suit
 	  @param: suitIndex               the suit index
 	  @return: array                  an array that contains the starting card value and ending card value that belongs to that suit
@@ -808,65 +819,23 @@
 	  /*
 	  Given a suit index and card values at hand, this function finds out all pairs within card values at hand that are the given suit
 	  @param: suitIndex                       the given suit index
-	  @param: cardValuesAtHand                the card values at hand
+	  @param: cardValues                      the card values from which to search pairs for
 	  @return: array                          all the values of pairs that satisfies the condition
 	   */
 
-	  getAllPairValuesAtHandForSuit = function(suitIndex, cardValuesAtHand) {
-	    var cardValuesAtHandOfSuit, i, j, pairValues, ref;
-	    cardValuesAtHandOfSuit = getCardValuesForSuit(suitIndex, cardValuesAtHand);
+	  getPairValuesForSuit = function(suitIndex, cardValues) {
+	    var cardValuesOfSuit, i, j, pairValues, ref;
+	    cardValuesOfSuit = getCardValuesForSuit(suitIndex, cardValues);
 	    pairValues = [];
-	    if (cardValuesAtHandOfSuit.length === 0) {
+	    if (cardValuesOfSuit.length === 0) {
 	      return pairValues;
 	    }
-	    for (i = j = 0, ref = cardValuesAtHandOfSuit.length - 1; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
-	      if (cardValuesAtHandOfSuit[i] === cardValuesAtHandOfSuit[i + 1]) {
-	        pairValues.push(cardValuesAtHandOfSuit[i]);
+	    for (i = j = 0, ref = cardValuesOfSuit.length - 1; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
+	      if (cardValuesOfSuit[i] === cardValuesOfSuit[i + 1]) {
+	        pairValues.push(cardValuesOfSuit[i]);
 	      }
 	    }
 	    return pairValues;
-	  };
-
-
-	  /*
-	  With the given suit as main suit, this function returns all related main suit card values
-	  @param: mainSuit                        the main suit index
-	  @return: mainSuitValues                 an array that contains card values including main seven, other sevens, main two, other twos and main ace
-	   */
-
-	  getRelativeMainSuitValues = function(mainSuit) {
-	    var mainSuitValues;
-	    mainSuitValues = {};
-	    switch (mainSuit) {
-	      case constants.INDEX_SUIT_SPADE:
-	        mainSuitValues.valueOfMainSuitOfSeven = constants.VALUE_SPADE_SEVEN;
-	        mainSuitValues.valuesOfRestSuitsOfSeven = [constants.VALUE_HEART_SEVEN, constants.VALUE_CLUB_SEVEN, constants.VALUE_DIAMOND_SEVEN];
-	        mainSuitValues.valueOfMainSuitOfTwo = constants.VALUE_SPADE_TWO;
-	        mainSuitValues.valuesOfRestSuitsOfTwo = [constants.VALUE_HEART_TWO, constants.VALUE_CLUB_TWO, constants.VALUE_DIAMOND_TWO];
-	        mainSuitValues.valueOfMainSuitOfAce = constants.VALUE_SPADE_ACE;
-	        break;
-	      case constants.INDEX_SUIT_HEART:
-	        mainSuitValues.valueOfMainSuitOfSeven = constants.VALUE_HEART_SEVEN;
-	        mainSuitValues.valuesOfRestSuitsOfSeven = [constants.VALUE_SPADE_SEVEN, constants.VALUE_CLUB_SEVEN, constants.VALUE_DIAMOND_SEVEN];
-	        mainSuitValues.valueOfMainSuitOfTwo = constants.VALUE_HEART_TWO;
-	        mainSuitValues.valuesOfRestSuitsOfTwo = [constants.VALUE_SPADE_TWO, constants.VALUE_CLUB_TWO, constants.VALUE_DIAMOND_TWO];
-	        mainSuitValues.valueOfMainSuitOfAce = constants.VALUE_HEART_ACE;
-	        break;
-	      case constants.INDEX_SUIT_CLUB:
-	        mainSuitValues.valueOfMainSuitOfSeven = constants.VALUE_CLUB_SEVEN;
-	        mainSuitValues.valuesOfRestSuitsOfSeven = [constants.VALUE_SPADE_SEVEN, constants.VALUE_HEART_SEVEN, constants.VALUE_DIAMOND_SEVEN];
-	        mainSuitValues.valueOfMainSuitOfTwo = constants.VALUE_CLUB_TWO;
-	        mainSuitValues.valuesOfRestSuitsOfTwo = [constants.VALUE_SPADE_TWO, constants.VALUE_HEART_TWO, constants.VALUE_DIAMOND_TWO];
-	        mainSuitValues.valueOfMainSuitOfAce = constants.VALUE_CLUB_ACE;
-	        break;
-	      case constants.INDEX_SUIT_DIAMOND:
-	        mainSuitValues.valueOfMainSuitOfSeven = constants.VALUE_DIAMOND_SEVEN;
-	        mainSuitValues.valuesOfRestSuitsOfSeven = [constants.VALUE_SPADE_SEVEN, constants.VALUE_HEART_SEVEN, constants.VALUE_CLUB_SEVEN];
-	        mainSuitValues.valueOfMainSuitOfTwo = constants.VALUE_DIAMOND_TWO;
-	        mainSuitValues.valuesOfRestSuitsOfTwo = [constants.VALUE_SPADE_TWO, constants.VALUE_HEART_TWO, constants.VALUE_CLUB_TWO];
-	        mainSuitValues.valueOfMainSuitOfAce = constants.VALUE_DIAMOND_ACE;
-	    }
-	    return mainSuitValues;
 	  };
 
 
@@ -878,9 +847,9 @@
 	   */
 
 	  haveSingleForSuit = function(suitIndex, cardValues) {
-	    var cardValuesAtHandOfSuit;
-	    cardValuesAtHandOfSuit = getCardValuesForSuit(suitIndex, cardValues);
-	    if (cardValuesAtHandOfSuit.length > 0) {
+	    var cardValuesOfSuit;
+	    cardValuesOfSuit = getCardValuesForSuit(suitIndex, cardValues);
+	    if (cardValuesOfSuit.length > 0) {
 	      return true;
 	    } else {
 	      return false;
@@ -888,10 +857,10 @@
 	  };
 
 	  haveSingleForMainSuit = function(mainSuit, cardValues) {
-	    var cardValuesAtHandForMain, cardValuesAtHandForMainSuit;
-	    cardValuesAtHandForMain = getCardValuesForSuit(constants.INDEX_SUIT_MAIN, cardValues);
-	    cardValuesAtHandForMainSuit = getCardValuesForSuit(mainSuit, cardValues);
-	    if (cardValuesAtHandForMain.length > 0 || cardValuesAtHandForMainSuit.length > 0) {
+	    var cardValuesForMain, cardValuesForMainSuit;
+	    cardValuesForMain = getCardValuesForSuit(constants.INDEX_SUIT_MAIN, cardValues);
+	    cardValuesForMainSuit = getCardValuesForSuit(mainSuit, cardValues);
+	    if (cardValuesForMain.length > 0 || cardValuesForMainSuit.length > 0) {
 	      return true;
 	    } else {
 	      return false;
@@ -899,10 +868,13 @@
 	  };
 
 	  havePairForSuit = function(suitIndex, cardValues) {
-	    var cardValuesAtHandOfSuit, i, j, ref;
-	    cardValuesAtHandOfSuit = getCardValuesForSuit(suitIndex, cardValues);
-	    for (i = j = 0, ref = cardValuesAtHandOfSuit.length - 1; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
-	      if (cardValuesAtHandOfSuit[i] === cardValuesAtHandOfSuit[i + 1]) {
+	    var cardValuesOfSuit, i, j, ref;
+	    cardValuesOfSuit = getCardValuesForSuit(suitIndex, cardValues);
+	    if (cardValuesOfSuit.length === 0) {
+	      return false;
+	    }
+	    for (i = j = 0, ref = cardValuesOfSuit.length - 1; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
+	      if (cardValuesOfSuit[i] === cardValuesOfSuit[i + 1]) {
 	        return true;
 	      }
 	    }
@@ -910,10 +882,13 @@
 	  };
 
 	  havePairForMainSuit = function(mainSuit, cardValues) {
-	    var cardValuesAtHandForMain, cardValuesAtHandForMainSuit, i, j, mains, ref;
-	    cardValuesAtHandForMain = getCardValuesForSuit(constants.INDEX_SUIT_MAIN, cardValues);
-	    cardValuesAtHandForMainSuit = getCardValuesForSuit(mainSuit, cardValues);
-	    mains = cardValuesAtHandForMain.concat(cardValuesAtHandForMainSuit);
+	    var cardValuesForMain, cardValuesForMainSuit, i, j, mains, ref;
+	    cardValuesForMain = getCardValuesForSuit(constants.INDEX_SUIT_MAIN, cardValues);
+	    cardValuesForMainSuit = getCardValuesForSuit(mainSuit, cardValues);
+	    mains = cardValuesForMain.concat(cardValuesForMainSuit);
+	    if (mains.length === 0) {
+	      return false;
+	    }
 	    for (i = j = 0, ref = mains.length - 1; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
 	      if (mains[i] === mains[i + 1]) {
 	        return true;
@@ -923,17 +898,17 @@
 	  };
 
 	  haveTractorForSuit = function(tractorLength, suitIndex, cardValues) {
-	    var i, j, numOfConsecutivePairs, pairValuesAtHandOfSuit, ref;
-	    pairValuesAtHandOfSuit = getAllPairValuesAtHandForSuit(suitIndex, cardValues);
-	    if (pairValuesAtHandOfSuit.length === 0) {
+	    var i, j, numOfConsecutivePairs, pairValuesOfSuit, ref;
+	    pairValuesOfSuit = getPairValuesForSuit(suitIndex, cardValues);
+	    if (pairValuesOfSuit.length === 0) {
 	      return false;
 	    }
-	    if (pairValuesAtHandOfSuit.length < tractorLength) {
+	    if (pairValuesOfSuit.length < tractorLength) {
 	      return false;
 	    }
 	    numOfConsecutivePairs = 1;
-	    for (i = j = 0, ref = pairValuesAtHandOfSuit.length; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
-	      if ((pairValuesAtHandOfSuit[i] + 1) === pairValuesAtHandOfSuit[i + 1]) {
+	    for (i = j = 0, ref = pairValuesOfSuit.length; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
+	      if ((pairValuesOfSuit[i] + 1) === pairValuesOfSuit[i + 1]) {
 	        numOfConsecutivePairs += 1;
 	        if (numOfConsecutivePairs === tractorLength) {
 	          return true;
@@ -945,11 +920,11 @@
 	    return false;
 	  };
 
-	  haveTractorForMainSuit = function(tractorLength, mainSuit, cardValues) {
-	    var i, j, k, numOfConsecutivePairs, pairRanks, pairValuesAtHandOfMain, pairValuesAtHandOfSuit, pairs, ref, ref1;
-	    pairValuesAtHandOfMain = getAllPairValuesAtHandForSuit(constants.INDEX_SUIT_MAIN, cardValues);
-	    pairValuesAtHandOfSuit = getAllPairValuesAtHandForSuit(mainSuit, cardValues);
-	    pairs = pairValuesAtHandOfMain.concat(pairValuesAtHandOfSuit);
+	  haveTractorForMainSuit = function(tractorLength, mainSuit, cardValues, cardValueRanks) {
+	    var i, j, k, numOfConsecutivePairs, pairRanks, pairValuesOfMain, pairValuesOfSuit, pairs, ref, ref1;
+	    pairValuesOfMain = getPairValuesForSuit(constants.INDEX_SUIT_MAIN, cardValues);
+	    pairValuesOfSuit = getPairValuesForSuit(mainSuit, cardValues);
+	    pairs = pairValuesOfMain.concat(pairValuesOfSuit);
 	    if (pairs.length === 0) {
 	      return false;
 	    }
@@ -959,7 +934,7 @@
 	    numOfConsecutivePairs = 1;
 	    pairRanks = [];
 	    for (i = j = 0, ref = pairs.length; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
-	      pairRanks.push(globalVariables.cardValueRanks[pairs[i]]);
+	      pairRanks.push(cardValueRanks[pairs[i]]);
 	    }
 	    pairRanks = sortCards(pairRanks);
 	    for (i = k = 0, ref1 = pairRanks.length - 1; 0 <= ref1 ? k < ref1 : k > ref1; i = 0 <= ref1 ? ++k : --k) {
@@ -1015,7 +990,7 @@
 	    }
 	  };
 
-	  isTractorForSuit = function(tractorLength, suitIndex, cardValues) {
+	  isTractorForSuit = function(tractorLength, suitIndex, cardValues, cardValueRanks) {
 	    var i, j, pairRanks, ref, startAndEndValuesForSuit;
 	    if (tractorLength === 0 || cardValues.length < 4) {
 	      return false;
@@ -1033,7 +1008,7 @@
 	      if (cardValues[i] !== cardValues[i + 1]) {
 	        return false;
 	      } else {
-	        pairRanks.push(globalVariables.cardValueRanks[cardValues[i]]);
+	        pairRanks.push(cardValueRanks[cardValues[i]]);
 	      }
 	      i += 2;
 	    }
@@ -1046,7 +1021,7 @@
 	    return true;
 	  };
 
-	  isTractorForMainSuit = function(tractorLength, mainSuit, cardValues) {
+	  isTractorForMainSuit = function(tractorLength, mainSuit, cardValues, cardValueRanks) {
 	    var i, j, k, pairRanks, ref, ref1, ref2, valuesOfMainAndMainSuit;
 	    if (tractorLength === 0 || cardValues.length < 4) {
 	      return false;
@@ -1066,7 +1041,7 @@
 	      if (cardValues[i] !== cardValues[i + 1]) {
 	        return false;
 	      } else {
-	        pairRanks.push(globalVariables.cardValueRanks[cardValues[i]]);
+	        pairRanks.push(cardValueRanks[cardValues[i]]);
 	      }
 	      i += 2;
 	    }
@@ -1079,7 +1054,7 @@
 	    return true;
 	  };
 
-	  validateSelectedCardsForPlay = function(selectedCardValues, firstlyPlayedCardValues, cardValuesAtHand, mainSuit) {
+	  validateSelectedCardsForPlay = function(selectedCardValues, firstlyPlayedCardValues, cardValuesAtHand, mainSuit, cardValueRanks) {
 	    var numberOfCardsAtHandForSpecificSuit, numberOfCardsInSelectedCardsForSpecificSuit, numberOfMainCardsAtHand, numberOfMainCardsInSelectedCards, pairValuesAtHandOfSuit, selectedPairValuesOfSuit, suitForFirstlyPlayedCards;
 	    if (selectedCardValues.length === 0) {
 	      return false;
@@ -1133,29 +1108,29 @@
 	            return false;
 	          }
 	        }
-	      } else if (isTractorForMainSuit(firstlyPlayedCardValues.length / 2, mainSuit, firstlyPlayedCardValues)) {
-	        if (haveTractorForMainSuit(firstlyPlayedCardValues.length / 2, mainSuit, cardValuesAtHand)) {
-	          if (!isTractorForMainSuit(selectedCardValues.length / 2, mainSuit, selectedCardValues)) {
+	      } else if (isTractorForMainSuit(firstlyPlayedCardValues.length / 2, mainSuit, firstlyPlayedCardValues, cardValueRanks)) {
+	        if (haveTractorForMainSuit(firstlyPlayedCardValues.length / 2, mainSuit, cardValuesAtHand, cardValueRanks)) {
+	          if (!isTractorForMainSuit(selectedCardValues.length / 2, mainSuit, selectedCardValues, cardValueRanks)) {
 	            return false;
 	          }
 	        }
-	        pairValuesAtHandOfSuit = getAllPairValuesAtHandForSuit(constants.INDEX_SUIT_MAIN, cardValuesAtHand);
-	        pairValuesAtHandOfSuit = pairValuesAtHandOfSuit.concat(getAllPairValuesAtHandForSuit(mainSuit, cardValuesAtHand));
-	        selectedPairValuesOfSuit = getAllPairValuesAtHandForSuit(constants.INDEX_SUIT_MAIN, selectedCardValues);
-	        selectedPairValuesOfSuit = selectedPairValuesOfSuit.concat(getAllPairValuesAtHandForSuit(mainSuit, selectedCardValues));
+	        pairValuesAtHandOfSuit = getPairValuesForSuit(constants.INDEX_SUIT_MAIN, cardValuesAtHand);
+	        pairValuesAtHandOfSuit = pairValuesAtHandOfSuit.concat(getPairValuesForSuit(mainSuit, cardValuesAtHand));
+	        selectedPairValuesOfSuit = getPairValuesForSuit(constants.INDEX_SUIT_MAIN, selectedCardValues);
+	        selectedPairValuesOfSuit = selectedPairValuesOfSuit.concat(getPairValuesForSuit(mainSuit, selectedCardValues));
 	        if (selectedPairValuesOfSuit.length < firstlyPlayedCardValues.length / 2) {
 	          if ((selectedPairValuesOfSuit.length !== pairValuesAtHandOfSuit.length) && (pairValuesAtHandOfSuit.length !== 0)) {
 	            return false;
 	          }
 	        }
-	      } else if (isTractorForSuit(firstlyPlayedCardValues.length / 2, suitForFirstlyPlayedCards, firstlyPlayedCardValues)) {
+	      } else if (isTractorForSuit(firstlyPlayedCardValues.length / 2, suitForFirstlyPlayedCards, firstlyPlayedCardValues, cardValueRanks)) {
 	        if (haveTractorForSuit(firstlyPlayedCardValues.length / 2, suitForFirstlyPlayedCards, cardValuesAtHand)) {
-	          if (!isTractorForSuit(selectedCardValues.length / 2, suitForFirstlyPlayedCards, selectedCardValues)) {
+	          if (!isTractorForSuit(selectedCardValues.length / 2, suitForFirstlyPlayedCards, selectedCardValues, cardValueRanks)) {
 	            return false;
 	          }
 	        }
-	        pairValuesAtHandOfSuit = getAllPairValuesAtHandForSuit(suitForFirstlyPlayedCards, cardValuesAtHand);
-	        selectedPairValuesOfSuit = getAllPairValuesAtHandForSuit(suitForFirstlyPlayedCards, selectedCardValues);
+	        pairValuesAtHandOfSuit = getPairValuesForSuit(suitForFirstlyPlayedCards, cardValuesAtHand);
+	        selectedPairValuesOfSuit = getPairValuesForSuit(suitForFirstlyPlayedCards, selectedCardValues);
 	        if (selectedPairValuesOfSuit.length < firstlyPlayedCardValues.length / 2) {
 	          if (selectedPairValuesOfSuit.length !== pairValuesAtHandOfSuit.length && pairValuesAtHandOfSuit.length !== 0) {
 	            return false;
@@ -1170,15 +1145,15 @@
 	        return false;
 	      }
 	      if (selectedCardValues.length >= 4) {
-	        if (isTractorForSuit(selectedCardValues.length / 2, constants.INDEX_SUIT_SPADE, selectedCardValues)) {
+	        if (isTractorForSuit(selectedCardValues.length / 2, constants.INDEX_SUIT_SPADE, selectedCardValues, cardValueRanks)) {
 	          return true;
-	        } else if (isTractorForSuit(selectedCardValues.length / 2, constants.INDEX_SUIT_HEART, selectedCardValues)) {
+	        } else if (isTractorForSuit(selectedCardValues.length / 2, constants.INDEX_SUIT_HEART, selectedCardValues, cardValueRanks)) {
 	          return true;
-	        } else if (isTractorForSuit(selectedCardValues.length / 2, constants.INDEX_SUIT_CLUB, selectedCardValues)) {
+	        } else if (isTractorForSuit(selectedCardValues.length / 2, constants.INDEX_SUIT_CLUB, selectedCardValues, cardValueRanks)) {
 	          return true;
-	        } else if (isTractorForSuit(selectedCardValues.length / 2, constants.INDEX_SUIT_DIAMOND, selectedCardValues)) {
+	        } else if (isTractorForSuit(selectedCardValues.length / 2, constants.INDEX_SUIT_DIAMOND, selectedCardValues, cardValueRanks)) {
 	          return true;
-	        } else if (isTractorForMainSuit(selectedCardValues.length / 2, mainSuit, selectedCardValues)) {
+	        } else if (isTractorForMainSuit(selectedCardValues.length / 2, mainSuit, selectedCardValues, cardValueRanks)) {
 	          return true;
 	        } else {
 	          return false;
@@ -1195,10 +1170,9 @@
 	    getCardValuesForSuit: getCardValuesForSuit,
 	    havePairForSuit: havePairForSuit,
 	    haveSingleForSuit: haveSingleForSuit,
-	    getAllPairValuesAtHandForSuit: getAllPairValuesAtHandForSuit,
+	    getPairValuesForSuit: getPairValuesForSuit,
 	    haveTractorForSuit: haveTractorForSuit,
 	    getRanksForMainSuitCards: getRanksForMainSuitCards,
-	    setPlayerStatusTextForOneUserAndClearStatusTextForOthers: setPlayerStatusTextForOneUserAndClearStatusTextForOthers,
 	    sortCardsAfterMainSuitSettled: sortCardsAfterMainSuitSettled,
 	    binarySearch: binarySearch
 	  };
@@ -1212,7 +1186,7 @@
 
 	// Generated by CoffeeScript 1.10.0
 	(function() {
-	  var actions, constants, getRoomInfo, globalVariables, socketEventHandler, toolbox;
+	  var actions, constants, getRoomInfo, globalVariables, setPlayerStatusTextForOneUserAndClearStatusTextForOthers, socketEventHandler, toolbox;
 
 	  constants = __webpack_require__(1);
 
@@ -1221,6 +1195,30 @@
 	  toolbox = __webpack_require__(3);
 
 	  globalVariables = __webpack_require__(2);
+
+
+	  /*
+	  Set status text for one player and clear status text for all other players
+	  @param: username                                player username whose status text needs to be updated
+	  @param: statusText                              the status text string
+	  @return: -
+	   */
+
+	  setPlayerStatusTextForOneUserAndClearStatusTextForOthers = function(username, statusText) {
+	    globalVariables.meStatusText.text = '';
+	    globalVariables.player1StatusText.text = '';
+	    globalVariables.player2StatusText.text = '';
+	    globalVariables.player3StatusText.text = '';
+	    if (username === globalVariables.username) {
+	      return globalVariables.meStatusText.text = statusText;
+	    } else if (username === globalVariables.player1Username.text) {
+	      return globalVariables.player1StatusText.text = statusText;
+	    } else if (username === globalVariables.player2Username.text) {
+	      return globalVariables.player2StatusText.text = statusText;
+	    } else if (username === globalVariables.player3Username.text) {
+	      return globalVariables.player3StatusText.text = statusText;
+	    }
+	  };
 
 	  getRoomInfo = function(game) {
 	    return io.socket.get('/get_room_info', {
@@ -1406,19 +1404,21 @@
 	        globalVariables.settleCoveredCardsButton.setFrames(2, 2, 2);
 	      }
 	      globalVariables.gameStatus = constants.GAME_STATUS_SETTLING_COVERED_CARDS;
-	      return toolbox.setPlayerStatusTextForOneUserAndClearStatusTextForOthers(makerUsername, '庄家埋底中...');
+	      return setPlayerStatusTextForOneUserAndClearStatusTextForOthers(makerUsername, '庄家埋底中...');
 	    });
 	    io.socket.on('finishedSettlingCoveredCards', function(data) {
 	      var makerUsername;
 	      makerUsername = data.maker;
-	      return toolbox.setPlayerStatusTextForOneUserAndClearStatusTextForOthers(makerUsername, '庄家选主中...');
+	      return setPlayerStatusTextForOneUserAndClearStatusTextForOthers(makerUsername, '庄家选主中...');
 	    });
 	    io.socket.on('mainSuitChosen', function(data) {
 	      var makerUsername;
+	      globalVariables.gameStatus = constants.GAME_STATUS_PLAYING;
 	      globalVariables.mainSuit = data.mainSuit;
+	      globalVariables.cardValueRanks = toolbox.getRanksForMainSuitCards(globalVariables.mainSuit);
 	      makerUsername = data.maker;
 	      globalVariables.iconOfMainSuit.frame = globalVariables.mainSuit;
-	      toolbox.setPlayerStatusTextForOneUserAndClearStatusTextForOthers(makerUsername, '出牌中...');
+	      setPlayerStatusTextForOneUserAndClearStatusTextForOthers(makerUsername, '出牌中...');
 	      globalVariables.cardsAtHand.values = toolbox.sortCardsAfterMainSuitSettled(globalVariables.cardsAtHand.values, globalVariables.mainSuit);
 	      return actions.displayCards(globalVariables.cardsAtHand.values);
 	    });
@@ -1429,21 +1429,27 @@
 	      globalVariables.firstlyPlayedCardValuesForCurrentRound = data.firstlyPlayedCardValues;
 	      nextPlayerUsername = data.nextPlayerUsername;
 	      n = -1;
-	      if (usernamePlayedCards === globalVariables.player1Username.text) {
+	      if (usernamePlayedCards === globalVariables.username) {
+	        globalVariables.meHistoricalPlayedCardValues.push(playedCardValues);
+	      } else if (usernamePlayedCards === globalVariables.player1Username.text) {
+	        globalVariables.player1HistoricalPlayedCardValues.push(playedCardValues);
 	        n = 1;
 	      } else if (usernamePlayedCards === globalVariables.player2Username.text) {
+	        globalVariables.player2HistoricalPlayedCardValues.push(playedCardValues);
 	        n = 2;
 	      } else if (usernamePlayedCards === globalVariables.player3Username.text) {
+	        globalVariables.player3HistoricalPlayedCardValues.push(playedCardValues);
 	        n = 3;
 	      }
 	      if (n !== -1) {
-	        actions.showPlayedCardsForUser(n, playedCardValues);
+	        actions.showPlayedCardsForUser(n, playedCardValues, true);
 	      }
 	      if (nextPlayerUsername === globalVariables.username) {
+	        globalVariables.playCardsButton.inputEnabled = false;
 	        globalVariables.playCardsButton.setFrames(2, 2, 2);
 	        globalVariables.playCardsButton.visible = true;
 	      }
-	      return toolbox.setPlayerStatusTextForOneUserAndClearStatusTextForOthers(nextPlayerUsername, '出牌中...');
+	      return setPlayerStatusTextForOneUserAndClearStatusTextForOthers(nextPlayerUsername, '出牌中...');
 	    });
 	    return io.socket.on('roundFinished', function(data) {
 	      var n, playedCardValues, scoresEarned, usernamePlayedCards, usernameWithLargestCardsForCurrentRound;
@@ -1452,17 +1458,44 @@
 	      scoresEarned = data.scoresEarned;
 	      usernameWithLargestCardsForCurrentRound = data.usernameWithLargestCardsForCurrentRound;
 	      n = -1;
-	      if (usernamePlayedCards === globalVariables.player1Username.text) {
+	      if (usernamePlayedCards === globalVariables.username) {
+	        globalVariables.meHistoricalPlayedCardValues.push(playedCardValues);
+	      } else if (usernamePlayedCards === globalVariables.player1Username.text) {
+	        globalVariables.player1HistoricalPlayedCardValues.push(playedCardValues);
 	        n = 1;
 	      } else if (usernamePlayedCards === globalVariables.player2Username.text) {
+	        globalVariables.player2HistoricalPlayedCardValues.push(playedCardValues);
 	        n = 2;
 	      } else if (usernamePlayedCards === globalVariables.player3Username.text) {
+	        globalVariables.player3HistoricalPlayedCardValues.push(playedCardValues);
 	        n = 3;
 	      }
 	      if (n !== -1) {
-	        actions.showPlayedCardsForUser(n, playedCardValues);
+	        actions.showPlayedCardsForUser(n, playedCardValues, true);
 	      }
-	      return actions.showBigStampForTheLargestPlayedCardsCurrentRound(playedCardValues.length, usernameWithLargestCardsForCurrentRound, game);
+	      actions.showBigStampForTheLargestPlayedCardsCurrentRound(playedCardValues.length, usernameWithLargestCardsForCurrentRound, game);
+	      globalVariables.textOfCurrentScores.text = parseInt(globalVariables.textOfCurrentScores.text) + scoresEarned;
+	      if (scoresEarned !== 0) {
+	        actions.showEarnedScoreTextWithFadeOutEffect(scoresEarned, game);
+	      }
+	      globalVariables.firstlyPlayedCardValuesForCurrentRound = [];
+	      globalVariables.historicalButton.inputEnabled = true;
+	      globalVariables.historicalButton.visible = true;
+	      return setTimeout(function() {
+	        globalVariables.bigSign.destroy();
+	        globalVariables.currentUserPlayedCards.removeAll();
+	        globalVariables.user1PlayedCards.removeAll();
+	        globalVariables.user2PlayedCards.removeAll();
+	        globalVariables.user3PlayedCards.removeAll();
+	        if (globalVariables.cardsAtHand.children.length !== 0) {
+	          if (usernameWithLargestCardsForCurrentRound === globalVariables.username) {
+	            globalVariables.playCardsButton.inputEnabled = false;
+	            globalVariables.playCardsButton.setFrames(2, 2, 2);
+	            globalVariables.playCardsButton.visible = true;
+	          }
+	          return setPlayerStatusTextForOneUserAndClearStatusTextForOthers(usernameWithLargestCardsForCurrentRound, '出牌中...');
+	        }
+	      }, 2000);
 	    });
 	  };
 
@@ -1480,7 +1513,7 @@
 
 	// Generated by CoffeeScript 1.10.0
 	(function() {
-	  var backgroundTapped, constants, displayCards, globalVariables, hideBigStamp, hideLeftPlayer, leaveRoom, lowerScore, pass, playSelectedCards, raiseScore, selectSuit, sendGetReadyMessage, setScore, settleCoveredCards, showBigStampForTheLargestPlayedCardsCurrentRound, showCallScorePanel, showCoveredCards, showPlayedCardsForUser, showPlayer1Info, showPlayer2Info, showPlayer3Info, showSelectSuitPanel, suitTapEffect, surrender, tapDownOnSprite, tapUp, toggleCardSelection, toolbox;
+	  var backgroundTapped, constants, displayCards, globalVariables, hideHistoricalRecordStage, hideLeftPlayer, leaveRoom, lowerScore, pass, playSelectedCards, raiseScore, selectSuit, sendGetReadyMessage, setScore, settleCoveredCards, showBigStampForTheLargestPlayedCardsCurrentRound, showCallScorePanel, showCoveredCards, showEarnedScoreTextWithFadeOutEffect, showHistoricallyPlayedCards, showLastRoundPlayedCards, showNextRoundPlayedCards, showPlayedCardsForUser, showPlayer1Info, showPlayer2Info, showPlayer3Info, showSelectSuitPanel, suitTapEffect, surrender, tapDownOnSprite, tapUp, toggleCardSelection, toggleLastAndNextRoundButton, toolbox;
 
 	  constants = __webpack_require__(1);
 
@@ -1525,70 +1558,92 @@
 	    return results;
 	  };
 
+	  showEarnedScoreTextWithFadeOutEffect = function(numOfScoresEarnedCurrentRound, game) {
+	    globalVariables.textOfEarnedScores.text = '+ ' + numOfScoresEarnedCurrentRound;
+	    globalVariables.textOfEarnedScores.alpha = 1;
+	    return game.add.tween(globalVariables.textOfEarnedScores).to({
+	      alpha: 0
+	    }, 2000, Phaser.Easing.Linear.None, true);
+	  };
+
 	  showBigStampForTheLargestPlayedCardsCurrentRound = function(numOfCardsPlayed, usernameWithLargestCardsForCurrentRound, game) {
-	    var startX, startY, x, y;
-	    x = null;
-	    y = null;
+	    var startX, startY;
+	    startX = null;
+	    startY = null;
 	    if (usernameWithLargestCardsForCurrentRound === globalVariables.username) {
-	      startX = globalVariables.screenWidth / 2 - (numOfCardsPlayed + 3) * globalVariables.scaledCardWidth / 8;
-	      startY = globalVariables.screenHeight - 2 * globalVariables.scaledCardHeight - 2 * constants.MARGIN;
+	      startX = globalVariables.screenWidth / 2 + (numOfCardsPlayed + 3) * globalVariables.scaledCardWidth / 8 - constants.MAKER_ICON_SIZE / 2;
+	      startY = globalVariables.screenHeight - 2 * globalVariables.scaledCardHeight - 2 * constants.MARGIN - constants.MAKER_ICON_SIZE / 2;
 	    } else if (usernameWithLargestCardsForCurrentRound === globalVariables.player1Username.text) {
-	      startX = globalVariables.screenWidth - (numOfCardsPlayed + 3) * globalVariables.scaledCardWidth / 4 - constants.MARGIN;
-	      startY = globalVariables.screenHeight / 2 - globalVariables.scaledCardHeight / 2;
+	      startX = globalVariables.screenWidth - 2 * constants.MARGIN - constants.AVATAR_SIZE - constants.MAKER_ICON_SIZE / 2;
+	      startY = globalVariables.screenHeight / 2 - globalVariables.scaledCardHeight / 2 - constants.MAKER_ICON_SIZE / 2;
 	    } else if (usernameWithLargestCardsForCurrentRound === globalVariables.player2Username.text) {
-	      startX = globalVariables.screenWidth / 2 - (numOfCardsPlayed + 3) * globalVariables.scaledCardWidth / 8;
-	      startY = constants.MARGIN;
+	      startX = globalVariables.screenWidth / 2 + (numOfCardsPlayed + 3) * globalVariables.scaledCardWidth / 8 - constants.MAKER_ICON_SIZE / 2;
+	      startY = 2 * constants.MARGIN + constants.AVATAR_SIZE - constants.MAKER_ICON_SIZE / 2;
 	    } else if (usernameWithLargestCardsForCurrentRound === globalVariables.player3Username.text) {
-	      startX = constants.MARGIN;
-	      startY = globalVariables.screenHeight / 2 - globalVariables.scaledCardHeight / 2;
+	      startX = (numOfCardsPlayed + 3) * globalVariables.scaledCardWidth / 4 + 2 * constants.MARGIN + constants.AVATAR_SIZE - constants.MAKER_ICON_SIZE / 2;
+	      startY = globalVariables.screenHeight / 2 - globalVariables.scaledCardHeight / 2 - constants.MAKER_ICON_SIZE / 2;
 	    }
-	    globalVariables.bigSign = game.add.sprite(x, y, 'big');
+	    globalVariables.bigSign = game.add.sprite(startX, startY, 'big');
 	    globalVariables.bigSign.width = constants.MAKER_ICON_SIZE;
 	    return globalVariables.bigSign.height = constants.MAKER_ICON_SIZE;
 	  };
 
-	  hideBigStamp = function() {
-	    return globalVariables.bigSign.destroy();
-	  };
 
-	  showPlayedCardsForUser = function(n, valuesOfPlayedCards) {
-	    var cardsToRemove, i, j, playedCard, ref, results, startX, startY;
+	  /*
+	  Show played cards or historically played cards as sprites for specific player
+	  @param: n                               player index
+	  @param: valuesOfPlayedCards             values of played cards or historically played cards
+	  @param: isCurrentRound                  boolean value:
+	                                          - true: the played cards is for current round
+	                                          - false: the played cards is for historical round
+	   */
+
+	  showPlayedCardsForUser = function(n, valuesOfPlayedCards, isCurrentRound) {
+	    var i, j, playedCard, ref, results, startX, startY, userPlayedCards;
 	    startX = null;
 	    startY = null;
+	    userPlayedCards = null;
 	    switch (n) {
 	      case 0:
 	        startX = globalVariables.screenWidth / 2 - (valuesOfPlayedCards.length + 3) * globalVariables.scaledCardWidth / 8;
 	        startY = globalVariables.screenHeight - 2 * globalVariables.scaledCardHeight - 2 * constants.MARGIN;
-	        globalVariables.currentUserPlayedCards.removeAll();
+	        if (isCurrentRound) {
+	          userPlayedCards = globalVariables.currentUserPlayedCards;
+	        } else {
+	          userPlayedCards = globalVariables.meHistoricalPlayedCardGroupForOneRound;
+	        }
 	        break;
 	      case 1:
 	        startX = globalVariables.screenWidth - (valuesOfPlayedCards.length + 3) * globalVariables.scaledCardWidth / 4 - 2 * constants.MARGIN - constants.AVATAR_SIZE;
 	        startY = globalVariables.screenHeight / 2 - globalVariables.scaledCardHeight / 2;
-	        globalVariables.user1PlayedCards.removeAll();
+	        if (isCurrentRound) {
+	          userPlayedCards = globalVariables.user1PlayedCards;
+	        } else {
+	          userPlayedCards = globalVariables.player1HistoricalPlayedCardGroupForOneRound;
+	        }
 	        break;
 	      case 2:
 	        startX = globalVariables.screenWidth / 2 - (valuesOfPlayedCards.length + 3) * globalVariables.scaledCardWidth / 8;
 	        startY = 2 * constants.MARGIN + constants.AVATAR_SIZE;
-	        globalVariables.user2PlayedCards.removeAll();
+	        if (isCurrentRound) {
+	          userPlayedCards = globalVariables.user2PlayedCards;
+	        } else {
+	          userPlayedCards = globalVariables.player2HistoricalPlayedCardGroupForOneRound;
+	        }
 	        break;
 	      case 3:
 	        startX = 2 * constants.MARGIN + constants.AVATAR_SIZE;
 	        startY = globalVariables.screenHeight / 2 - globalVariables.scaledCardHeight / 2;
-	        globalVariables.user3PlayedCards.removeAll();
+	        if (isCurrentRound) {
+	          userPlayedCards = globalVariables.user3PlayedCards;
+	        } else {
+	          userPlayedCards = globalVariables.player3HistoricalPlayedCardGroupForOneRound;
+	        }
 	    }
-	    cardsToRemove = [];
+	    userPlayedCards.removeAll();
 	    results = [];
 	    for (i = j = 0, ref = valuesOfPlayedCards.length; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
-	      playedCard = null;
-	      if (n === 0) {
-	        playedCard = globalVariables.currentUserPlayedCards.create(startX + i * globalVariables.scaledCardWidth / 4, startY, toolbox.getCardName(valuesOfPlayedCards[i]));
-	      } else if (n === 1) {
-	        playedCard = globalVariables.user1PlayedCards.create(startX + i * globalVariables.scaledCardWidth / 4, startY, toolbox.getCardName(valuesOfPlayedCards[i]));
-	      } else if (n === 2) {
-	        playedCard = globalVariables.user2PlayedCards.create(startX + i * globalVariables.scaledCardWidth / 4, startY, toolbox.getCardName(valuesOfPlayedCards[i]));
-	      } else if (n === 3) {
-	        playedCard = globalVariables.user3PlayedCards.create(startX + i * globalVariables.scaledCardWidth / 4, startY, toolbox.getCardName(valuesOfPlayedCards[i]));
-	      }
+	      playedCard = userPlayedCards.create(startX + i * globalVariables.scaledCardWidth / 4, startY, toolbox.getCardName(valuesOfPlayedCards[i]));
 	      playedCard.width = globalVariables.scaledCardWidth;
 	      results.push(playedCard.height = globalVariables.scaledCardHeight);
 	    }
@@ -1668,7 +1723,7 @@
 	          return globalVariables.settleCoveredCardsButton.setFrames(2, 2, 2);
 	        }
 	      } else if (globalVariables.gameStatus === constants.GAME_STATUS_PLAYING) {
-	        if (toolbox.validateSelectedCardsForPlay(selectedCardValues, globalVariables.firstlyPlayedCardValuesForCurrentRound, globalVariables.cardsAtHand.values, globalVariables.mainSuit)) {
+	        if (toolbox.validateSelectedCardsForPlay(selectedCardValues, globalVariables.firstlyPlayedCardValuesForCurrentRound, globalVariables.cardsAtHand.values, globalVariables.mainSuit, globalVariables.cardValueRanks)) {
 	          globalVariables.playCardsButton.inputEnabled = true;
 	          return globalVariables.playCardsButton.setFrames(1, 0, 1);
 	        } else {
@@ -1742,6 +1797,9 @@
 	    var csrfToken, i, j, ref, selectedCards, valuesOfCurrentUserPlayedCards;
 	    selectedCards = [];
 	    valuesOfCurrentUserPlayedCards = [];
+	    globalVariables.playCardsButton.inputEnabled = false;
+	    globalVariables.playCardsButton.setFrames(2, 2, 2);
+	    globalVariables.playCardsButton.visible = false;
 	    for (i = j = 0, ref = globalVariables.cardsAtHand.children.length; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
 	      if (globalVariables.cardsAtHand.children[i].isSelected) {
 	        selectedCards.push(globalVariables.cardsAtHand.children[i]);
@@ -1769,9 +1827,9 @@
 	          globalVariables.cardsAtHand.children[i].x = leftMargin + i * Math.floor(globalVariables.scaledCardWidth / 4);
 	          globalVariables.cardsAtHand.children[i].index = i;
 	        }
-	        return showPlayedCardsForUser(0, valuesOfCurrentUserPlayedCards);
+	        return showPlayedCardsForUser(0, valuesOfCurrentUserPlayedCards, true);
 	      } else {
-	        return alert(resData);
+	        return console.log(resData);
 	      }
 	    });
 	  };
@@ -2037,7 +2095,6 @@
 	  suitTapEffect = function(suitIndex) {
 	    var rectangle, suitIcon;
 	    globalVariables.mainSuit = suitIndex;
-	    globalVariables.cardValueRanks = toolbox.getRanksForMainSuitCards(suitIndex);
 	    rectangle = globalVariables.selectSuitStage.children[globalVariables.selectSuitStage.children.length - 1];
 	    suitIcon = globalVariables.selectSuitStage.children[suitIndex];
 	    rectangle.x = suitIcon.x - 5;
@@ -2061,6 +2118,91 @@
 	        return alert(resData);
 	      }
 	    });
+	  };
+
+	  showHistoricallyPlayedCards = function(game) {
+	    var background, lastRoundButton, nextRoundButton;
+	    if (globalVariables.playCardsButton.visible === true) {
+	      globalVariables.isPlayCardButtonVisibleBeforeShowingHistoricalRecordStage = true;
+	      globalVariables.playCardsButton.visible = false;
+	    } else {
+	      globalVariables.isPlayCardButtonVisibleBeforeShowingHistoricalRecordStage = false;
+	    }
+	    globalVariables.historicalButton.visible = false;
+	    globalVariables.historicalRecordStage = game.add.group();
+	    background = globalVariables.historicalRecordStage.create(0, 0, 'stageBackground');
+	    background.alpha = 0.3;
+	    background.width = globalVariables.screenWidth;
+	    background.height = globalVariables.screenHeight;
+	    background.inputEnabled = true;
+	    background.events.onInputDown.add(hideHistoricalRecordStage, this);
+	    globalVariables.historicalRecordStage.add(background);
+	    lastRoundButton = game.add.button(globalVariables.screenWidth - 2 * constants.MARGIN - constants.BUTTON_WIDTH - constants.AVATAR_SIZE, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'lastRound', showLastRoundPlayedCards, this, 1, 0, 1);
+	    globalVariables.historicalRecordStage.add(lastRoundButton);
+	    nextRoundButton = game.add.button(globalVariables.screenWidth - 2 * constants.MARGIN - constants.BUTTON_WIDTH - constants.AVATAR_SIZE, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET + constants.MARGIN + constants.BUTTON_HEIGHT, 'nextRound', showNextRoundPlayedCards, this, 1, 0, 1);
+	    globalVariables.historicalRecordStage.add(nextRoundButton);
+	    globalVariables.historicalRoundIndex = globalVariables.meHistoricalPlayedCardValues.length;
+	    return showLastRoundPlayedCards();
+	  };
+
+	  hideHistoricalRecordStage = function() {
+	    if (globalVariables.isPlayCardButtonVisibleBeforeShowingHistoricalRecordStage === true) {
+	      globalVariables.playCardsButton.visible = true;
+	    }
+	    globalVariables.historicalRecordStage.destroy(true, false);
+	    globalVariables.historicalButton.visible = true;
+	    globalVariables.meHistoricalPlayedCardGroupForOneRound.removeAll();
+	    globalVariables.player1HistoricalPlayedCardGroupForOneRound.removeAll();
+	    globalVariables.player2HistoricalPlayedCardGroupForOneRound.removeAll();
+	    return globalVariables.player3HistoricalPlayedCardGroupForOneRound.removeAll();
+	  };
+
+	  toggleLastAndNextRoundButton = function() {
+	    if (globalVariables.meHistoricalPlayedCardValues.length === 1) {
+	      globalVariables.historicalRecordStage.children[1].inputEnabled = false;
+	      globalVariables.historicalRecordStage.children[1].setFrames(2, 2, 2);
+	      globalVariables.historicalRecordStage.children[2].inputEnabled = false;
+	      return globalVariables.historicalRecordStage.children[2].setFrames(2, 2, 2);
+	    } else if (globalVariables.historicalRoundIndex === 0) {
+	      globalVariables.historicalRecordStage.children[1].inputEnabled = false;
+	      globalVariables.historicalRecordStage.children[1].setFrames(2, 2, 2);
+	      globalVariables.historicalRecordStage.children[2].inputEnabled = true;
+	      return globalVariables.historicalRecordStage.children[2].setFrames(1, 0, 1);
+	    } else if (globalVariables.historicalRoundIndex === (globalVariables.meHistoricalPlayedCardValues.length - 1)) {
+	      globalVariables.historicalRecordStage.children[1].inputEnabled = true;
+	      globalVariables.historicalRecordStage.children[1].setFrames(1, 0, 1);
+	      globalVariables.historicalRecordStage.children[2].inputEnabled = false;
+	      return globalVariables.historicalRecordStage.children[2].setFrames(2, 2, 2);
+	    } else {
+	      globalVariables.historicalRecordStage.children[1].inputEnabled = true;
+	      globalVariables.historicalRecordStage.children[1].setFrames(1, 0, 1);
+	      globalVariables.historicalRecordStage.children[2].inputEnabled = true;
+	      return globalVariables.historicalRecordStage.children[2].setFrames(1, 0, 1);
+	    }
+	  };
+
+	  showLastRoundPlayedCards = function() {
+	    if (globalVariables.historicalRoundIndex === 0) {
+	      return;
+	    }
+	    globalVariables.historicalRoundIndex -= 1;
+	    toggleLastAndNextRoundButton();
+	    showPlayedCardsForUser(0, globalVariables.meHistoricalPlayedCardValues[globalVariables.historicalRoundIndex], false);
+	    showPlayedCardsForUser(1, globalVariables.player1HistoricalPlayedCardValues[globalVariables.historicalRoundIndex], false);
+	    showPlayedCardsForUser(2, globalVariables.player2HistoricalPlayedCardValues[globalVariables.historicalRoundIndex], false);
+	    return showPlayedCardsForUser(3, globalVariables.player3HistoricalPlayedCardValues[globalVariables.historicalRoundIndex], false);
+	  };
+
+	  showNextRoundPlayedCards = function() {
+	    if (globalVariables.historicalRoundIndex === globalVariables.meHistoricalPlayedCardValues.length - 1) {
+	      return;
+	    }
+	    globalVariables.historicalRoundIndex += 1;
+	    toggleLastAndNextRoundButton();
+	    showPlayedCardsForUser(0, globalVariables.meHistoricalPlayedCardValues[globalVariables.historicalRoundIndex], false);
+	    showPlayedCardsForUser(1, globalVariables.player1HistoricalPlayedCardValues[globalVariables.historicalRoundIndex], false);
+	    showPlayedCardsForUser(2, globalVariables.player2HistoricalPlayedCardValues[globalVariables.historicalRoundIndex], false);
+	    return showPlayedCardsForUser(3, globalVariables.player3HistoricalPlayedCardValues[globalVariables.historicalRoundIndex], false);
 	  };
 
 	  module.exports = {
@@ -2087,7 +2229,9 @@
 	    selectSuit: selectSuit,
 	    leaveRoom: leaveRoom,
 	    sendGetReadyMessage: sendGetReadyMessage,
-	    showBigStampForTheLargestPlayedCardsCurrentRound: showBigStampForTheLargestPlayedCardsCurrentRound
+	    showBigStampForTheLargestPlayedCardsCurrentRound: showBigStampForTheLargestPlayedCardsCurrentRound,
+	    showEarnedScoreTextWithFadeOutEffect: showEarnedScoreTextWithFadeOutEffect,
+	    showHistoricallyPlayedCards: showHistoricallyPlayedCards
 	  };
 
 	}).call(this);

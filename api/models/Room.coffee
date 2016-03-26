@@ -68,3 +68,5 @@ module.exports =
         cardValueRanks:
             type: 'json'
             defaultsTo: {}
+        firstScoreCallerUsername:
+            type: 'string'

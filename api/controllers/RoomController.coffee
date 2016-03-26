@@ -40,6 +40,7 @@ module.exports =
                 password: hash
                 socketIds: [socketId]
                 usernames: [currentUserObject.username]
+                firstScoreCallerUsername: currentUserObject.username
                 seats:
                     one: currentUserObject.username
                     two: ''
@@ -147,7 +148,7 @@ module.exports =
             Room.update id: foundRoomWithName.id,
                 readyPlayers: foundRoomWithName.readyPlayers
         .then (updatedRooms) ->
-            if updatedRooms[0].readyPlayers.length is 4 then GameService.sendCards updatedRooms[0], updatedRooms[0].usernames[0]
+            if updatedRooms[0].readyPlayers.length is 4 then GameService.sendCards updatedRooms[0], updatedRooms[0].firstScoreCallerUsername
             else
                 sails.sockets.broadcast updatedRooms[0].name, 'playerReady', {username: currentUserObject.username}
                 Promise.resolve()
@@ -190,6 +191,7 @@ module.exports =
         userId = req.param 'userId'
         currentUserObject = null
         currentRoomObject = null
+        didFirstCallerPassed = false
         User.findOne id: userId
         .then (foundUserWithId) ->
             return Promise.reject '用户不存在' if not foundUserWithId
@@ -197,19 +199,37 @@ module.exports =
             Room.findOne name: foundUserWithId.roomName
         .then (foundRoomWithName) ->
             return Promise.reject '房间不存在' if not foundRoomWithName
-            foundRoomWithName.passedUsernames.push currentUserObject.username
-            Room.update id: foundRoomWithName.id,
-                passedUsernames: foundRoomWithName.passedUsernames
-        .then (updatedRooms) ->
-            currentRoomObject = updatedRooms[0]
-            res.send 'OK'
+            currentRoomObject = foundRoomWithName
+            # If the first caller passes, he/she is calling 80 since he/she CANNOT really pass
+            if currentRoomObject.firstScoreCallerUsername is currentUserObject.username and
+            currentRoomObject.passedUsernames.length is 0 and
+            not currentRoomObject.lastCaller
+                didFirstCallerPassed = true
+                Room.update id: currentRoomObject.id,
+                    lastCaller: currentUserObject.username
+                .then (updatedRooms) -> currentRoomObject = updatedRooms[0]
+        .then () ->
+            if not didFirstCallerPassed
+                currentRoomObject.passedUsernames.push currentUserObject.username
+                Room.update id: currentRoomObject.id,
+                    passedUsernames: currentRoomObject.passedUsernames
+                .then (updatedRooms) -> currentRoomObject = updatedRooms[0]
+        .then () -> res.send 'OK'
+        .then () ->
             nextUsernameToCallScore = RoomService.getNextUsernameToCallScore currentRoomObject, currentUserObject
-            if nextUsernameToCallScore isnt ''     # At least one user have not passed yet
-                sails.sockets.broadcast currentUserObject.roomName, 'userPassed',
-                    aimedScore: currentRoomObject.aimedScore
-                    passedUser: currentUserObject.username
-                    usernameToCallScore: nextUsernameToCallScore
-                Promise.resolve()
+            if nextUsernameToCallScore              # At least one user have not passed yet
+                if not didFirstCallerPassed
+                    sails.sockets.broadcast currentUserObject.roomName, 'userPassed',
+                        aimedScore: currentRoomObject.aimedScore
+                        passedUser: currentUserObject.username
+                        usernameToCallScore: nextUsernameToCallScore
+                    return Promise.resolve()
+                else
+                    sails.sockets.broadcast currentUserObject.roomName, 'userCalledScore',
+                        currentAimedScore: 80
+                        usernameCalledScore: currentUserObject.username
+                        usernameToCallScore: nextUsernameToCallScore
+                    return Promise.resolve()
             else
                 sails.sockets.broadcast currentUserObject.roomName, 'makerSettled',
                     aimedScore: currentRoomObject.aimedScore
@@ -269,6 +289,10 @@ module.exports =
         .then (foundRoomWithName) ->
             return Promise.reject '房间不存在' if not foundRoomWithName
             return Promise.reject '本轮所有玩家已出玩牌' if foundRoomWithName.playedCardValuesForCurrentRound.length is 4
+            # validate whether the played card is legal or not
+            firstlyPlayedCardValues = []
+            if foundRoomWithName.playedCardValuesForCurrentRound.length isnt 0 then firstlyPlayedCardValues = foundRoomWithName.playedCardValuesForCurrentRound[0].playedCardValues
+            return Promise.reject '出牌不符合规则' if not Toolbox.validatePlayedCards(playedCardValues, firstlyPlayedCardValues, foundRoomWithName.decks[currentUserObject.username], foundRoomWithName.mainSuit, foundRoomWithName.cardValueRanks)
             # remove the played cards from the corresponding deck
             deck = foundRoomWithName.decks[currentUserObject.username]
             for i in [0...playedCardValues.length]
@@ -300,6 +324,10 @@ module.exports =
                     playedCardValues: playedCardValues
                     scoresEarned: scoresEarned
                     usernameWithLargestCardsForCurrentRound: usernameWithLargestCardsForCurrentRound
+                # now that current round is finished, we should clear the played card values for current round
+                Room.update id: updatedRoom.id,
+                    playedCardValuesForCurrentRound: []
+                .then () -> Promise.resolve()
             else
                 nextPlayerUsername = RoomService.findNextPlayerToPlayCard updatedRoom.seats, currentUserObject.username
                 sails.sockets.broadcast currentUserObject.roomName, 'cardPlayed',

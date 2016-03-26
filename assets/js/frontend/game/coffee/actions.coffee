@@ -27,55 +27,67 @@ displayCards = (array) ->
         cardSprite.events.onInputDown.add tapDownOnSprite, this
         cardSprite.events.onInputUp.add tapUp, this
 
+showEarnedScoreTextWithFadeOutEffect = (numOfScoresEarnedCurrentRound, game) ->
+    globalVariables.textOfEarnedScores.text = '+ ' + numOfScoresEarnedCurrentRound
+    globalVariables.textOfEarnedScores.alpha = 1
+    game.add.tween(globalVariables.textOfEarnedScores).to( { alpha: 0 }, 2000, Phaser.Easing.Linear.None, true)
+
 showBigStampForTheLargestPlayedCardsCurrentRound = (numOfCardsPlayed, usernameWithLargestCardsForCurrentRound, game) ->
-    x = null
-    y = null
+    startX = null
+    startY = null
     if usernameWithLargestCardsForCurrentRound is globalVariables.username
-        startX = globalVariables.screenWidth / 2 - (numOfCardsPlayed + 3) * globalVariables.scaledCardWidth / 8
-        startY = globalVariables.screenHeight - 2 * globalVariables.scaledCardHeight - 2 * constants.MARGIN
+        startX = globalVariables.screenWidth / 2 + (numOfCardsPlayed + 3) * globalVariables.scaledCardWidth / 8 - constants.MAKER_ICON_SIZE / 2
+        startY = globalVariables.screenHeight - 2 * globalVariables.scaledCardHeight - 2 * constants.MARGIN - constants.MAKER_ICON_SIZE / 2
     else if usernameWithLargestCardsForCurrentRound is globalVariables.player1Username.text
-        startX = globalVariables.screenWidth - (numOfCardsPlayed + 3) * globalVariables.scaledCardWidth / 4 - constants.MARGIN
-        startY = globalVariables.screenHeight / 2 - globalVariables.scaledCardHeight / 2
+        startX = globalVariables.screenWidth - 2 * constants.MARGIN - constants.AVATAR_SIZE - constants.MAKER_ICON_SIZE / 2
+        startY = globalVariables.screenHeight / 2 - globalVariables.scaledCardHeight / 2 - constants.MAKER_ICON_SIZE / 2
     else if usernameWithLargestCardsForCurrentRound is globalVariables.player2Username.text
-        startX = globalVariables.screenWidth / 2 - (numOfCardsPlayed + 3) * globalVariables.scaledCardWidth / 8
-        startY = constants.MARGIN
+        startX = globalVariables.screenWidth / 2 + (numOfCardsPlayed + 3) * globalVariables.scaledCardWidth / 8 - constants.MAKER_ICON_SIZE / 2
+        startY = 2 * constants.MARGIN + constants.AVATAR_SIZE - constants.MAKER_ICON_SIZE / 2
     else if usernameWithLargestCardsForCurrentRound is globalVariables.player3Username.text
-        startX = constants.MARGIN
-        startY = globalVariables.screenHeight / 2 - globalVariables.scaledCardHeight / 2
-    globalVariables.bigSign = game.add.sprite x, y, 'big'
+        startX = (numOfCardsPlayed + 3) * globalVariables.scaledCardWidth / 4 + 2 * constants.MARGIN + constants.AVATAR_SIZE - constants.MAKER_ICON_SIZE / 2
+        startY = globalVariables.screenHeight / 2 - globalVariables.scaledCardHeight / 2 - constants.MAKER_ICON_SIZE / 2
+    globalVariables.bigSign = game.add.sprite startX, startY, 'big'
     globalVariables.bigSign.width = constants.MAKER_ICON_SIZE
     globalVariables.bigSign.height = constants.MAKER_ICON_SIZE
 
-hideBigStamp = () -> globalVariables.bigSign.destroy()
-
-showPlayedCardsForUser = (n, valuesOfPlayedCards) ->
+###
+Show played cards or historically played cards as sprites for specific player
+@param: n                               player index
+@param: valuesOfPlayedCards             values of played cards or historically played cards
+@param: isCurrentRound                  boolean value:
+                                        - true: the played cards is for current round
+                                        - false: the played cards is for historical round
+###
+showPlayedCardsForUser = (n, valuesOfPlayedCards, isCurrentRound) ->
     startX = null
     startY = null
+    userPlayedCards = null
     switch n
         when 0         # current user
             startX = globalVariables.screenWidth / 2 - (valuesOfPlayedCards.length + 3) * globalVariables.scaledCardWidth / 8
             startY = globalVariables.screenHeight - 2 * globalVariables.scaledCardHeight - 2 * constants.MARGIN
-            globalVariables.currentUserPlayedCards.removeAll()
+            if isCurrentRound then userPlayedCards = globalVariables.currentUserPlayedCards
+            else userPlayedCards = globalVariables.meHistoricalPlayedCardGroupForOneRound
         when 1         # the 1st user
             startX = globalVariables.screenWidth - (valuesOfPlayedCards.length + 3) * globalVariables.scaledCardWidth / 4 - 2 * constants.MARGIN - constants.AVATAR_SIZE
             startY = globalVariables.screenHeight / 2 - globalVariables.scaledCardHeight / 2
-            globalVariables.user1PlayedCards.removeAll()
+            if isCurrentRound then userPlayedCards = globalVariables.user1PlayedCards
+            else userPlayedCards = globalVariables.player1HistoricalPlayedCardGroupForOneRound
         when 2         # the 2nd user
             startX = globalVariables.screenWidth / 2 - (valuesOfPlayedCards.length + 3) * globalVariables.scaledCardWidth / 8
             startY = 2 * constants.MARGIN + constants.AVATAR_SIZE
-            globalVariables.user2PlayedCards.removeAll()
+            if isCurrentRound then userPlayedCards = globalVariables.user2PlayedCards
+            else userPlayedCards = globalVariables.player2HistoricalPlayedCardGroupForOneRound
         when 3         # the 3rd user
             startX = 2 * constants.MARGIN + constants.AVATAR_SIZE
             startY = globalVariables.screenHeight / 2 - globalVariables.scaledCardHeight / 2
-            globalVariables.user3PlayedCards.removeAll()
+            if isCurrentRound then userPlayedCards = globalVariables.user3PlayedCards
+            else userPlayedCards = globalVariables.player3HistoricalPlayedCardGroupForOneRound
     # remove played cards
-    cardsToRemove = []
+    userPlayedCards.removeAll()
     for i in [0...valuesOfPlayedCards.length]
-        playedCard = null
-        if n is 0 then playedCard = globalVariables.currentUserPlayedCards.create startX + i * globalVariables.scaledCardWidth / 4, startY, toolbox.getCardName(valuesOfPlayedCards[i])
-        else if n is 1 then playedCard = globalVariables.user1PlayedCards.create startX + i * globalVariables.scaledCardWidth / 4, startY, toolbox.getCardName(valuesOfPlayedCards[i])
-        else if n is 2 then playedCard = globalVariables.user2PlayedCards.create startX + i * globalVariables.scaledCardWidth / 4, startY, toolbox.getCardName(valuesOfPlayedCards[i])
-        else if n is 3 then playedCard = globalVariables.user3PlayedCards.create startX + i * globalVariables.scaledCardWidth / 4, startY, toolbox.getCardName(valuesOfPlayedCards[i])
+        playedCard = userPlayedCards.create startX + i * globalVariables.scaledCardWidth / 4, startY, toolbox.getCardName(valuesOfPlayedCards[i])
         playedCard.width = globalVariables.scaledCardWidth
         playedCard.height = globalVariables.scaledCardHeight
 
@@ -134,7 +146,7 @@ tapUp = (sprite, pointer) ->
                 globalVariables.settleCoveredCardsButton.inputEnabled = false
                 globalVariables.settleCoveredCardsButton.setFrames 2, 2, 2
         else if globalVariables.gameStatus is constants.GAME_STATUS_PLAYING
-            if toolbox.validateSelectedCardsForPlay selectedCardValues, globalVariables.firstlyPlayedCardValuesForCurrentRound, globalVariables.cardsAtHand.values, globalVariables.mainSuit
+            if toolbox.validateSelectedCardsForPlay selectedCardValues, globalVariables.firstlyPlayedCardValuesForCurrentRound, globalVariables.cardsAtHand.values, globalVariables.mainSuit, globalVariables.cardValueRanks
                 globalVariables.playCardsButton.inputEnabled = true
                 globalVariables.playCardsButton.setFrames 1, 0, 1
             else
@@ -190,12 +202,14 @@ backgroundTapped = () ->
 playSelectedCards = () ->
     selectedCards = []
     valuesOfCurrentUserPlayedCards = []
+    # cards played, now disable and hide the play cards button
+    globalVariables.playCardsButton.inputEnabled = false
+    globalVariables.playCardsButton.setFrames 2, 2, 2
+    globalVariables.playCardsButton.visible = false
     for i in [0...globalVariables.cardsAtHand.children.length]
         if globalVariables.cardsAtHand.children[i].isSelected
             selectedCards.push globalVariables.cardsAtHand.children[i]
             valuesOfCurrentUserPlayedCards.push globalVariables.cardsAtHand.children[i].value
-
-    ############################ to be tested ############################
     csrfToken = document.getElementsByName('csrf-token')[0].content
     io.socket.post '/play_cards',
         playedCardValues: valuesOfCurrentUserPlayedCards
@@ -215,9 +229,8 @@ playSelectedCards = () ->
             for i in [0...globalVariables.cardsAtHand.children.length]
                 globalVariables.cardsAtHand.children[i].x = leftMargin + i * Math.floor(globalVariables.scaledCardWidth / 4)
                 globalVariables.cardsAtHand.children[i].index = i
-            showPlayedCardsForUser 0, valuesOfCurrentUserPlayedCards
-        else alert resData
-    ############################ end of to be ############################
+            showPlayedCardsForUser 0, valuesOfCurrentUserPlayedCards, true
+        else console.log resData
 
 showPlayer1Info = (game, username) ->
     globalVariables.user1Avatar = game.add.sprite(globalVariables.screenWidth - constants.AVATAR_SIZE - constants.MARGIN, game.world.centerY - constants.AVATAR_SIZE / 2, 'avatar')
@@ -269,7 +282,7 @@ showCallScorePanel = (game, currentScore) ->
     background.height = stageHeight
 
     raiseScoreButton = game.add.button(game.world.centerX - constants.ROUND_BUTTON_SIZE / 2 - constants.ROUND_BUTTON_SIZE - constants.MARGIN, game.world.centerY - stageHeight / 2 + constants.MARGIN, 'raiseScoreButton', raiseScore, this, 1, 0, 1, 0)
-    globalVariables.callScoreStage.add(raiseScoreButton)
+    globalVariables.callScoreStage.add raiseScoreButton
 
     currentScoreText = game.add.text(game.world.centerX - constants.ROUND_BUTTON_SIZE / 2, game.world.centerY - stageHeight / 2 + constants.MARGIN, '' + currentScore - 5, constants.LARGE_TEXT_STYLE)
     currentScoreText.setTextBounds(0, 0, constants.ROUND_BUTTON_SIZE, constants.ROUND_BUTTON_SIZE)
@@ -445,8 +458,6 @@ selectSuit = () ->
 
 suitTapEffect = (suitIndex) ->
     globalVariables.mainSuit = suitIndex
-    # after main suit is decided, rank all card values
-    globalVariables.cardValueRanks = toolbox.getRanksForMainSuitCards suitIndex
     rectangle = globalVariables.selectSuitStage.children[globalVariables.selectSuitStage.children.length - 1]
     suitIcon = globalVariables.selectSuitStage.children[suitIndex]
     rectangle.x = suitIcon.x - 5
@@ -464,6 +475,99 @@ leaveRoom = () ->
     , (resData, jwres) ->
         if jwres.statusCode is 200 then window.location.href = '/'
         else alert resData
+
+showHistoricallyPlayedCards = (game) ->
+    # hide playCardButton if it is currently visible
+    if globalVariables.playCardsButton.visible is true
+        globalVariables.isPlayCardButtonVisibleBeforeShowingHistoricalRecordStage = true
+        globalVariables.playCardsButton.visible = false
+    else globalVariables.isPlayCardButtonVisibleBeforeShowingHistoricalRecordStage = false
+    # hide historicalButton
+    globalVariables.historicalButton.visible = false
+
+    # initialize historical record stage group
+    globalVariables.historicalRecordStage = game.add.group()
+
+    background = globalVariables.historicalRecordStage.create 0, 0, 'stageBackground'
+    background.alpha = 0.3
+    background.width = globalVariables.screenWidth
+    background.height = globalVariables.screenHeight
+
+    background.inputEnabled = true
+    background.events.onInputDown.add hideHistoricalRecordStage, this
+    globalVariables.historicalRecordStage.add background
+
+    lastRoundButton = game.add.button globalVariables.screenWidth - 2 * constants.MARGIN - constants.BUTTON_WIDTH - constants.AVATAR_SIZE, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'lastRound', showLastRoundPlayedCards, this, 1, 0, 1
+    globalVariables.historicalRecordStage.add lastRoundButton
+
+    nextRoundButton = game.add.button globalVariables.screenWidth - 2 * constants.MARGIN - constants.BUTTON_WIDTH - constants.AVATAR_SIZE, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET + constants.MARGIN + constants.BUTTON_HEIGHT, 'nextRound', showNextRoundPlayedCards, this, 1, 0, 1
+    globalVariables.historicalRecordStage.add nextRoundButton
+
+    globalVariables.historicalRoundIndex = globalVariables.meHistoricalPlayedCardValues.length
+    showLastRoundPlayedCards()
+
+hideHistoricalRecordStage = () ->
+    # if playCardButton was visible before showing historical record stage, make it visible again
+    if globalVariables.isPlayCardButtonVisibleBeforeShowingHistoricalRecordStage is true
+        globalVariables.playCardsButton.visible = true
+    globalVariables.historicalRecordStage.destroy true, false
+    # show historicalButton
+    globalVariables.historicalButton.visible = true
+    # remove historical played card sprites for each player
+    globalVariables.meHistoricalPlayedCardGroupForOneRound.removeAll()
+    globalVariables.player1HistoricalPlayedCardGroupForOneRound.removeAll()
+    globalVariables.player2HistoricalPlayedCardGroupForOneRound.removeAll()
+    globalVariables.player3HistoricalPlayedCardGroupForOneRound.removeAll()
+
+toggleLastAndNextRoundButton = () ->
+    if globalVariables.meHistoricalPlayedCardValues.length is 1
+        # there's only one historical round, lastRoundButton and nextRoundButton should both be disabled
+        globalVariables.historicalRecordStage.children[1].inputEnabled = false
+        globalVariables.historicalRecordStage.children[1].setFrames 2, 2, 2
+        globalVariables.historicalRecordStage.children[2].inputEnabled = false
+        globalVariables.historicalRecordStage.children[2].setFrames 2, 2, 2
+    else if globalVariables.historicalRoundIndex is 0
+        # no more last round, lastRoundButton should be disabled
+        globalVariables.historicalRecordStage.children[1].inputEnabled = false
+        globalVariables.historicalRecordStage.children[1].setFrames 2, 2, 2
+
+        globalVariables.historicalRecordStage.children[2].inputEnabled = true
+        globalVariables.historicalRecordStage.children[2].setFrames 1, 0, 1
+    else if globalVariables.historicalRoundIndex is (globalVariables.meHistoricalPlayedCardValues.length - 1)
+        # no more next round, nextRoundButton should be disabled
+        globalVariables.historicalRecordStage.children[1].inputEnabled = true
+        globalVariables.historicalRecordStage.children[1].setFrames 1, 0, 1
+
+        globalVariables.historicalRecordStage.children[2].inputEnabled = false
+        globalVariables.historicalRecordStage.children[2].setFrames 2, 2, 2
+    else
+        globalVariables.historicalRecordStage.children[1].inputEnabled = true
+        globalVariables.historicalRecordStage.children[1].setFrames 1, 0, 1
+
+        globalVariables.historicalRecordStage.children[2].inputEnabled = true
+        globalVariables.historicalRecordStage.children[2].setFrames 1, 0, 1
+
+showLastRoundPlayedCards = () ->
+    return if globalVariables.historicalRoundIndex is 0
+    globalVariables.historicalRoundIndex -= 1
+    # enable or disable last and next round button based on historical round index and how many historical rounds we have so far
+    toggleLastAndNextRoundButton()
+    # show the historical round played cards for each player
+    showPlayedCardsForUser 0, globalVariables.meHistoricalPlayedCardValues[globalVariables.historicalRoundIndex], false
+    showPlayedCardsForUser 1, globalVariables.player1HistoricalPlayedCardValues[globalVariables.historicalRoundIndex], false
+    showPlayedCardsForUser 2, globalVariables.player2HistoricalPlayedCardValues[globalVariables.historicalRoundIndex], false
+    showPlayedCardsForUser 3, globalVariables.player3HistoricalPlayedCardValues[globalVariables.historicalRoundIndex], false
+
+showNextRoundPlayedCards = () ->
+    return if globalVariables.historicalRoundIndex is globalVariables.meHistoricalPlayedCardValues.length - 1
+    globalVariables.historicalRoundIndex += 1
+    # enable or disable last and next round button based on historical round index and how many historical rounds we have so far
+    toggleLastAndNextRoundButton()
+    # show the historical round played cards for each player
+    showPlayedCardsForUser 0, globalVariables.meHistoricalPlayedCardValues[globalVariables.historicalRoundIndex], false
+    showPlayedCardsForUser 1, globalVariables.player1HistoricalPlayedCardValues[globalVariables.historicalRoundIndex], false
+    showPlayedCardsForUser 2, globalVariables.player2HistoricalPlayedCardValues[globalVariables.historicalRoundIndex], false
+    showPlayedCardsForUser 3, globalVariables.player3HistoricalPlayedCardValues[globalVariables.historicalRoundIndex], false
 
 module.exports =
     toggleCardSelection: toggleCardSelection
@@ -490,3 +594,5 @@ module.exports =
     leaveRoom: leaveRoom
     sendGetReadyMessage: sendGetReadyMessage
     showBigStampForTheLargestPlayedCardsCurrentRound: showBigStampForTheLargestPlayedCardsCurrentRound
+    showEarnedScoreTextWithFadeOutEffect: showEarnedScoreTextWithFadeOutEffect
+    showHistoricallyPlayedCards: showHistoricallyPlayedCards

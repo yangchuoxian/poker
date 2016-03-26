@@ -18,6 +18,7 @@ module.exports =
     coveredCards: null
     background: null
     playCardsButton: null
+    historicalButton: null
     prepareButton: null
     leaveButton: null
     surrenderButton: null
@@ -27,6 +28,7 @@ module.exports =
     iconOfMainSuit: null
     textOfCurrentScores: null
     textOfAimedScores: null
+    textOfEarnedScores: null
     textOfChipsWon: null
     textOfRoomName: null
     player1Username: null
@@ -51,3 +53,16 @@ module.exports =
     firstlyPlayedCardValuesForCurrentRound: []
     bigSign: null
     cardValueRanks: null
+    # historical played cards values
+    meHistoricalPlayedCardValues: []
+    player1HistoricalPlayedCardValues: []
+    player2HistoricalPlayedCardValues: []
+    player3HistoricalPlayedCardValues: []
+    # historical played card group of sprites for one round
+    meHistoricalPlayedCardGroupForOneRound: null
+    player1HistoricalPlayedCardGroupForOneRound: null
+    player2HistoricalPlayedCardGroupForOneRound: null
+    player3HistoricalPlayedCardGroupForOneRound: null
+    historicalRecordStage: null
+    historicalRoundIndex: null
+    isPlayCardButtonVisibleBeforeShowingHistoricalRecordStage: false

@@ -27,10 +27,18 @@
       boundsAlignH: "center",
       boundsAlignV: "middle"
     },
+    ALERT_TEXT_STYLE: {
+      font: "bold 20px Arial",
+      fill: "#fa6161",
+      boundsAlignH: "center",
+      boundsAlignV: "middle"
+    },
     RED_TEXT_STYLE: {
       font: "bold 20px Arial",
       fill: "#fa6161"
     },
+    UPPER_RIGHT_TEXT_WIDTH: 70,
+    UPPER_RIGHT_TEXT_HEIGHT: 30,
     GAME_STATUS_NOT_STARTED: 0,
     GAME_STATUS_SETTLING_COVERED_CARDS: 1,
     GAME_STATUS_DECIDING_SUIT: 2,

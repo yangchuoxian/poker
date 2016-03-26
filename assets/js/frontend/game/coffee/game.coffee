@@ -18,6 +18,10 @@ preload = () ->
     game.load.spritesheet 'surrenderButton', 'images/surrenderButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT
     game.load.spritesheet 'selectSuitButton', 'images/selectSuitButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT
     game.load.spritesheet 'settleCoveredCardsButton', 'images/settleCoveredCardsButton.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT
+    game.load.spritesheet 'historical', 'images/historical.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT
+    game.load.spritesheet 'lastRound', 'images/lastRound.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT
+    game.load.spritesheet 'nextRound', 'images/nextRound.png', constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT
+
     game.load.image 'back', 'images/back.png'
     game.load.image 'bigJoker', 'images/bigJoker.png'
     game.load.image 'smallJoker', 'images/smallJoker.png'
@@ -96,7 +100,14 @@ create = () ->
     globalVariables.selectSuitStage = game.add.group()
 
     globalVariables.playCardsButton = game.add.button game.world.centerX - constants.BUTTON_WIDTH / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'playButton', actions.playSelectedCards, this, 1, 0, 1
+    globalVariables.playCardsButton.inputEnabled = false
     globalVariables.playCardsButton.visible = false
+
+    globalVariables.historicalButton = game.add.button globalVariables.screenWidth - 2 * constants.MARGIN - constants.BUTTON_WIDTH - constants.AVATAR_SIZE, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'historical', () ->
+        actions.showHistoricallyPlayedCards(game)
+    , this, 1, 0, 1
+    globalVariables.historicalButton.inputEnabled = false
+    globalVariables.historicalButton.visible = false
 
     globalVariables.prepareButton = game.add.button game.world.centerX - constants.BUTTON_WIDTH - constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'prepareButton', actions.sendGetReadyMessage, this, 1, 0, 1
 
@@ -114,74 +125,54 @@ create = () ->
     globalVariables.selectSuitButton.inputEnabled = false
     globalVariables.selectSuitButton.visible = false
 
+    # groups of player played cards for current round
     globalVariables.currentUserPlayedCards = game.add.group()
     globalVariables.user1PlayedCards = game.add.group()
     globalVariables.user2PlayedCards = game.add.group()
     globalVariables.user3PlayedCards = game.add.group()
 
-    titleOfMainSuit = game.add.text globalVariables.screenWidth - 350, constants.MARGIN, '主牌', constants.TEXT_STYLE
-    titleOfMainSuit.setTextBounds 0, 0, 70, 30
-    globalVariables.iconOfMainSuit = game.add.sprite globalVariables.screenWidth - 350 + 20, 2 * constants.MARGIN + 30, 'suites'
-    globalVariables.iconOfMainSuit.scale.setTo 30 / constants.MAIN_SUIT_ICON_SIZE, 30 / constants.MAIN_SUIT_ICON_SIZE
+    titleOfMainSuit = game.add.text globalVariables.screenWidth - 5 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '主牌', constants.TEXT_STYLE
+    titleOfMainSuit.setTextBounds 0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT
+    globalVariables.iconOfMainSuit = game.add.sprite globalVariables.screenWidth - 5 * constants.UPPER_RIGHT_TEXT_WIDTH + constants.MARGIN, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, 'suites'
+    globalVariables.iconOfMainSuit.scale.setTo constants.UPPER_RIGHT_TEXT_HEIGHT / constants.MAIN_SUIT_ICON_SIZE, constants.UPPER_RIGHT_TEXT_HEIGHT / constants.MAIN_SUIT_ICON_SIZE
     globalVariables.iconOfMainSuit.frame = 0
 
-    titleOfAimedScores = game.add.text globalVariables.screenWidth - 280, constants.MARGIN, '叫分', constants.TEXT_STYLE
-    titleOfAimedScores.setTextBounds 0, 0, 70, 30
-    globalVariables.textOfAimedScores = game.add.text globalVariables.screenWidth - 280, 2 * constants.MARGIN + 30, '80', constants.TEXT_STYLE
-    globalVariables.textOfAimedScores.setTextBounds 0, 0, 70, 30
-    titleOfCurrentScores = game.add.text globalVariables.screenWidth - 210, constants.MARGIN, '得分', constants.TEXT_STYLE
-    titleOfCurrentScores.setTextBounds 0, 0, 70, 30
-    globalVariables.textOfCurrentScores = game.add.text globalVariables.screenWidth - 210, 2 * constants.MARGIN + 30, '0', constants.TEXT_STYLE
-    globalVariables.textOfCurrentScores.setTextBounds 0, 0, 70, 30
+    titleOfAimedScores = game.add.text globalVariables.screenWidth - 4 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '叫分', constants.TEXT_STYLE
+    titleOfAimedScores.setTextBounds 0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT
+    globalVariables.textOfAimedScores = game.add.text globalVariables.screenWidth - 4 * constants.UPPER_RIGHT_TEXT_WIDTH, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, '80', constants.TEXT_STYLE
+    globalVariables.textOfAimedScores.setTextBounds 0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT
+    titleOfCurrentScores = game.add.text globalVariables.screenWidth - 3 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '得分', constants.TEXT_STYLE
+    titleOfCurrentScores.setTextBounds 0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT
+    globalVariables.textOfCurrentScores = game.add.text globalVariables.screenWidth - 3 * constants.UPPER_RIGHT_TEXT_WIDTH, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, '0', constants.TEXT_STYLE
+    globalVariables.textOfCurrentScores.setTextBounds 0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT
 
-    titleOfChipsWon = game.add.text globalVariables.screenWidth - 140, constants.MARGIN, '输赢', constants.TEXT_STYLE
-    titleOfChipsWon.setTextBounds 0, 0, 70, 30
-    globalVariables.textOfChipsWon = game.add.text globalVariables.screenWidth - 140, 2 * constants.MARGIN + 30, '0', constants.TEXT_STYLE
-    globalVariables.textOfChipsWon.setTextBounds 0, 0, 70, 30
+    globalVariables.textOfEarnedScores = game.add.text globalVariables.screenWidth - 3 * constants.UPPER_RIGHT_TEXT_WIDTH, 3 * constants.MARGIN + 2 * constants.UPPER_RIGHT_TEXT_HEIGHT, '+ 0', constants.ALERT_TEXT_STYLE
+    globalVariables.textOfEarnedScores.setTextBounds 0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT
+    globalVariables.textOfEarnedScores.alpha = 0
+
+    titleOfChipsWon = game.add.text globalVariables.screenWidth - 2 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '输赢', constants.TEXT_STYLE
+    titleOfChipsWon.setTextBounds 0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT
+    globalVariables.textOfChipsWon = game.add.text globalVariables.screenWidth - 2 * constants.UPPER_RIGHT_TEXT_WIDTH, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, '0', constants.TEXT_STYLE
+    globalVariables.textOfChipsWon.setTextBounds 0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT
     titleOfRoomName = game.add.text globalVariables.screenWidth - 70, constants.MARGIN, '房间', constants.TEXT_STYLE
-    titleOfRoomName.setTextBounds 0, 0, 70, 30
-    globalVariables.textOfRoomName = game.add.text globalVariables.screenWidth - 70, 2 * constants.MARGIN + 30, '', constants.TEXT_STYLE
-    globalVariables.textOfRoomName.setTextBounds 0, 0, 70, 30
+    titleOfRoomName.setTextBounds 0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT
+    globalVariables.textOfRoomName = game.add.text globalVariables.screenWidth - constants.UPPER_RIGHT_TEXT_WIDTH, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, '', constants.TEXT_STYLE
+    globalVariables.textOfRoomName.setTextBounds 0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT
     globalVariables.meStatusText = game.add.text game.world.centerX - constants.MARGIN, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 3 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET - constants.BUTTON_HEIGHT, '', constants.TEXT_STYLE
     globalVariables.player1StatusText = game.add.text globalVariables.screenWidth - 2 * constants.AVATAR_SIZE - 3 * constants.MARGIN, game.world.centerY, '', constants.TEXT_STYLE
     globalVariables.player2StatusText = game.add.text game.world.centerX - constants.MARGIN, constants.AVATAR_SIZE + 4 * constants.MARGIN, '', constants.TEXT_STYLE
     globalVariables.player3StatusText = game.add.text constants.AVATAR_SIZE + 2 * constants.MARGIN, game.world.centerY, '', constants.TEXT_STYLE
+
+    # initialize historical played cards group for one round for 4 players
+    globalVariables.meHistoricalPlayedCardGroupForOneRound = game.add.group()
+    globalVariables.player1HistoricalPlayedCardGroupForOneRound = game.add.group()
+    globalVariables.player2HistoricalPlayedCardGroupForOneRound = game.add.group()
+    globalVariables.player3HistoricalPlayedCardGroupForOneRound = game.add.group()
+
+    # get room information
     communications.getRoomInfo game
+    # listens to socket events
     communications.socketEventHandler game
-
-    ################################## TESTING ##################################
-    # globalVariables.gameStatus = constants.GAME_STATUS_PLAYING
-    # globalVariables.mainSuit = constants.INDEX_SUIT_CLUB
-    # globalVariables.cardValueRanks = toolbox.getRanksForMainSuitCards globalVariables.mainSuit
-    # shuffleCards = ->
-    #     array = []
-    #     for j in [0...2]
-    #         for i in [1...47]
-    #             array.push i
-    #     copy = []
-    #     n = array.length
-    #     numOfIterations = n
-    #     for i in [0...numOfIterations]
-    #         j = Math.floor(Math.random() * n)
-    #         copy.push array[j]
-    #         array.splice j, 1
-    #         n -= 1
-    #     return copy
-
-    # shuffledCards = shuffleCards()
-    # deck1 = shuffledCards.slice 0, 21
-    # # deck1 = toolbox.sortCards deck1
-    # deck1 = toolbox.sortCardsAfterMainSuitSettled deck1, globalVariables.mainSuit
-    # actions.displayCards deck1
-    # globalVariables.cardsAtHand.values = deck1
-    # globalVariables.playCardsButton.visible = true
-    # globalVariables.playCardsButton.setFrames 2, 2, 2
-    # globalVariables.playCardsButton.inputEnabled = false
-
-    # globalVariables.prepareButton.visible = false
-    # globalVariables.leaveButton.visible = false
-
-    ################################## TESTING ##################################
 
 update = () ->
 

@@ -20,6 +20,7 @@
     coveredCards: null,
     background: null,
     playCardsButton: null,
+    historicalButton: null,
     prepareButton: null,
     leaveButton: null,
     surrenderButton: null,
@@ -29,6 +30,7 @@
     iconOfMainSuit: null,
     textOfCurrentScores: null,
     textOfAimedScores: null,
+    textOfEarnedScores: null,
     textOfChipsWon: null,
     textOfRoomName: null,
     player1Username: null,
@@ -52,7 +54,18 @@
     mainSuit: null,
     firstlyPlayedCardValuesForCurrentRound: [],
     bigSign: null,
-    cardValueRanks: null
+    cardValueRanks: null,
+    meHistoricalPlayedCardValues: [],
+    player1HistoricalPlayedCardValues: [],
+    player2HistoricalPlayedCardValues: [],
+    player3HistoricalPlayedCardValues: [],
+    meHistoricalPlayedCardGroupForOneRound: null,
+    player1HistoricalPlayedCardGroupForOneRound: null,
+    player2HistoricalPlayedCardGroupForOneRound: null,
+    player3HistoricalPlayedCardGroupForOneRound: null,
+    historicalRecordStage: null,
+    historicalRoundIndex: null,
+    isPlayCardButtonVisibleBeforeShowingHistoricalRecordStage: false
   };
 
 }).call(this);
