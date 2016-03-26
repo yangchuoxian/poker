@@ -45,6 +45,7 @@ module.exports =
             defaultsTo: 80
         currentScore:
             type: 'integer'
+            defaultsTo: 0
         passedUsernames:
             type: 'array'
             array: true

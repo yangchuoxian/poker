@@ -569,6 +569,9 @@ showNextRoundPlayedCards = () ->
     showPlayedCardsForUser 2, globalVariables.player2HistoricalPlayedCardValues[globalVariables.historicalRoundIndex], false
     showPlayedCardsForUser 3, globalVariables.player3HistoricalPlayedCardValues[globalVariables.historicalRoundIndex], false
 
+endGame = () ->
+    alert('游戏结束')
+
 module.exports =
     toggleCardSelection: toggleCardSelection
     displayCards: displayCards
@@ -596,3 +599,4 @@ module.exports =
     showBigStampForTheLargestPlayedCardsCurrentRound: showBigStampForTheLargestPlayedCardsCurrentRound
     showEarnedScoreTextWithFadeOutEffect: showEarnedScoreTextWithFadeOutEffect
     showHistoricallyPlayedCards: showHistoricallyPlayedCards
+    endGame: endGame

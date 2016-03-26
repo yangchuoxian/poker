@@ -314,16 +314,20 @@ module.exports =
                 usernameWithLargestCardsForCurrentRound = Toolbox.getPlayerThatPlayedLargestCardsForThisRound updatedRoom.playedCardValuesForCurrentRound, updatedRoom.mainSuit, updatedRoom.cardValueRanks
                 scoresEarned = 0
                 # if the username that played the largest cards is NOT the maker, then we calculate how many scores are earned for this round
+                shouldGameEndInAdvance = false
                 if usernameWithLargestCardsForCurrentRound isnt updatedRoom.maker
                     scoresEarned = Toolbox.calculateTotalScoresForThisRound updatedRoom.playedCardValuesForCurrentRound
+                    # earned scores has already reached the triple chip threshold, game should end in advance
+                    if (updatedRoom.currentScore + scoresEarned) >= (updatedRoom.aimedScore + sails.config.constants.THRESHOLD_SCORES_FOR_TRIPLE_CHIPS) then shouldGameEndInAdvance = true
                     Room.update id: updatedRoom.id,
-                        currentScore: scoresEarned
+                        currentScore: updatedRoom.currentScore + scoresEarned
                     .then () -> Promise.resolve()
                 sails.sockets.broadcast currentUserObject.roomName, 'roundFinished',
                     lastPlayerName: currentUserObject.username
                     playedCardValues: playedCardValues
                     scoresEarned: scoresEarned
                     usernameWithLargestCardsForCurrentRound: usernameWithLargestCardsForCurrentRound
+                    shouldGameEndInAdvance: shouldGameEndInAdvance
                 # now that current round is finished, we should clear the played card values for current round
                 Room.update id: updatedRoom.id,
                     playedCardValuesForCurrentRound: []
