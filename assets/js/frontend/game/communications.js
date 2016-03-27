@@ -195,19 +195,19 @@
         return actions.showCallScorePanel(game, currentAimedScore);
       }
     });
-    io.socket.on('makerSettled', function(data) {
-      var aimedScore, coveredCards, makerUsername;
+    io.socket.on('bankerSettled', function(data) {
+      var aimedScore, bankerUsername, coveredCards;
       aimedScore = data.aimedScore;
-      makerUsername = data.makerUsername;
+      bankerUsername = data.bankerUsername;
       globalVariables.textOfAimedScores.text = aimedScore + '分';
-      if (makerUsername === globalVariables.player1Username.text) {
-        globalVariables.player1IsMakerIcon.visible = true;
-      } else if (makerUsername === globalVariables.player2Username.text) {
-        globalVariables.player2IsMakerIcon.visible = true;
-      } else if (makerUsername === globalVariables.player3Username.text) {
-        globalVariables.player3IsMakerIcon.visible = true;
+      if (bankerUsername === globalVariables.player1Username.text) {
+        globalVariables.player1IsBankerIcon.visible = true;
+      } else if (bankerUsername === globalVariables.player2Username.text) {
+        globalVariables.player2IsBankerIcon.visible = true;
+      } else if (bankerUsername === globalVariables.player3Username.text) {
+        globalVariables.player3IsBankerIcon.visible = true;
       }
-      if (makerUsername === globalVariables.username) {
+      if (bankerUsername === globalVariables.username) {
         coveredCards = data.coveredCards;
         globalVariables.cardsAtHand.values = globalVariables.cardsAtHand.values.concat(coveredCards);
         globalVariables.cardsAtHand.values = toolbox.sortCards(globalVariables.cardsAtHand.values);
@@ -218,21 +218,21 @@
         globalVariables.settleCoveredCardsButton.setFrames(2, 2, 2);
       }
       globalVariables.gameStatus = constants.GAME_STATUS_SETTLING_COVERED_CARDS;
-      return setPlayerStatusTextForOneUserAndClearStatusTextForOthers(makerUsername, '庄家埋底中...');
+      return setPlayerStatusTextForOneUserAndClearStatusTextForOthers(bankerUsername, '庄家埋底中...');
     });
     io.socket.on('finishedSettlingCoveredCards', function(data) {
-      var makerUsername;
-      makerUsername = data.maker;
-      return setPlayerStatusTextForOneUserAndClearStatusTextForOthers(makerUsername, '庄家选主中...');
+      var bankerUsername;
+      bankerUsername = data.banker;
+      return setPlayerStatusTextForOneUserAndClearStatusTextForOthers(bankerUsername, '庄家选主中...');
     });
     io.socket.on('mainSuitChosen', function(data) {
-      var makerUsername;
+      var bankerUsername;
       globalVariables.gameStatus = constants.GAME_STATUS_PLAYING;
       globalVariables.mainSuit = data.mainSuit;
       globalVariables.cardValueRanks = toolbox.getRanksForMainSuitCards(globalVariables.mainSuit);
-      makerUsername = data.maker;
+      bankerUsername = data.banker;
       globalVariables.iconOfMainSuit.frame = globalVariables.mainSuit;
-      setPlayerStatusTextForOneUserAndClearStatusTextForOthers(makerUsername, '出牌中...');
+      setPlayerStatusTextForOneUserAndClearStatusTextForOthers(bankerUsername, '出牌中...');
       globalVariables.cardsAtHand.values = toolbox.sortCardsAfterMainSuitSettled(globalVariables.cardsAtHand.values, globalVariables.mainSuit);
       return actions.displayCards(globalVariables.cardsAtHand.values);
     });
@@ -271,6 +271,7 @@
       playedCardValues = data.playedCardValues;
       scoresEarned = data.scoresEarned;
       usernameWithLargestCardsForCurrentRound = data.usernameWithLargestCardsForCurrentRound;
+      globalVariables.nonBankerPlayersHaveNoMainSuit = data.nonBankerPlayersHaveNoMainSuit;
       n = -1;
       if (usernamePlayedCards === globalVariables.username) {
         globalVariables.meHistoricalPlayedCardValues.push(playedCardValues);

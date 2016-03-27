@@ -357,7 +357,7 @@ haveTractorForMainSuit = (tractorLength, mainSuit, cardValues, cardValueRanks) -
         else numOfConsecutivePairs = 0
     return false
 
-validatePlayedCards = (selectedCardValues, firstlyPlayedCardValues, cardValuesAtHand, mainSuit, cardValueRanks) ->
+validatePlayedCards = (selectedCardValues, firstlyPlayedCardValues, cardValuesAtHand, mainSuit, cardValueRanks, nonBankerPlayersHaveNoMainSuit) ->
     if selectedCardValues.length is 0 then return false
     # 别人已经出牌，本次出牌为跟牌
     if firstlyPlayedCardValues.length > 0
@@ -428,23 +428,58 @@ validatePlayedCards = (selectedCardValues, firstlyPlayedCardValues, cardValuesAt
             if selectedPairValuesOfSuit.length < firstlyPlayedCardValues.length / 2
                 if selectedPairValuesOfSuit.length isnt pairValuesAtHandOfSuit.length and
                 pairValuesAtHandOfSuit.length isnt 0 then return false
+        return true
     # 第一个出牌
     else
-        # 选中的牌数量为大于1的单数，非法
-        if (selectedCardValues.length > 1) and
-        (selectedCardValues.length % 2 isnt 0) then return false
-        # 选中的牌为2张，但是不是对子，非法
-        if (selectedCardValues.length is 2) and
-        (selectedCardValues[0] isnt selectedCardValues[1]) then return false
-        # 选中的牌数量大于等于4张，但是不是任何花色的拖拉机，非法
-        if selectedCardValues.length >= 4
-            if isTractorForSuit selectedCardValues.length / 2, sails.config.constants.INDEX_SUIT_SPADE, selectedCardValues, cardValueRanks then return true
-            else if isTractorForSuit selectedCardValues.length / 2, sails.config.constants.INDEX_SUIT_HEART, selectedCardValues, cardValueRanks then return true
-            else if isTractorForSuit selectedCardValues.length / 2, sails.config.constants.INDEX_SUIT_CLUB, selectedCardValues, cardValueRanks then return true
-            else if isTractorForSuit selectedCardValues.length / 2, sails.config.constants.INDEX_SUIT_DIAMOND, selectedCardValues, cardValueRanks then return true
-            else if isTractorForMainSuit selectedCardValues.length / 2, mainSuit, selectedCardValues, cardValueRanks then return true
-            else return false
-    return true
+        # 选中的牌是单牌，合法
+        if selectedCardValues.length is 1 then return true
+        # 选中的牌是对子，合法
+        if selectedCardValues.length is 2 and
+        selectedCardValues[0] is selectedCardValues[1] then return true
+        # 选中的牌是任意花色的拖拉机或主牌拖拉机，合法
+        if isTractorForSuit selectedCardValues.length / 2, sails.config.constants.INDEX_SUIT_SPADE, selectedCardValues, cardValueRanks then return true
+        else if isTractorForSuit selectedCardValues.length / 2, sails.config.constants.INDEX_SUIT_HEART, selectedCardValues, cardValueRanks then return true
+        else if isTractorForSuit selectedCardValues.length / 2, sails.config.constants.INDEX_SUIT_CLUB, selectedCardValues, cardValueRanks then return true
+        else if isTractorForSuit selectedCardValues.length / 2, sails.config.constants.INDEX_SUIT_DIAMOND, selectedCardValues, cardValueRanks then return true
+        else if isTractorForMainSuit selectedCardValues.length / 2, mainSuit, selectedCardValues, cardValueRanks then return true
+
+        numOfMainSuitCardsInSelectedCards = 0
+        for i in [0...selectedCardValues.length]
+            if isSingleForMainSuit mainSuit, [selectedCardValues[i]] then numOfMainSuitCardsInSelectedCards += 1
+        # 要出的牌全部是主牌，而且所有闲家都已经脱主（也即甩牌），合法
+        if numOfMainSuitCardsInSelectedCards is selectedCardValues.length and
+        nonBankerPlayersHaveNoMainSuit is sails.config.constants.TRUE then return true
+        # 其他所有情况都是非法
+        return false
+
+###
+Given played cards info for one round, this function checks whether it is true that none of the non bankers have any main suit cards left
+@param: playedCardsInfo                                 played card info object with such format
+                                                        {
+                                                            username: 'someUsername',
+                                                            playedCardValues: [
+                                                                valueOfCard1,
+                                                                valueOfCard2,
+                                                                ...
+                                                            ]
+                                                        }
+@param: mainSuit                                        the main suit index
+@return: Boolean                                        true of false
+###
+noMainSuitCardLeftForAllNonBankers = (playedCardsInfo, mainSuit, bankerUsername) ->
+    # If the cards that the first player played for this round is not main suit, we cannot know for sure whether nonbanker players have main suit card left or not
+    if not isSingleForMainSuit mainSuit, [playedCardsInfo[0].playedCardValues[0]] then return false
+    nonBankerPlayersPlayedCardValues = []
+    numOfNonBankerPlayersWithNoMainSuitCard = 0
+    for i in [0...playedCardsInfo.length]
+        if playedCardsInfo[i].username isnt bankerUsername then nonBankerPlayersPlayedCardValues.push playedCardsInfo[i].playedCardValues
+    for i in [0...nonBankerPlayersPlayedCardValues.length]
+        for j in [0...nonBankerPlayersPlayedCardValues[i].length]
+            if not isSingleForMainSuit mainSuit, [nonBankerPlayersPlayedCardValues[i][j]]
+                numOfNonBankerPlayersWithNoMainSuitCard += 1
+                break
+    if numOfNonBankerPlayersWithNoMainSuitCard is 3 then return true
+    return false
 
 module.exports =
     sortCards: sortCards
@@ -461,3 +496,4 @@ module.exports =
     calculateTotalScoresForThisRound: calculateTotalScoresForThisRound
     getRanksForMainSuitCards: getRanksForMainSuitCards
     validatePlayedCards: validatePlayedCards
+    noMainSuitCardLeftForAllNonBankers: noMainSuitCardLeftForAllNonBankers

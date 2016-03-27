@@ -1,3 +1,4 @@
+constants = require './constants.js'
 module.exports =
     screenWidth: Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
     screenHeight: Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
@@ -66,3 +67,4 @@ module.exports =
     historicalRecordStage: null
     historicalRoundIndex: null
     isPlayCardButtonVisibleBeforeShowingHistoricalRecordStage: false
+    nonBankerPlayersHaveNoMainSuit: constants.FALSE

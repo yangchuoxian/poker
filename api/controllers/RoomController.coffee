@@ -291,17 +291,17 @@ module.exports =
             # validate whether the played card is legal or not
             firstlyPlayedCardValues = []
             if foundRoomWithName.playedCardValuesForCurrentRound.length isnt 0 then firstlyPlayedCardValues = foundRoomWithName.playedCardValuesForCurrentRound[0].playedCardValues
-            return Promise.reject '出牌不符合规则' if not Toolbox.validatePlayedCards(playedCardValues, firstlyPlayedCardValues, foundRoomWithName.decks[currentUserObject.username], foundRoomWithName.mainSuit, foundRoomWithName.cardValueRanks)
+            # push the played cards into current round played cards
+            foundRoomWithName.playedCardValuesForCurrentRound.push
+                username: currentUserObject.username
+                playedCardValues: playedCardValues
+            return Promise.reject '出牌不符合规则' if not Toolbox.validatePlayedCards(playedCardValues, firstlyPlayedCardValues, foundRoomWithName.decks[currentUserObject.username], foundRoomWithName.mainSuit, foundRoomWithName.cardValueRanks, foundRoomWithName.nonBankerPlayersHaveNoMainSuit)
             # remove the played cards from the corresponding deck
             deck = foundRoomWithName.decks[currentUserObject.username]
             for i in [0...playedCardValues.length]
                 index = deck.indexOf playedCardValues[i]
                 deck.splice index, 1
             foundRoomWithName.decks[currentUserObject.username] = deck
-            # push the played cards into current round played cards
-            foundRoomWithName.playedCardValuesForCurrentRound.push
-                username: currentUserObject.username
-                playedCardValues: playedCardValues
             Room.update id: foundRoomWithName.id,
                 decks: foundRoomWithName.decks
                 playedCardValuesForCurrentRound: foundRoomWithName.playedCardValuesForCurrentRound
@@ -314,10 +314,14 @@ module.exports =
                 scoresEarned = 0
                 # if the username that played the largest cards is NOT the banker, then we calculate how many scores are earned for this round
                 if usernameWithLargestCardsForCurrentRound isnt updatedRoom.banker then scoresEarned = Toolbox.calculateTotalScoresForThisRound updatedRoom.playedCardValuesForCurrentRound
+                # check whether all non banker players have no main suit card left
+                if Toolbox.noMainSuitCardLeftForAllNonBankers(updatedRoom.playedCardValuesForCurrentRound, updatedRoom.mainSuit, updatedRoom.banker) then updatedRoom.nonBankerPlayersHaveNoMainSuit = sails.config.constants.TRUE
+                else updatedRoom.nonBankerPlayersHaveNoMainSuit = sails.config.constants.FALSE
                 # now that current round is finished, we should clear the played card values for current round
                 Room.update id: updatedRoom.id,
                     currentScore: updatedRoom.currentScore + scoresEarned
                     playedCardValuesForCurrentRound: []
+                    nonBankerPlayersHaveNoMainSuit: updatedRoom.nonBankerPlayersHaveNoMainSuit
                 .then (updatedRooms) ->
                     updatedRoom = updatedRooms[0]
                     shouldGameEnd = false
@@ -331,6 +335,7 @@ module.exports =
                         scoresEarned: scoresEarned
                         usernameWithLargestCardsForCurrentRound: usernameWithLargestCardsForCurrentRound
                         shouldGameEnd: shouldGameEnd
+                        nonBankerPlayersHaveNoMainSuit: updatedRoom.nonBankerPlayersHaveNoMainSuit
                     if shouldGameEnd
                         RoomService.handleGameResult updatedRoom, false
                         .then (gameResults) ->
@@ -347,7 +352,7 @@ module.exports =
                     nextPlayerUsername: nextPlayerUsername
                 Promise.resolve()
         .then () -> res.send 'OK'
-        # .catch (err) -> res.send 400, err
+        .catch (err) -> res.send 400, err
 
     surrender: (req, res) ->
         userId = req.param 'userId'

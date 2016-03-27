@@ -1,4 +1,7 @@
 module.exports =
+    TRUE: 1
+    FALSE: 0
+    
     BACKGROUND_IMAGE_SIZE: 200
     MAKER_ICON_SIZE: 30
     CARD_WIDTH: 180

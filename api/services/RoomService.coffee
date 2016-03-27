@@ -215,6 +215,7 @@ module.exports =
             firstScoreCallerUsername: firstScoreCallerUsername
             winning: room.winning
             waterpool: room.waterpool
+            nonBankerPlayersHaveNoMainSuit: sails.config.constants.FALSE
         .then (updatedRooms) ->
             numOfWinningChipsForBanker: numOfWinningChipsForBanker
             firstScoreCallerUsername: firstScoreCallerUsername

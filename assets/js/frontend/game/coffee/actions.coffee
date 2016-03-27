@@ -146,7 +146,7 @@ tapUp = (sprite, pointer) ->
                 globalVariables.settleCoveredCardsButton.inputEnabled = false
                 globalVariables.settleCoveredCardsButton.setFrames 2, 2, 2
         else if globalVariables.gameStatus is constants.GAME_STATUS_PLAYING
-            if toolbox.validateSelectedCardsForPlay selectedCardValues, globalVariables.firstlyPlayedCardValuesForCurrentRound, globalVariables.cardsAtHand.values, globalVariables.mainSuit, globalVariables.cardValueRanks
+            if toolbox.validateSelectedCardsForPlay selectedCardValues, globalVariables.firstlyPlayedCardValuesForCurrentRound, globalVariables.cardsAtHand.values, globalVariables.mainSuit, globalVariables.cardValueRanks, globalVariables.nonBankerPlayersHaveNoMainSuit
                 globalVariables.playCardsButton.inputEnabled = true
                 globalVariables.playCardsButton.setFrames 1, 0, 1
             else

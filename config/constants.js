@@ -1,4 +1,7 @@
 module.exports.constants = {
+    TRUE: 1,
+    FALSE: 0,
+
 	numOfCardsForEachPlayer: 21,
 	numOfCoveredCards: 8,
 

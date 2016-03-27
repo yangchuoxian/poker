@@ -179,6 +179,7 @@ socketEventHandler = (game) ->
         playedCardValues = data.playedCardValues
         scoresEarned = data.scoresEarned
         usernameWithLargestCardsForCurrentRound = data.usernameWithLargestCardsForCurrentRound
+        globalVariables.nonBankerPlayersHaveNoMainSuit = data.nonBankerPlayersHaveNoMainSuit
         n = -1
         if usernamePlayedCards is globalVariables.username
             globalVariables.meHistoricalPlayedCardValues.push playedCardValues

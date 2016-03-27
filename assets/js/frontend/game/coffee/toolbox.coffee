@@ -392,7 +392,7 @@ isTractorForMainSuit = (tractorLength, mainSuit, cardValues, cardValueRanks) ->
         if (pairRanks[i] + 1) isnt pairRanks[i + 1] then return false
     return true
 
-validateSelectedCardsForPlay = (selectedCardValues, firstlyPlayedCardValues, cardValuesAtHand, mainSuit, cardValueRanks) ->
+validateSelectedCardsForPlay = (selectedCardValues, firstlyPlayedCardValues, cardValuesAtHand, mainSuit, cardValueRanks, nonBankerPlayersHaveNoMainSuit) ->
     if selectedCardValues.length is 0 then return false
     # 别人已经出牌，本次出牌为跟牌
     if firstlyPlayedCardValues.length > 0
@@ -464,23 +464,30 @@ validateSelectedCardsForPlay = (selectedCardValues, firstlyPlayedCardValues, car
             if selectedPairValuesOfSuit.length < firstlyPlayedCardValues.length / 2
                 if selectedPairValuesOfSuit.length isnt pairValuesAtHandOfSuit.length and
                 pairValuesAtHandOfSuit.length isnt 0 then return false
+        # 其他所有情况都是合法
+        return true
     # 第一个出牌
     else
-        # 选中的牌数量为大于1的单数，非法
-        if (selectedCardValues.length > 1) and
-        (selectedCardValues.length % 2 isnt 0) then return false
-        # 选中的牌为2张，但是不是对子，非法
-        if (selectedCardValues.length is 2) and
-        (selectedCardValues[0] isnt selectedCardValues[1]) then return false
-        # 选中的牌数量大于等于4张，但是不是任何花色的拖拉机，非法
-        if selectedCardValues.length >= 4
-            if isTractorForSuit selectedCardValues.length / 2, constants.INDEX_SUIT_SPADE, selectedCardValues, cardValueRanks then return true
-            else if isTractorForSuit selectedCardValues.length / 2, constants.INDEX_SUIT_HEART, selectedCardValues, cardValueRanks then return true
-            else if isTractorForSuit selectedCardValues.length / 2, constants.INDEX_SUIT_CLUB, selectedCardValues, cardValueRanks then return true
-            else if isTractorForSuit selectedCardValues.length / 2, constants.INDEX_SUIT_DIAMOND, selectedCardValues, cardValueRanks then return true
-            else if isTractorForMainSuit selectedCardValues.length / 2, mainSuit, selectedCardValues, cardValueRanks then return true
-            else return false
-    return true
+        # 选中的牌是单牌，合法
+        if selectedCardValues.length is 1 then return true
+        # 选中的牌是对子，合法
+        if selectedCardValues.length is 2 and
+        selectedCardValues[0] is selectedCardValues[1] then return true
+        # 选中的牌是任意花色的拖拉机或主牌拖拉机，合法
+        if isTractorForSuit selectedCardValues.length / 2, constants.INDEX_SUIT_SPADE, selectedCardValues, cardValueRanks then return true
+        else if isTractorForSuit selectedCardValues.length / 2, constants.INDEX_SUIT_HEART, selectedCardValues, cardValueRanks then return true
+        else if isTractorForSuit selectedCardValues.length / 2, constants.INDEX_SUIT_CLUB, selectedCardValues, cardValueRanks then return true
+        else if isTractorForSuit selectedCardValues.length / 2, constants.INDEX_SUIT_DIAMOND, selectedCardValues, cardValueRanks then return true
+        else if isTractorForMainSuit selectedCardValues.length / 2, mainSuit, selectedCardValues, cardValueRanks then return true
+
+        numOfMainSuitCardsInSelectedCards = 0
+        for i in [0...selectedCardValues.length]
+            if isSingleForMainSuit mainSuit, [selectedCardValues[i]] then numOfMainSuitCardsInSelectedCards += 1
+        # 要出的牌全部是主牌，而且所有闲家都已经脱主（也即甩牌），合法
+        if numOfMainSuitCardsInSelectedCards is selectedCardValues.length and
+        nonBankerPlayersHaveNoMainSuit is constants.TRUE then return true
+        # 其他所有情况都是非法
+        return false
 
 module.exports =
     sortCards: sortCards

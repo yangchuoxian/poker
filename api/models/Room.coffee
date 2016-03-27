@@ -76,3 +76,6 @@ module.exports =
         waterpool:
             type: 'integer'
             defaultsTo: 0
+        nonBankerPlayersHaveNoMainSuit:
+            type: 'integer'
+            defaultsTo: sails.config.constants.FALSE

@@ -638,8 +638,8 @@
     return true;
   };
 
-  validateSelectedCardsForPlay = function(selectedCardValues, firstlyPlayedCardValues, cardValuesAtHand, mainSuit, cardValueRanks) {
-    var numberOfCardsAtHandForSpecificSuit, numberOfCardsInSelectedCardsForSpecificSuit, numberOfMainCardsAtHand, numberOfMainCardsInSelectedCards, pairValuesAtHandOfSuit, selectedPairValuesOfSuit, suitForFirstlyPlayedCards;
+  validateSelectedCardsForPlay = function(selectedCardValues, firstlyPlayedCardValues, cardValuesAtHand, mainSuit, cardValueRanks, nonBankerPlayersHaveNoMainSuit) {
+    var i, j, numOfMainSuitCardsInSelectedCards, numberOfCardsAtHandForSpecificSuit, numberOfCardsInSelectedCardsForSpecificSuit, numberOfMainCardsAtHand, numberOfMainCardsInSelectedCards, pairValuesAtHandOfSuit, ref, selectedPairValuesOfSuit, suitForFirstlyPlayedCards;
     if (selectedCardValues.length === 0) {
       return false;
     }
@@ -721,30 +721,36 @@
           }
         }
       }
+      return true;
     } else {
-      if ((selectedCardValues.length > 1) && (selectedCardValues.length % 2 !== 0)) {
-        return false;
+      if (selectedCardValues.length === 1) {
+        return true;
       }
-      if ((selectedCardValues.length === 2) && (selectedCardValues[0] !== selectedCardValues[1])) {
-        return false;
+      if (selectedCardValues.length === 2 && selectedCardValues[0] === selectedCardValues[1]) {
+        return true;
       }
-      if (selectedCardValues.length >= 4) {
-        if (isTractorForSuit(selectedCardValues.length / 2, constants.INDEX_SUIT_SPADE, selectedCardValues, cardValueRanks)) {
-          return true;
-        } else if (isTractorForSuit(selectedCardValues.length / 2, constants.INDEX_SUIT_HEART, selectedCardValues, cardValueRanks)) {
-          return true;
-        } else if (isTractorForSuit(selectedCardValues.length / 2, constants.INDEX_SUIT_CLUB, selectedCardValues, cardValueRanks)) {
-          return true;
-        } else if (isTractorForSuit(selectedCardValues.length / 2, constants.INDEX_SUIT_DIAMOND, selectedCardValues, cardValueRanks)) {
-          return true;
-        } else if (isTractorForMainSuit(selectedCardValues.length / 2, mainSuit, selectedCardValues, cardValueRanks)) {
-          return true;
-        } else {
-          return false;
+      if (isTractorForSuit(selectedCardValues.length / 2, constants.INDEX_SUIT_SPADE, selectedCardValues, cardValueRanks)) {
+        return true;
+      } else if (isTractorForSuit(selectedCardValues.length / 2, constants.INDEX_SUIT_HEART, selectedCardValues, cardValueRanks)) {
+        return true;
+      } else if (isTractorForSuit(selectedCardValues.length / 2, constants.INDEX_SUIT_CLUB, selectedCardValues, cardValueRanks)) {
+        return true;
+      } else if (isTractorForSuit(selectedCardValues.length / 2, constants.INDEX_SUIT_DIAMOND, selectedCardValues, cardValueRanks)) {
+        return true;
+      } else if (isTractorForMainSuit(selectedCardValues.length / 2, mainSuit, selectedCardValues, cardValueRanks)) {
+        return true;
+      }
+      numOfMainSuitCardsInSelectedCards = 0;
+      for (i = j = 0, ref = selectedCardValues.length; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
+        if (isSingleForMainSuit(mainSuit, [selectedCardValues[i]])) {
+          numOfMainSuitCardsInSelectedCards += 1;
         }
       }
+      if (numOfMainSuitCardsInSelectedCards === selectedCardValues.length && nonBankerPlayersHaveNoMainSuit === constants.TRUE) {
+        return true;
+      }
+      return false;
     }
-    return true;
   };
 
   module.exports = {
