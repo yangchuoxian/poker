@@ -117,23 +117,23 @@ module.exports =
             Promise.resolve()
         .catch (err) -> Promise.reject err
 
-    clearAfterGameEnd: (room, didMakerWin) ->
+    clearAfterGameEnd: (room, didBankerWin) ->
         firstScoreCallerUsername = ''
         # 本盘庄家胜，下盘第一个叫分的玩家是本盘庄家
-        if didMakerWin then firstScoreCallerUsername = room.maker
+        if didBankerWin then firstScoreCallerUsername = room.banker
         # 本盘闲家胜，下盘第一个叫分的玩家是本盘庄家的下家
         else
-            if room.seats.one is room.maker then firstScoreCallerUsername = room.seats.two
-            else if room.seats.two is room.maker then firstScoreCallerUsername = room.seats.three
-            else if room.seats.three is room.maker then firstScoreCallerUsername = room.seats.four
-            else if room.seats.four is room.maker then firstScoreCallerUsername = room.seats.one
+            if room.seats.one is room.banker then firstScoreCallerUsername = room.seats.two
+            else if room.seats.two is room.banker then firstScoreCallerUsername = room.seats.three
+            else if room.seats.three is room.banker then firstScoreCallerUsername = room.seats.four
+            else if room.seats.four is room.banker then firstScoreCallerUsername = room.seats.one
         Room.update id: room.id,
             readyPlayers: []
             aimedScore: 80
             currentScore: 0
             passedUsernames: []
             lastCaller: ''
-            maker: ''
+            banker: ''
             mainSuit: null
             decks: {}
             coveredCards: []
@@ -150,55 +150,55 @@ module.exports =
             room.seats.three
             room.seats.four
         ]
-        numOfWinningChipsForMaker = 0
+        numOfWinningChipsForBanker = 0
         changedQuantityOfWaterpool = 0
-        didMakerWin = false
+        didBankerWin = false
         if isSurrender
             # 投降输一倍
             if room.aimedScore >= sails.config.constants.FLOOR_SCORES_FOR_DOUBLE_CHIPS_WHEN_SURRENDER
-                numOfWinningChipsForMaker = -3 * sails.config.constants.NUM_OF_BASIC_CHIPS
-                changedQuantityOfWaterpool = Math.abs numOfWinningChipsForMaker
+                numOfWinningChipsForBanker = -3 * sails.config.constants.NUM_OF_BASIC_CHIPS
+                changedQuantityOfWaterpool = Math.abs numOfWinningChipsForBanker
             # 投降输两倍
             else
-                numOfWinningChipsForMaker = -2 * 3 * sails.config.constants.NUM_OF_BASIC_CHIPS
-                changedQuantityOfWaterpool = Math.abs numOfWinningChipsForMaker
-            room.winning[room.maker] += numOfWinningChipsForMaker
+                numOfWinningChipsForBanker = -2 * 3 * sails.config.constants.NUM_OF_BASIC_CHIPS
+                changedQuantityOfWaterpool = Math.abs numOfWinningChipsForBanker
+            room.winning[room.banker] += numOfWinningChipsForBanker
             room.waterpool += changedQuantityOfWaterpool
         else
             ############################# 得分不够，庄家胜利，双进单出 #############################
             if room.currentScore < room.aimedScore
-                didMakerWin = true
+                didBankerWin = true
                 # 清光
-                if room.currentScore is 0 then numOfWinningChipsForMaker = 6 * 3 * sails.config.constants.NUM_OF_BASIC_CHIPS
+                if room.currentScore is 0 then numOfWinningChipsForBanker = 6 * 3 * sails.config.constants.NUM_OF_BASIC_CHIPS
                 # 小光
-                else if room.currentScore < sails.config.constants.THRESHOLD_SCORES_FOR_XIAOGUANG then numOfWinningChipsForMaker = 4 * 3 * sails.config.constants.NUM_OF_BASIC_CHIPS
+                else if room.currentScore < sails.config.constants.THRESHOLD_SCORES_FOR_XIAOGUANG then numOfWinningChipsForBanker = 4 * 3 * sails.config.constants.NUM_OF_BASIC_CHIPS
                 # 过庄
-                else numOfWinningChipsForMaker = 2 * 3 * sails.config.constants.NUM_OF_BASIC_CHIPS
+                else numOfWinningChipsForBanker = 2 * 3 * sails.config.constants.NUM_OF_BASIC_CHIPS
             ############################# 超过喊分，闲家胜利，双进单出 #############################
             else
                 # 垮庄
-                if room.currentScore < (room.aimedScore + sails.config.constants.THRESHOLD_SCORES_FOR_DOUBLE_CHIPS) then numOfWinningChipsForMaker = -3 * sails.config.constants.NUM_OF_BASIC_CHIPS
+                if room.currentScore < (room.aimedScore + sails.config.constants.THRESHOLD_SCORES_FOR_DOUBLE_CHIPS) then numOfWinningChipsForBanker = -3 * sails.config.constants.NUM_OF_BASIC_CHIPS
                 # 小到
-                else if room.currentScore < (room.aimedScore + sails.config.constants.THRESHOLD_SCORES_FOR_TRIPLE_CHIPS) then numOfWinningChipsForMaker = -2 * 3 * sails.config.constants.NUM_OF_BASIC_CHIPS
+                else if room.currentScore < (room.aimedScore + sails.config.constants.THRESHOLD_SCORES_FOR_TRIPLE_CHIPS) then numOfWinningChipsForBanker = -2 * 3 * sails.config.constants.NUM_OF_BASIC_CHIPS
                 # 大到
-                else numOfWinningChipsForMaker = -3 * 3 * sails.config.constants.NUM_OF_BASIC_CHIPS
+                else numOfWinningChipsForBanker = -3 * 3 * sails.config.constants.NUM_OF_BASIC_CHIPS
             for i in [0...users.length]
-                if users[i] isnt room.maker
-                    room.winning[users[i]] -= numOfWinningChipsForMaker / 3
-            if didMakerWin
-                room.winning[room.maker] += (numOfWinningChipsForMaker + room.waterpool)
+                if users[i] isnt room.banker
+                    room.winning[users[i]] -= numOfWinningChipsForBanker / 3
+            if didBankerWin
+                room.winning[room.banker] += (numOfWinningChipsForBanker + room.waterpool)
                 changedQuantityOfWaterpool = -room.waterpool
                 room.waterpool = 0
 
         firstScoreCallerUsername = ''
         # 本盘庄家胜，下盘第一个叫分的玩家是本盘庄家
-        if didMakerWin then firstScoreCallerUsername = room.maker
+        if didBankerWin then firstScoreCallerUsername = room.banker
         # 本盘闲家胜，下盘第一个叫分的玩家是本盘庄家的下家
         else
-            if room.seats.one is room.maker then firstScoreCallerUsername = room.seats.two
-            else if room.seats.two is room.maker then firstScoreCallerUsername = room.seats.three
-            else if room.seats.three is room.maker then firstScoreCallerUsername = room.seats.four
-            else if room.seats.four is room.maker then firstScoreCallerUsername = room.seats.one
+            if room.seats.one is room.banker then firstScoreCallerUsername = room.seats.two
+            else if room.seats.two is room.banker then firstScoreCallerUsername = room.seats.three
+            else if room.seats.three is room.banker then firstScoreCallerUsername = room.seats.four
+            else if room.seats.four is room.banker then firstScoreCallerUsername = room.seats.one
         # clear info for this game since this game is finished
         Room.update id: room.id,
             readyPlayers: []
@@ -206,7 +206,7 @@ module.exports =
             currentScore: 0
             passedUsernames: []
             lastCaller: ''
-            maker: ''
+            banker: ''
             mainSuit: null
             decks: {}
             coveredCards: []
@@ -216,7 +216,7 @@ module.exports =
             winning: room.winning
             waterpool: room.waterpool
         .then (updatedRooms) ->
-            numOfWinningChipsForMaker: numOfWinningChipsForMaker
+            numOfWinningChipsForBanker: numOfWinningChipsForBanker
             firstScoreCallerUsername: firstScoreCallerUsername
             changedQuantityOfWaterpool: changedQuantityOfWaterpool
             currentWaterpoll: updatedRooms[0].waterpool

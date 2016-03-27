@@ -50,7 +50,7 @@ module.exports =
             defaultsTo: []
         lastCaller:
             type: 'string'
-        maker:
+        banker:
             type: 'string'
         mainSuit:
             type: 'integer'

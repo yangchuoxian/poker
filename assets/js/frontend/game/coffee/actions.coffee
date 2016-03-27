@@ -161,19 +161,19 @@ hideLeftPlayer = (username) ->
         if  username is globalVariables.player1Username.text
             globalVariables.user1Avatar.destroy()
             globalVariables.player1Username.destroy()
-            globalVariables.player1IsMakerIcon.destroy()
+            globalVariables.player1IsBankerIcon.destroy()
             globalVariables.player1StatusText.destroy()
     if globalVariables.player2Username
         if username is globalVariables.player2Username.text
             globalVariables.user2Avatar.destroy()
             globalVariables.player2Username.destroy()
-            globalVariables.player2IsMakerIcon.destroy()
+            globalVariables.player2IsBankerIcon.destroy()
             globalVariables.player2StatusText.destroy()
     if globalVariables.player3Username
         if username is globalVariables.player3Username.text
             globalVariables.user3Avatar.destroy()
             globalVariables.player3Username.destroy()
-            globalVariables.player3IsMakerIcon.destroy()
+            globalVariables.player3IsBankerIcon.destroy()
             globalVariables.player3StatusText.destroy()
 
 backgroundTapped = () ->
@@ -194,7 +194,7 @@ backgroundTapped = () ->
     if globalVariables.gameStatus is constants.GAME_STATUS_PLAYING
         globalVariables.playCardsButton.inputEnabled = false
         globalVariables.playCardsButton.setFrames 2, 2, 2
-    # if player is a maker and is deciding which cards get to be the new covered cards, since his/her/selections are canceled, now should disable the settle covered card button
+    # if player is a banker and is deciding which cards get to be the new covered cards, since his/her/selections are canceled, now should disable the settle covered card button
     if globalVariables.gameStatus is constants.GAME_STATUS_SETTLING_COVERED_CARDS
         globalVariables.settleCoveredCardsButton.inputEnabled = false
         globalVariables.settleCoveredCardsButton.setFrames 2, 2, 2
@@ -236,10 +236,10 @@ showPlayer1Info = (game, username) ->
     globalVariables.user1Avatar = game.add.sprite(globalVariables.screenWidth - constants.AVATAR_SIZE - constants.MARGIN, game.world.centerY - constants.AVATAR_SIZE / 2, 'avatar')
     globalVariables.user1Avatar.width /= 2
     globalVariables.user1Avatar.height /= 2
-    globalVariables.player1IsMakerIcon = game.add.sprite globalVariables.screenWidth - constants.AVATAR_SIZE - constants.MARGIN, game.world.centerY - constants.AVATAR_SIZE / 2, 'makerIcon'
-    globalVariables.player1IsMakerIcon.width = constants.MAKER_ICON_SIZE
-    globalVariables.player1IsMakerIcon.height = constants.MAKER_ICON_SIZE
-    globalVariables.player1IsMakerIcon.visible = false
+    globalVariables.player1IsBankerIcon = game.add.sprite globalVariables.screenWidth - constants.AVATAR_SIZE - constants.MARGIN, game.world.centerY - constants.AVATAR_SIZE / 2, 'bankerIcon'
+    globalVariables.player1IsBankerIcon.width = constants.MAKER_ICON_SIZE
+    globalVariables.player1IsBankerIcon.height = constants.MAKER_ICON_SIZE
+    globalVariables.player1IsBankerIcon.visible = false
     globalVariables.player1Username = game.add.text(globalVariables.screenWidth - constants.AVATAR_SIZE - constants.MARGIN, game.world.centerY + constants.AVATAR_SIZE / 2 + constants.MARGIN, username, constants.TEXT_STYLE)
     globalVariables.player1Username.setTextBounds 0, 0, constants.AVATAR_SIZE, 25
 
@@ -247,10 +247,10 @@ showPlayer2Info = (game, username) ->
     globalVariables.user2Avatar = game.add.sprite(game.world.centerX - constants.AVATAR_SIZE / 2, constants.MARGIN, 'avatar')
     globalVariables.user2Avatar.width /= 2
     globalVariables.user2Avatar.height /= 2
-    globalVariables.player2IsMakerIcon = game.add.sprite game.world.centerX - constants.AVATAR_SIZE / 2, constants.MARGIN, 'makerIcon'
-    globalVariables.player2IsMakerIcon.width = constants.MAKER_ICON_SIZE
-    globalVariables.player2IsMakerIcon.height = constants.MAKER_ICON_SIZE
-    globalVariables.player2IsMakerIcon.visible = false
+    globalVariables.player2IsBankerIcon = game.add.sprite game.world.centerX - constants.AVATAR_SIZE / 2, constants.MARGIN, 'bankerIcon'
+    globalVariables.player2IsBankerIcon.width = constants.MAKER_ICON_SIZE
+    globalVariables.player2IsBankerIcon.height = constants.MAKER_ICON_SIZE
+    globalVariables.player2IsBankerIcon.visible = false
     globalVariables.player2Username = game.add.text(game.world.centerX - constants.AVATAR_SIZE / 2, constants.AVATAR_SIZE + 2 * constants.MARGIN, username, constants.TEXT_STYLE)
     globalVariables.player2Username.setTextBounds 0, 0, constants.AVATAR_SIZE, 25
 
@@ -258,10 +258,10 @@ showPlayer3Info = (game, username) ->
     globalVariables.user3Avatar = game.add.sprite(constants.MARGIN, game.world.centerY - constants.AVATAR_SIZE / 2, 'avatar')
     globalVariables.user3Avatar.width /= 2
     globalVariables.user3Avatar.height /= 2
-    globalVariables.player3IsMakerIcon = game.add.sprite constants.MARGIN, game.world.centerY - constants.AVATAR_SIZE / 2, 'makerIcon'
-    globalVariables.player3IsMakerIcon.width = constants.MAKER_ICON_SIZE
-    globalVariables.player3IsMakerIcon.height = constants.MAKER_ICON_SIZE
-    globalVariables.player3IsMakerIcon.visible = false
+    globalVariables.player3IsBankerIcon = game.add.sprite constants.MARGIN, game.world.centerY - constants.AVATAR_SIZE / 2, 'bankerIcon'
+    globalVariables.player3IsBankerIcon.width = constants.MAKER_ICON_SIZE
+    globalVariables.player3IsBankerIcon.height = constants.MAKER_ICON_SIZE
+    globalVariables.player3IsBankerIcon.visible = false
     globalVariables.player3Username = game.add.text(constants.MARGIN, game.world.centerY + constants.AVATAR_SIZE / 2 + constants.MARGIN, username, constants.TEXT_STYLE)
     globalVariables.player3Username.setTextBounds 0, 0, constants.AVATAR_SIZE, 25
 
@@ -368,7 +368,7 @@ settleCoveredCards = () ->
         loginToken: globalVariables.loginToken
         roomName: globalVariables.roomName
         coveredCards: globalVariables.coveredCards.indexes
-        maker: globalVariables.username
+        banker: globalVariables.username
         cardsAtHand: globalVariables.cardsAtHand.values
     , (resData, jwres) ->
         if jwres.statusCode is 200 then showSelectSuitPanel()
@@ -440,7 +440,7 @@ selectSuit = () ->
         userId: globalVariables.userId
         loginToken: globalVariables.loginToken
         roomName: globalVariables.roomName
-        maker: globalVariables.username
+        banker: globalVariables.username
         mainSuit: globalVariables.mainSuit
     , (resData, jwres) ->
         if jwres.statusCode is 200
@@ -572,7 +572,7 @@ showNextRoundPlayedCards = () ->
     showPlayedCardsForUser 3, globalVariables.player3HistoricalPlayedCardValues[globalVariables.historicalRoundIndex], false
 
 endGame = (isSurrender, gameResults) ->
-    # Maker surrendered
+    # Banker surrendered
     if isSurrender
         console.log '庄家投降了, 输赢：'
         console.log gameResults

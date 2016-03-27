@@ -114,14 +114,14 @@ socketEventHandler = (game) ->
         else if passedUser is globalVariables.player3Username.text then globalVariables.player3StatusText.text = '不要'
         if usernameToCallScore is globalVariables.username then actions.showCallScorePanel game, currentAimedScore
 
-    io.socket.on 'makerSettled', (data) ->
+    io.socket.on 'bankerSettled', (data) ->
         aimedScore = data.aimedScore
-        makerUsername = data.makerUsername
+        bankerUsername = data.bankerUsername
         globalVariables.textOfAimedScores.text = aimedScore + '分'
-        if makerUsername is globalVariables.player1Username.text then globalVariables.player1IsMakerIcon.visible = true
-        else if makerUsername is globalVariables.player2Username.text then globalVariables.player2IsMakerIcon.visible = true
-        else if makerUsername is globalVariables.player3Username.text then globalVariables.player3IsMakerIcon.visible = true
-        if makerUsername is globalVariables.username
+        if bankerUsername is globalVariables.player1Username.text then globalVariables.player1IsBankerIcon.visible = true
+        else if bankerUsername is globalVariables.player2Username.text then globalVariables.player2IsBankerIcon.visible = true
+        else if bankerUsername is globalVariables.player3Username.text then globalVariables.player3IsBankerIcon.visible = true
+        if bankerUsername is globalVariables.username
             coveredCards = data.coveredCards
             globalVariables.cardsAtHand.values = globalVariables.cardsAtHand.values.concat coveredCards
             globalVariables.cardsAtHand.values = toolbox.sortCards globalVariables.cardsAtHand.values
@@ -131,20 +131,20 @@ socketEventHandler = (game) ->
             globalVariables.settleCoveredCardsButton.inputEnabled = false
             globalVariables.settleCoveredCardsButton.setFrames 2, 2, 2
         globalVariables.gameStatus = constants.GAME_STATUS_SETTLING_COVERED_CARDS
-        setPlayerStatusTextForOneUserAndClearStatusTextForOthers makerUsername, '庄家埋底中...'
+        setPlayerStatusTextForOneUserAndClearStatusTextForOthers bankerUsername, '庄家埋底中...'
 
     io.socket.on 'finishedSettlingCoveredCards', (data) ->
-        makerUsername = data.maker
-        setPlayerStatusTextForOneUserAndClearStatusTextForOthers makerUsername, '庄家选主中...'
+        bankerUsername = data.banker
+        setPlayerStatusTextForOneUserAndClearStatusTextForOthers bankerUsername, '庄家选主中...'
 
     io.socket.on 'mainSuitChosen', (data) ->
         globalVariables.gameStatus = constants.GAME_STATUS_PLAYING
         globalVariables.mainSuit = data.mainSuit
         # after main suit is decided, rank all card values
         globalVariables.cardValueRanks = toolbox.getRanksForMainSuitCards globalVariables.mainSuit
-        makerUsername = data.maker
+        bankerUsername = data.banker
         globalVariables.iconOfMainSuit.frame = globalVariables.mainSuit
-        setPlayerStatusTextForOneUserAndClearStatusTextForOthers makerUsername, '出牌中...'
+        setPlayerStatusTextForOneUserAndClearStatusTextForOthers bankerUsername, '出牌中...'
         globalVariables.cardsAtHand.values = toolbox.sortCardsAfterMainSuitSettled globalVariables.cardsAtHand.values, globalVariables.mainSuit
         actions.displayCards globalVariables.cardsAtHand.values
 

@@ -178,12 +178,12 @@ module.exports =
                         usernameCalledScore: currentUserObject.username
                         usernameToCallScore: nextUsernameToCallScore
                     return Promise.resolve()
-            sails.sockets.broadcast currentUserObject.roomName, 'makerSettled',
+            sails.sockets.broadcast currentUserObject.roomName, 'bankerSettled',
                 aimedScore: score
-                makerUsername: currentUserObject.username
+                bankerUsername: currentUserObject.username
                 coveredCards: foundRoomWithName.coveredCards
             Room.update id: foundRoomWithName.id,
-                maker: currentUserObject.username
+                banker: currentUserObject.username
         .then () -> res.send 'OK'
         .catch (err) -> res.send 400, err
 
@@ -231,12 +231,12 @@ module.exports =
                         usernameToCallScore: nextUsernameToCallScore
                     return Promise.resolve()
             else
-                sails.sockets.broadcast currentUserObject.roomName, 'makerSettled',
+                sails.sockets.broadcast currentUserObject.roomName, 'bankerSettled',
                     aimedScore: currentRoomObject.aimedScore
-                    makerUsername: currentRoomObject.lastCaller
+                    bankerUsername: currentRoomObject.lastCaller
                     coveredCards: currentRoomObject.coveredCards
                 Room.update id: currentRoomObject.id,
-                    maker: currentRoomObject.lastCaller
+                    banker: currentRoomObject.lastCaller
                 .then () -> Promise.resolve()
         .catch (err) -> res.send 400, err
 
@@ -244,25 +244,25 @@ module.exports =
         roomName = req.param 'roomName'
         coveredCards = req.param 'coveredCards'
         cardsAtHand = req.param 'cardsAtHand'
-        maker = req.param 'maker'
+        banker = req.param 'banker'
         Room.findOne name: roomName
         .then (foundRoomWithName) ->
             return Promise.reject '房间不存在' if not foundRoomWithName
-            foundRoomWithName.decks[maker] = cardsAtHand
+            foundRoomWithName.decks[banker] = cardsAtHand
             foundRoomWithName.coveredCards = coveredCards
             Room.update id: foundRoomWithName.id,
                 decks: foundRoomWithName.decks
                 coveredCards: foundRoomWithName.coveredCards
-                maker: maker
+                banker: banker
         .then (updatedRooms) ->
             sails.sockets.broadcast roomName, 'finishedSettlingCoveredCards',
-                maker: maker
+                banker: banker
             res.send 'OK'
         .catch (err) -> res.send 400, err
 
     chooseMainSuit: (req, res) ->
         roomName = req.param 'roomName'
-        maker = req.param 'maker'
+        banker = req.param 'banker'
         mainSuit = req.param 'mainSuit'
         cardValueRanks = Toolbox.getRanksForMainSuitCards mainSuit
         Room.update name: roomName,
@@ -272,7 +272,7 @@ module.exports =
             return Promise.reject '房间不存在' if not updatedRooms
             sails.sockets.broadcast roomName, 'mainSuitChosen',
                 mainSuit: mainSuit
-                maker: updatedRooms[0].maker
+                banker: updatedRooms[0].banker
             res.send 'OK'
         .catch (err) -> res.send 400, err
 
@@ -312,8 +312,8 @@ module.exports =
                 # get the username that played the largest cards for current round
                 usernameWithLargestCardsForCurrentRound = Toolbox.getPlayerThatPlayedLargestCardsForThisRound updatedRoom.playedCardValuesForCurrentRound, updatedRoom.mainSuit, updatedRoom.cardValueRanks
                 scoresEarned = 0
-                # if the username that played the largest cards is NOT the maker, then we calculate how many scores are earned for this round
-                if usernameWithLargestCardsForCurrentRound isnt updatedRoom.maker then scoresEarned = Toolbox.calculateTotalScoresForThisRound updatedRoom.playedCardValuesForCurrentRound
+                # if the username that played the largest cards is NOT the banker, then we calculate how many scores are earned for this round
+                if usernameWithLargestCardsForCurrentRound isnt updatedRoom.banker then scoresEarned = Toolbox.calculateTotalScoresForThisRound updatedRoom.playedCardValuesForCurrentRound
                 # now that current round is finished, we should clear the played card values for current round
                 Room.update id: updatedRoom.id,
                     currentScore: updatedRoom.currentScore + scoresEarned
@@ -324,7 +324,7 @@ module.exports =
                     # earned scores has already reached the triple chip threshold, game should end in advance
                     if updatedRoom.currentScore >= (updatedRoom.aimedScore + sails.config.constants.THRESHOLD_SCORES_FOR_TRIPLE_CHIPS) then shouldGameEnd = true
                     # no more card left, all cards played out
-                    if updatedRoom.decks[updatedRoom.maker].length is 0 then shouldGameEnd = true
+                    if updatedRoom.decks[updatedRoom.banker].length is 0 then shouldGameEnd = true
                     roundFinishedInfo =
                         lastPlayerName: currentUserObject.username
                         playedCardValues: playedCardValues
@@ -360,11 +360,11 @@ module.exports =
             Room.findOne name: currentUserObject.roomName
         .then (foundRoomWithName) ->
             return Promise.reject '房间不存在' if not foundRoomWithName
-            return Promise.reject '闲家不能投降' if foundRoomWithName.maker isnt currentUserObject.username
+            return Promise.reject '闲家不能投降' if foundRoomWithName.banker isnt currentUserObject.username
             currentRoomObject = foundRoomWithName
             RoomService.handleGameResult currentRoomObject, true
         .then (gameResults) ->
             res.json
                 gameResults: gameResults
-                makerUsername: currentRoomObject.maker
+                bankerUsername: currentRoomObject.banker
         .catch (err) -> res.send 400, err
