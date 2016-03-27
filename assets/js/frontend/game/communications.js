@@ -266,10 +266,10 @@
       return setPlayerStatusTextForOneUserAndClearStatusTextForOthers(nextPlayerUsername, '出牌中...');
     });
     return io.socket.on('roundFinished', function(data) {
-      var n, playedCardValues, scoresEarned, usernamePlayedCards, usernameWithLargestCardsForCurrentRound;
+      var n, playedCardValues, scoresEarnedCurrentRound, usernamePlayedCards, usernameWithLargestCardsForCurrentRound;
       usernamePlayedCards = data.lastPlayerName;
       playedCardValues = data.playedCardValues;
-      scoresEarned = data.scoresEarned;
+      scoresEarnedCurrentRound = data.scoresEarnedCurrentRound;
       usernameWithLargestCardsForCurrentRound = data.usernameWithLargestCardsForCurrentRound;
       globalVariables.nonBankerPlayersHaveNoMainSuit = data.nonBankerPlayersHaveNoMainSuit;
       n = -1;
@@ -289,9 +289,9 @@
         actions.showPlayedCardsForUser(n, playedCardValues, true);
       }
       actions.showBigStampForTheLargestPlayedCardsCurrentRound(playedCardValues.length, usernameWithLargestCardsForCurrentRound, game);
-      globalVariables.textOfCurrentScores.text = parseInt(globalVariables.textOfCurrentScores.text) + scoresEarned;
-      if (scoresEarned !== 0) {
-        actions.showEarnedScoreTextWithFadeOutEffect(scoresEarned, game);
+      globalVariables.textOfCurrentScores.text = parseInt(globalVariables.textOfCurrentScores.text) + scoresEarnedCurrentRound;
+      if (scoresEarnedCurrentRound !== 0) {
+        actions.showEarnedScoreTextWithFadeOutEffect(scoresEarnedCurrentRound, game);
       }
       globalVariables.firstlyPlayedCardValuesForCurrentRound = [];
       globalVariables.historicalButton.inputEnabled = true;

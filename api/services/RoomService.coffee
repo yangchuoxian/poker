@@ -189,6 +189,7 @@ module.exports =
                 room.winning[room.banker] += (numOfWinningChipsForBanker + room.waterpool)
                 changedQuantityOfWaterpool = -room.waterpool
                 room.waterpool = 0
+            else room.winning[room.banker] += numOfWinningChipsForBanker
 
         firstScoreCallerUsername = ''
         # 本盘庄家胜，下盘第一个叫分的玩家是本盘庄家

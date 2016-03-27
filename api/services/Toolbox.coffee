@@ -45,6 +45,13 @@ calculateTotalScoresForThisRound = (playedCardsInfo) ->
             else if playedCardsInfo[i].playedCardValues[j] in sails.config.constants.indexesOfTenScoreCards then totalScores += 10
     totalScores
 
+calculateScoresInCoveredCards = (coveredCardValues) ->
+    scoresInCoveredCards = 0
+    for i in [0...coveredCardValues.length]
+        if coveredCardValues[i] in sails.config.constants.indexesOfFiveScoreCards then scoresInCoveredCards += 5
+        if coveredCardValues[i] in sails.config.constants.indexesOfTenScoreCards then scoresInCoveredCards += 10
+    return scoresInCoveredCards
+
 ###
 Given the selected main suit index and user played cards info for one round, this function returns the username
 that played the largest cards for this round
@@ -497,3 +504,4 @@ module.exports =
     getRanksForMainSuitCards: getRanksForMainSuitCards
     validatePlayedCards: validatePlayedCards
     noMainSuitCardLeftForAllNonBankers: noMainSuitCardLeftForAllNonBankers
+    calculateScoresInCoveredCards: calculateScoresInCoveredCards

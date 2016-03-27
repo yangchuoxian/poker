@@ -113,8 +113,8 @@ showCoveredCards = () ->
         coveredCardsStage.alpha = 0.3
         coveredCardsStage.width = stageWidth
         coveredCardsStage.height = stageHeight
-        for i in [0...globalVariables.coveredCards.indexes.length]
-            cardName = toolbox.getCardName(globalVariables.coveredCards.indexes[i])
+        for i in [0...globalVariables.coveredCards.values.length]
+            cardName = toolbox.getCardName(globalVariables.coveredCards.values[i])
             coveredCard = globalVariables.coveredCards.create(coveredCardsStage.x + constants.MARGIN + i * globalVariables.scaledCardWidth / 4, coveredCardsStage.y + constants.MARGIN, cardName)
             coveredCard.scale.setTo globalVariables.scaleWidthRatio, globalVariables.scaleHeightRatio
         globalVariables.isShowingCoveredCards = true
@@ -332,14 +332,14 @@ pass = () ->
         if jwres.statusCode is 200 then globalVariables.callScoreStage.destroy true, false
         else alert resData
 
-surrender = () ->
+surrender = (game) ->
     csrfToken = document.getElementsByName('csrf-token')[0].content
     io.socket.post '/surrender',
         _csrf: csrfToken
         userId: globalVariables.userId
         loginToken: globalVariables.loginToken
     , (resData, jwres) ->
-        if jwres.statusCode is 200 then endGame true, resData.gameResults
+        if jwres.statusCode is 200 then endGame(true, resData.gameResults, game)
         else alert resData
 
 settleCoveredCards = () ->
@@ -355,7 +355,7 @@ settleCoveredCards = () ->
     coveredCardsIcon = globalVariables.coveredCards.create constants.MARGIN, constants.MARGIN, 'back'
     coveredCardsIcon.scale.setTo globalVariables.scaleWidthRatio, globalVariables.scaleHeightRatio
     coveredCardsIcon.inputEnabled = true
-    globalVariables.coveredCards.indexes = valuesOfSelectedCoveredCards
+    globalVariables.coveredCards.values = valuesOfSelectedCoveredCards
     coveredCardsIcon.events.onInputDown.add showCoveredCards, this
     globalVariables.settleCoveredCardsButton.visible = false
     globalVariables.settleCoveredCardsButton.inputEnabled = false
@@ -367,7 +367,7 @@ settleCoveredCards = () ->
         userId: globalVariables.userId
         loginToken: globalVariables.loginToken
         roomName: globalVariables.roomName
-        coveredCards: globalVariables.coveredCards.indexes
+        coveredCards: globalVariables.coveredCards.values
         banker: globalVariables.username
         cardsAtHand: globalVariables.cardsAtHand.values
     , (resData, jwres) ->
@@ -571,7 +571,7 @@ showNextRoundPlayedCards = () ->
     showPlayedCardsForUser 2, globalVariables.player2HistoricalPlayedCardValues[globalVariables.historicalRoundIndex], false
     showPlayedCardsForUser 3, globalVariables.player3HistoricalPlayedCardValues[globalVariables.historicalRoundIndex], false
 
-endGame = (isSurrender, gameResults) ->
+endGame = (isSurrender, gameResults, game) ->
     # Banker surrendered
     if isSurrender
         console.log '庄家投降了, 输赢：'
@@ -580,6 +580,12 @@ endGame = (isSurrender, gameResults) ->
     else
         console.log '游戏结束, 输赢：'
         console.log gameResults
+        # 庄家被扣底
+        if gameResults.shouldEarnScoresInCoveredCards
+            globalVariables.coveredCards.values = gameResults.coveredCardsToExpose
+            showCoveredCards()
+            showEarnedScoreTextWithFadeOutEffect gameResults.scoresEarnedFromCoveredCards, game
+
 
 
 module.exports =

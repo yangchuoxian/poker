@@ -280,6 +280,12 @@ module.exports =
         userId = req.param 'userId'
         playedCardValues = req.param 'playedCardValues'
         currentUserObject = null
+        scoresEarnedCurrentRound = 0
+        shouldGameEnd = false
+        shouldEarnScoresInCoveredCards = false
+        scoresEarnedFromCoveredCards = 0
+        coveredCardsToExpose = []
+
         User.findOne id: userId
         .then (foundUserWithId) ->
             return Promise.reject '用户不存在' if not foundUserWithId
@@ -311,34 +317,52 @@ module.exports =
             if updatedRoom.playedCardValuesForCurrentRound.length is 4
                 # get the username that played the largest cards for current round
                 usernameWithLargestCardsForCurrentRound = Toolbox.getPlayerThatPlayedLargestCardsForThisRound updatedRoom.playedCardValuesForCurrentRound, updatedRoom.mainSuit, updatedRoom.cardValueRanks
-                scoresEarned = 0
                 # if the username that played the largest cards is NOT the banker, then we calculate how many scores are earned for this round
-                if usernameWithLargestCardsForCurrentRound isnt updatedRoom.banker then scoresEarned = Toolbox.calculateTotalScoresForThisRound updatedRoom.playedCardValuesForCurrentRound
+                if usernameWithLargestCardsForCurrentRound isnt updatedRoom.banker then scoresEarnedCurrentRound = Toolbox.calculateTotalScoresForThisRound updatedRoom.playedCardValuesForCurrentRound
                 # check whether all non banker players have no main suit card left
                 if Toolbox.noMainSuitCardLeftForAllNonBankers(updatedRoom.playedCardValuesForCurrentRound, updatedRoom.mainSuit, updatedRoom.banker) then updatedRoom.nonBankerPlayersHaveNoMainSuit = sails.config.constants.TRUE
                 else updatedRoom.nonBankerPlayersHaveNoMainSuit = sails.config.constants.FALSE
+
+                updatedRoom.currentScore += scoresEarnedCurrentRound
+                # earned scores has already reached the triple chip threshold, game should end in advance
+                if updatedRoom.currentScore >= (updatedRoom.aimedScore + sails.config.constants.THRESHOLD_SCORES_FOR_TRIPLE_CHIPS) then shouldGameEnd = true
+                # no more card left, all cards played out
+                if updatedRoom.decks[updatedRoom.banker].length is 0
+                    shouldGameEnd = true
+                    # 检查该最后一回合是否存在闲家扣底的情况
+                    if usernameWithLargestCardsForCurrentRound isnt updatedRoom.banker
+                        # 该回合是闲家的牌大
+                        largestPlayedCardValuesThisRound = []
+                        for i in [0...updatedRoom.playedCardValuesForCurrentRound.length]
+                            if updatedRoom.playedCardValuesForCurrentRound[i].username is usernameWithLargestCardsForCurrentRound
+                                largestPlayedCardValuesThisRound = updatedRoom.playedCardValuesForCurrentRound[i].playedCardValues
+                                break
+                        # 该回合的最大牌是主牌, 扣底!
+                        if Toolbox.isSingleForMainSuit updatedRoom.mainSuit, [largestPlayedCardValuesThisRound[0]]
+                            scoresEarnedFromCoveredCards = Toolbox.calculateScoresInCoveredCards(updatedRoom.coveredCards) * playedCardValues.length
+                            shouldEarnScoresInCoveredCards = true
+                            updatedRoom.currentScore += scoresEarnedFromCoveredCards
+                            coveredCardsToExpose = updatedRoom.coveredCards
                 # now that current round is finished, we should clear the played card values for current round
                 Room.update id: updatedRoom.id,
-                    currentScore: updatedRoom.currentScore + scoresEarned
+                    currentScore: updatedRoom.currentScore
                     playedCardValuesForCurrentRound: []
                     nonBankerPlayersHaveNoMainSuit: updatedRoom.nonBankerPlayersHaveNoMainSuit
                 .then (updatedRooms) ->
                     updatedRoom = updatedRooms[0]
-                    shouldGameEnd = false
-                    # earned scores has already reached the triple chip threshold, game should end in advance
-                    if updatedRoom.currentScore >= (updatedRoom.aimedScore + sails.config.constants.THRESHOLD_SCORES_FOR_TRIPLE_CHIPS) then shouldGameEnd = true
-                    # no more card left, all cards played out
-                    if updatedRoom.decks[updatedRoom.banker].length is 0 then shouldGameEnd = true
                     roundFinishedInfo =
                         lastPlayerName: currentUserObject.username
                         playedCardValues: playedCardValues
-                        scoresEarned: scoresEarned
+                        scoresEarnedCurrentRound: scoresEarnedCurrentRound
                         usernameWithLargestCardsForCurrentRound: usernameWithLargestCardsForCurrentRound
                         shouldGameEnd: shouldGameEnd
                         nonBankerPlayersHaveNoMainSuit: updatedRoom.nonBankerPlayersHaveNoMainSuit
                     if shouldGameEnd
                         RoomService.handleGameResult updatedRoom, false
                         .then (gameResults) ->
+                            gameResults.shouldEarnScoresInCoveredCards = shouldEarnScoresInCoveredCards
+                            gameResults.scoresEarnedFromCoveredCards = scoresEarnedFromCoveredCards
+                            gameResults.coveredCardsToExpose = coveredCardsToExpose
                             roundFinishedInfo.gameResults = gameResults
                             sails.sockets.broadcast currentUserObject.roomName, 'roundFinished', roundFinishedInfo
                     else sails.sockets.broadcast currentUserObject.roomName, 'roundFinished', roundFinishedInfo

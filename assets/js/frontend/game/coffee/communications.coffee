@@ -177,7 +177,7 @@ socketEventHandler = (game) ->
     io.socket.on 'roundFinished', (data) ->
         usernamePlayedCards = data.lastPlayerName
         playedCardValues = data.playedCardValues
-        scoresEarned = data.scoresEarned
+        scoresEarnedCurrentRound = data.scoresEarnedCurrentRound
         usernameWithLargestCardsForCurrentRound = data.usernameWithLargestCardsForCurrentRound
         globalVariables.nonBankerPlayersHaveNoMainSuit = data.nonBankerPlayersHaveNoMainSuit
         n = -1
@@ -195,8 +195,8 @@ socketEventHandler = (game) ->
         if n isnt -1 then actions.showPlayedCardsForUser n, playedCardValues, true
         actions.showBigStampForTheLargestPlayedCardsCurrentRound playedCardValues.length, usernameWithLargestCardsForCurrentRound, game
         # increase the scores earned so far
-        globalVariables.textOfCurrentScores.text = parseInt(globalVariables.textOfCurrentScores.text) + scoresEarned
-        actions.showEarnedScoreTextWithFadeOutEffect scoresEarned, game if scoresEarned isnt 0
+        globalVariables.textOfCurrentScores.text = parseInt(globalVariables.textOfCurrentScores.text) + scoresEarnedCurrentRound
+        actions.showEarnedScoreTextWithFadeOutEffect scoresEarnedCurrentRound, game if scoresEarnedCurrentRound isnt 0
         globalVariables.firstlyPlayedCardValuesForCurrentRound = []
 
         # now that at least one round is finished, enable the button to check historically played card
@@ -205,7 +205,7 @@ socketEventHandler = (game) ->
 
         setTimeout(() ->
             # either already earned enough scores to triple chips or all cards have been played
-            return actions.endGame(false, data.gameResults) if data.shouldGameEnd
+            return actions.endGame(false, data.gameResults, game) if data.shouldGameEnd
             globalVariables.bigSign.destroy()
             globalVariables.currentUserPlayedCards.removeAll()
             globalVariables.user1PlayedCards.removeAll()
