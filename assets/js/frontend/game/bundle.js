@@ -2239,13 +2239,9 @@
 
 	  endGame = function(isSurrender, gameResults, game) {
 	    if (isSurrender) {
-	      console.log('庄家投降了, 输赢：');
-	      console.log(gameResults);
 	      clearGameInfo();
 	      return showGameResultsPanel(gameResults, game);
 	    } else {
-	      console.log('游戏结束, 输赢：');
-	      console.log(gameResults);
 	      if (gameResults.shouldEarnScoresInCoveredCards) {
 	        globalVariables.coveredCards.values = gameResults.coveredCardsToExpose;
 	        showCoveredCards();
