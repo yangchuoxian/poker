@@ -393,7 +393,6 @@ module.exports =
             currentRoomObject = foundRoomWithName
             RoomService.handleGameResult currentRoomObject, true
         .then (gameResults) ->
-            res.json
-                gameResults: gameResults
-                bankerUsername: currentRoomObject.banker
+            sails.sockets.broadcast( currentRoomObject.name, 'bankerSurrendered', gameResults )
+            res.send( 'OK' )
         .catch (err) -> res.send 400, err

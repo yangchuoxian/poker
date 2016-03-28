@@ -195,6 +195,9 @@
         return actions.showCallScorePanel(game, currentAimedScore);
       }
     });
+    io.socket.on('bankerSurrendered', function(data) {
+      return actions.endGame(true, data, game);
+    });
     io.socket.on('bankerSettled', function(data) {
       var aimedScore, bankerUsername, coveredCards;
       aimedScore = data.aimedScore;
@@ -212,7 +215,7 @@
         globalVariables.cardsAtHand.values = globalVariables.cardsAtHand.values.concat(coveredCards);
         globalVariables.cardsAtHand.values = toolbox.sortCards(globalVariables.cardsAtHand.values);
         actions.displayCards(globalVariables.cardsAtHand.values);
-        globalVariables.surrenderButton.visible = true;
+        actions.showAndEnableButton(globalVariables.surrenderButton);
         globalVariables.settleCoveredCardsButton.visible = true;
         globalVariables.settleCoveredCardsButton.inputEnabled = false;
         globalVariables.settleCoveredCardsButton.setFrames(2, 2, 2);
@@ -294,11 +297,10 @@
         actions.showEarnedScoreTextWithFadeOutEffect(scoresEarnedCurrentRound, game);
       }
       globalVariables.firstlyPlayedCardValuesForCurrentRound = [];
-      globalVariables.historicalButton.inputEnabled = true;
-      globalVariables.historicalButton.visible = true;
+      actions.showAndEnableButton(globalVariables.historicalButton);
       return setTimeout(function() {
         if (data.shouldGameEnd) {
-          return actions.endGame(false, data.gameResults);
+          return actions.endGame(false, data.gameResults, game);
         }
         globalVariables.bigSign.destroy();
         globalVariables.currentUserPlayedCards.removeAll();

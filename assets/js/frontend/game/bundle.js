@@ -133,7 +133,7 @@
 	  };
 
 	  create = function() {
-	    var titleOfAimedScores, titleOfChipsWon, titleOfCurrentScores, titleOfMainSuit, titleOfRoomName;
+	    var titleOfAimedScores, titleOfChipsWon, titleOfCurrentScores, titleOfMainSuit, titleOfRoomName, titleOfWaterpool;
 	    globalVariables.background = game.add.sprite(0, 0, 'background');
 	    globalVariables.background.inputEnabled = true;
 	    globalVariables.background.events.onInputDown.add(actions.backgroundTapped, this);
@@ -170,26 +170,30 @@
 	    globalVariables.user1PlayedCards = game.add.group();
 	    globalVariables.user2PlayedCards = game.add.group();
 	    globalVariables.user3PlayedCards = game.add.group();
-	    titleOfMainSuit = game.add.text(globalVariables.screenWidth - 5 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '主牌', constants.TEXT_STYLE);
+	    titleOfMainSuit = game.add.text(globalVariables.screenWidth - 6 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '主牌', constants.TEXT_STYLE);
 	    titleOfMainSuit.setTextBounds(0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT);
-	    globalVariables.iconOfMainSuit = game.add.sprite(globalVariables.screenWidth - 5 * constants.UPPER_RIGHT_TEXT_WIDTH + constants.MARGIN, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, 'suites');
+	    globalVariables.iconOfMainSuit = game.add.sprite(globalVariables.screenWidth - 6 * constants.UPPER_RIGHT_TEXT_WIDTH + constants.MARGIN, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, 'suites');
 	    globalVariables.iconOfMainSuit.scale.setTo(constants.UPPER_RIGHT_TEXT_HEIGHT / constants.MAIN_SUIT_ICON_SIZE, constants.UPPER_RIGHT_TEXT_HEIGHT / constants.MAIN_SUIT_ICON_SIZE);
 	    globalVariables.iconOfMainSuit.frame = 0;
-	    titleOfAimedScores = game.add.text(globalVariables.screenWidth - 4 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '叫分', constants.TEXT_STYLE);
+	    titleOfAimedScores = game.add.text(globalVariables.screenWidth - 5 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '叫分', constants.TEXT_STYLE);
 	    titleOfAimedScores.setTextBounds(0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT);
-	    globalVariables.textOfAimedScores = game.add.text(globalVariables.screenWidth - 4 * constants.UPPER_RIGHT_TEXT_WIDTH, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, '80', constants.TEXT_STYLE);
+	    globalVariables.textOfAimedScores = game.add.text(globalVariables.screenWidth - 5 * constants.UPPER_RIGHT_TEXT_WIDTH, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, '80', constants.TEXT_STYLE);
 	    globalVariables.textOfAimedScores.setTextBounds(0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT);
-	    titleOfCurrentScores = game.add.text(globalVariables.screenWidth - 3 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '得分', constants.TEXT_STYLE);
+	    titleOfCurrentScores = game.add.text(globalVariables.screenWidth - 4 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '得分', constants.TEXT_STYLE);
 	    titleOfCurrentScores.setTextBounds(0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT);
-	    globalVariables.textOfCurrentScores = game.add.text(globalVariables.screenWidth - 3 * constants.UPPER_RIGHT_TEXT_WIDTH, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, '0', constants.TEXT_STYLE);
+	    globalVariables.textOfCurrentScores = game.add.text(globalVariables.screenWidth - 4 * constants.UPPER_RIGHT_TEXT_WIDTH, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, '0', constants.TEXT_STYLE);
 	    globalVariables.textOfCurrentScores.setTextBounds(0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT);
-	    globalVariables.textOfEarnedScores = game.add.text(globalVariables.screenWidth - 3 * constants.UPPER_RIGHT_TEXT_WIDTH, 3 * constants.MARGIN + 2 * constants.UPPER_RIGHT_TEXT_HEIGHT, '+ 0', constants.ALERT_TEXT_STYLE);
+	    globalVariables.textOfEarnedScores = game.add.text(globalVariables.screenWidth - 4 * constants.UPPER_RIGHT_TEXT_WIDTH, 3 * constants.MARGIN + 2 * constants.UPPER_RIGHT_TEXT_HEIGHT, '+ 0', constants.ALERT_TEXT_STYLE);
 	    globalVariables.textOfEarnedScores.setTextBounds(0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT);
 	    globalVariables.textOfEarnedScores.alpha = 0;
-	    titleOfChipsWon = game.add.text(globalVariables.screenWidth - 2 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '输赢', constants.TEXT_STYLE);
+	    titleOfChipsWon = game.add.text(globalVariables.screenWidth - 3 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '输赢', constants.TEXT_STYLE);
 	    titleOfChipsWon.setTextBounds(0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT);
-	    globalVariables.textOfChipsWon = game.add.text(globalVariables.screenWidth - 2 * constants.UPPER_RIGHT_TEXT_WIDTH, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, '0', constants.TEXT_STYLE);
+	    globalVariables.textOfChipsWon = game.add.text(globalVariables.screenWidth - 3 * constants.UPPER_RIGHT_TEXT_WIDTH, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, '0', constants.TEXT_STYLE);
 	    globalVariables.textOfChipsWon.setTextBounds(0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT);
+	    titleOfWaterpool = game.add.text(globalVariables.screenWidth - 2 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '水钱', constants.TEXT_STYLE);
+	    titleOfWaterpool.setTextBounds(0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT);
+	    globalVariables.textOfWaterpool = game.add.text(globalVariables.screenWidth - 2 * constants.UPPER_RIGHT_TEXT_WIDTH, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, '0', constants.TEXT_STYLE);
+	    globalVariables.textOfWaterpool.setTextBounds(0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT);
 	    titleOfRoomName = game.add.text(globalVariables.screenWidth - 70, constants.MARGIN, '房间', constants.TEXT_STYLE);
 	    titleOfRoomName.setTextBounds(0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT);
 	    globalVariables.textOfRoomName = game.add.text(globalVariables.screenWidth - constants.UPPER_RIGHT_TEXT_WIDTH, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, '', constants.TEXT_STYLE);
@@ -264,6 +268,8 @@
 	    },
 	    UPPER_RIGHT_TEXT_WIDTH: 70,
 	    UPPER_RIGHT_TEXT_HEIGHT: 30,
+	    TITLE_TEXT_WIDTH: 100,
+	    TITLE_TEXT_HEIGHT: 50,
 	    GAME_STATUS_NOT_STARTED: 0,
 	    GAME_STATUS_SETTLING_COVERED_CARDS: 1,
 	    GAME_STATUS_DECIDING_SUIT: 2,
@@ -377,6 +383,7 @@
 	    textOfAimedScores: null,
 	    textOfEarnedScores: null,
 	    textOfChipsWon: null,
+	    textOfWaterpool: null,
 	    textOfRoomName: null,
 	    player1Username: null,
 	    player2Username: null,
@@ -385,14 +392,13 @@
 	    user2Avatar: null,
 	    user3Avatar: null,
 	    meStatusText: null,
-	    player1IsBankerIcon: null,
-	    player2IsBankerIcon: null,
-	    player3IsBankerIcon: null,
 	    player1StatusText: null,
 	    player2StatusText: null,
 	    player3StatusText: null,
+	    player1IsBankerIcon: null,
+	    player2IsBankerIcon: null,
+	    player3IsBankerIcon: null,
 	    callScoreStage: null,
-	    selectMainStage: null,
 	    gameStatus: null,
 	    selectSuitButton: null,
 	    selectSuitStage: null,
@@ -411,7 +417,8 @@
 	    historicalRecordStage: null,
 	    historicalRoundIndex: null,
 	    isPlayCardButtonVisibleBeforeShowingHistoricalRecordStage: false,
-	    nonBankerPlayersHaveNoMainSuit: constants.FALSE
+	    nonBankerPlayersHaveNoMainSuit: constants.FALSE,
+	    gameResultsStage: null
 	  };
 
 	}).call(this);
@@ -1394,6 +1401,9 @@
 	        return actions.showCallScorePanel(game, currentAimedScore);
 	      }
 	    });
+	    io.socket.on('bankerSurrendered', function(data) {
+	      return actions.endGame(true, data, game);
+	    });
 	    io.socket.on('bankerSettled', function(data) {
 	      var aimedScore, bankerUsername, coveredCards;
 	      aimedScore = data.aimedScore;
@@ -1411,7 +1421,7 @@
 	        globalVariables.cardsAtHand.values = globalVariables.cardsAtHand.values.concat(coveredCards);
 	        globalVariables.cardsAtHand.values = toolbox.sortCards(globalVariables.cardsAtHand.values);
 	        actions.displayCards(globalVariables.cardsAtHand.values);
-	        globalVariables.surrenderButton.visible = true;
+	        actions.showAndEnableButton(globalVariables.surrenderButton);
 	        globalVariables.settleCoveredCardsButton.visible = true;
 	        globalVariables.settleCoveredCardsButton.inputEnabled = false;
 	        globalVariables.settleCoveredCardsButton.setFrames(2, 2, 2);
@@ -1493,11 +1503,10 @@
 	        actions.showEarnedScoreTextWithFadeOutEffect(scoresEarnedCurrentRound, game);
 	      }
 	      globalVariables.firstlyPlayedCardValuesForCurrentRound = [];
-	      globalVariables.historicalButton.inputEnabled = true;
-	      globalVariables.historicalButton.visible = true;
+	      actions.showAndEnableButton(globalVariables.historicalButton);
 	      return setTimeout(function() {
 	        if (data.shouldGameEnd) {
-	          return actions.endGame(false, data.gameResults);
+	          return actions.endGame(false, data.gameResults, game);
 	        }
 	        globalVariables.bigSign.destroy();
 	        globalVariables.currentUserPlayedCards.removeAll();
@@ -1530,7 +1539,7 @@
 
 	// Generated by CoffeeScript 1.10.0
 	(function() {
-	  var backgroundTapped, constants, displayCards, endGame, globalVariables, hideHistoricalRecordStage, hideLeftPlayer, leaveRoom, lowerScore, pass, playSelectedCards, raiseScore, selectSuit, sendGetReadyMessage, setScore, settleCoveredCards, showBigStampForTheLargestPlayedCardsCurrentRound, showCallScorePanel, showCoveredCards, showEarnedScoreTextWithFadeOutEffect, showHistoricallyPlayedCards, showLastRoundPlayedCards, showNextRoundPlayedCards, showPlayedCardsForUser, showPlayer1Info, showPlayer2Info, showPlayer3Info, showSelectSuitPanel, suitTapEffect, surrender, tapDownOnSprite, tapUp, toggleCardSelection, toggleLastAndNextRoundButton, toolbox;
+	  var backgroundTapped, clearGameInfo, constants, displayCards, endGame, globalVariables, hideAndDisableButton, hideHistoricalRecordStage, hideLeftPlayer, leaveRoom, lowerScore, pass, playSelectedCards, raiseScore, selectSuit, sendGetReadyMessage, setScore, settleCoveredCards, showAndEnableButton, showBigStampForTheLargestPlayedCardsCurrentRound, showCallScorePanel, showCoveredCards, showEarnedScoreTextWithFadeOutEffect, showGameResultsPanel, showHistoricallyPlayedCards, showLastRoundPlayedCards, showNextRoundPlayedCards, showPlayedCardsForUser, showPlayer1Info, showPlayer2Info, showPlayer3Info, showSelectSuitPanel, suitTapEffect, surrender, tapDownOnSprite, tapUp, toggleCardSelection, toggleLastAndNextRoundButton, toolbox;
 
 	  constants = __webpack_require__(1);
 
@@ -1694,8 +1703,8 @@
 	      coveredCardsStage.alpha = 0.3;
 	      coveredCardsStage.width = stageWidth;
 	      coveredCardsStage.height = stageHeight;
-	      for (i = j = 0, ref = globalVariables.coveredCards.indexes.length; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
-	        cardName = toolbox.getCardName(globalVariables.coveredCards.indexes[i]);
+	      for (i = j = 0, ref = globalVariables.coveredCards.values.length; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
+	        cardName = toolbox.getCardName(globalVariables.coveredCards.values[i]);
 	        coveredCard = globalVariables.coveredCards.create(coveredCardsStage.x + constants.MARGIN + i * globalVariables.scaledCardWidth / 4, coveredCardsStage.y + constants.MARGIN, cardName);
 	        coveredCard.scale.setTo(globalVariables.scaleWidthRatio, globalVariables.scaleHeightRatio);
 	      }
@@ -1977,7 +1986,7 @@
 	      loginToken: globalVariables.loginToken
 	    }, function(resData, jwres) {
 	      if (jwres.statusCode === 200) {
-	        return endGame(true, resData.gameResults);
+
 	      } else {
 	        return alert(resData);
 	      }
@@ -2003,7 +2012,7 @@
 	    coveredCardsIcon = globalVariables.coveredCards.create(constants.MARGIN, constants.MARGIN, 'back');
 	    coveredCardsIcon.scale.setTo(globalVariables.scaleWidthRatio, globalVariables.scaleHeightRatio);
 	    coveredCardsIcon.inputEnabled = true;
-	    globalVariables.coveredCards.indexes = valuesOfSelectedCoveredCards;
+	    globalVariables.coveredCards.values = valuesOfSelectedCoveredCards;
 	    coveredCardsIcon.events.onInputDown.add(showCoveredCards, this);
 	    globalVariables.settleCoveredCardsButton.visible = false;
 	    globalVariables.settleCoveredCardsButton.inputEnabled = false;
@@ -2014,7 +2023,7 @@
 	      userId: globalVariables.userId,
 	      loginToken: globalVariables.loginToken,
 	      roomName: globalVariables.roomName,
-	      coveredCards: globalVariables.coveredCards.indexes,
+	      coveredCards: globalVariables.coveredCards.values,
 	      banker: globalVariables.username,
 	      cardsAtHand: globalVariables.cardsAtHand.values
 	    }, function(resData, jwres) {
@@ -2228,14 +2237,165 @@
 	    return showPlayedCardsForUser(3, globalVariables.player3HistoricalPlayedCardValues[globalVariables.historicalRoundIndex], false);
 	  };
 
-	  endGame = function(isSurrender, gameResults) {
+	  endGame = function(isSurrender, gameResults, game) {
 	    if (isSurrender) {
 	      console.log('庄家投降了, 输赢：');
-	      return console.log(gameResults);
+	      console.log(gameResults);
+	      clearGameInfo();
+	      return showGameResultsPanel(gameResults, game);
 	    } else {
 	      console.log('游戏结束, 输赢：');
-	      return console.log(gameResults);
+	      console.log(gameResults);
+	      if (gameResults.shouldEarnScoresInCoveredCards) {
+	        globalVariables.coveredCards.values = gameResults.coveredCardsToExpose;
+	        showCoveredCards();
+	        showEarnedScoreTextWithFadeOutEffect(gameResults.scoresEarnedFromCoveredCards, game);
+	        return setTimeout(function() {
+	          globalVariables.coveredCards.removeAll();
+	          clearGameInfo();
+	          return showGameResultsPanel(gameResults, game);
+	        }, 2000);
+	      } else {
+	        clearGameInfo();
+	        return showGameResultsPanel(gameResults, game);
+	      }
 	    }
+	  };
+
+	  clearGameInfo = function() {
+	    globalVariables.currentUserPlayedCards.removeAll();
+	    globalVariables.user1PlayedCards.removeAll();
+	    globalVariables.user2PlayedCards.removeAll();
+	    globalVariables.user3PlayedCards.removeAll();
+	    globalVariables.isShowingCoveredCards = false;
+	    globalVariables.cardsAtHand.removeAll();
+	    globalVariables.coveredCards.removeAll();
+	    hideAndDisableButton(globalVariables.playCardsButton);
+	    hideAndDisableButton(globalVariables.historicalButton);
+	    hideAndDisableButton(globalVariables.surrenderButton);
+	    hideAndDisableButton(globalVariables.settleCoveredCardsButton);
+	    globalVariables.startSwipeCardIndex = null;
+	    globalVariables.endSwipeCardIndex = null;
+	    globalVariables.iconOfMainSuit.frame = 0;
+	    globalVariables.textOfCurrentScores.text = '0';
+	    globalVariables.textOfAimedScores.text = '80';
+	    globalVariables.textOfEarnedScores.text = '';
+	    globalVariables.meStatusText.text = '';
+	    globalVariables.player1StatusText.text = '';
+	    globalVariables.player2StatusText.text = '';
+	    globalVariables.player3StatusText.text = '';
+	    if (globalVariables.player1IsBankerIcon) {
+	      globalVariables.player1IsBankerIcon.destroy();
+	    }
+	    if (globalVariables.player2IsBankerIcon) {
+	      globalVariables.player2IsBankerIcon.destroy();
+	    }
+	    if (globalVariables.player3IsBankerIcon) {
+	      globalVariables.player3IsBankerIcon.destroy();
+	    }
+	    if (globalVariables.callScoreStage) {
+	      globalVariables.callScoreStage.destroy(true, false);
+	    }
+	    globalVariables.gameStatus = null;
+	    hideAndDisableButton(globalVariables.selectSuitButton);
+	    globalVariables.selectSuitStage.removeAll();
+	    globalVariables.mainSuit = null;
+	    globalVariables.firstlyPlayedCardValuesForCurrentRound = [];
+	    if (globalVariables.bigSign) {
+	      globalVariables.bigSign.destroy();
+	    }
+	    globalVariables.cardValueRanks = null;
+	    globalVariables.meHistoricalPlayedCardValues = [];
+	    globalVariables.player1HistoricalPlayedCardValues = [];
+	    globalVariables.player2HistoricalPlayedCardValues = [];
+	    globalVariables.player3HistoricalPlayedCardValues = [];
+	    globalVariables.meHistoricalPlayedCardGroupForOneRound.removeAll();
+	    globalVariables.player1HistoricalPlayedCardGroupForOneRound.removeAll();
+	    globalVariables.player2HistoricalPlayedCardGroupForOneRound.removeAll();
+	    globalVariables.player3HistoricalPlayedCardGroupForOneRound.removeAll();
+	    if (globalVariables.historicalRecordStage) {
+	      globalVariables.historicalRecordStage.destroy(true, false);
+	    }
+	    globalVariables.historicalRoundIndex = null;
+	    globalVariables.isPlayCardButtonVisibleBeforeShowingHistoricalRecordStage = false;
+	    globalVariables.nonBankerPlayersHaveNoMainSuit = constants.FALSE;
+	    if (globalVariables.gameResultsStage) {
+	      return globalVariables.gameResultsStage.destroy(true, false);
+	    }
+	  };
+
+	  showGameResultsPanel = function(gameResults, game) {
+	    var background, bankerResultText, changedChipsForWaterpool, changedChipsText, changedChipsTextForBanker, changedChipsTextForNonBankers, i, j, k, numOfCurrentChipsWon, playerChangedChipsText, playerUsernameText, ref, ref1, stageHeight, stageWidth, updatedCurrentChipsWon, usernames, waterpoolChangedChipsText, waterpoolName, winOrLoseText;
+	    globalVariables.gameResultsStage = game.add.group();
+	    stageWidth = 11 * globalVariables.scaledCardWidth / 4 + 2 * constants.MARGIN;
+	    stageHeight = constants.TITLE_TEXT_HEIGHT * 6 + constants.MARGIN * 7;
+	    background = globalVariables.gameResultsStage.create(globalVariables.screenWidth / 2 - stageWidth / 2, globalVariables.screenHeight / 2 - stageHeight / 2, 'stageBackground');
+	    background.alpha = 0.3;
+	    background.width = stageWidth;
+	    background.height = stageHeight;
+	    bankerResultText = '';
+	    changedChipsTextForNonBankers = '';
+	    changedChipsTextForBanker = '';
+	    changedChipsForWaterpool = '';
+	    if (gameResults.changedQuantityOfWaterpool > 0) {
+	      bankerResultText = '庄家输了';
+	      changedChipsTextForBanker = '-' + Math.abs(gameResults.numOfWinningChipsForBanker);
+	      changedChipsTextForNonBankers = '0';
+	      changedChipsForWaterpool = '+' + gameResults.changedQuantityOfWaterpool;
+	    } else if (gameResults.numOfWinningChipsForBanker < 0) {
+	      bankerResultText = '庄家输了';
+	      changedChipsTextForBanker = '-' + Math.abs(gameResults.numOfWinningChipsForBanker);
+	      changedChipsTextForNonBankers = '+' + Math.abs(gameResults.numOfWinningChipsForBanker) / 3;
+	      changedChipsForWaterpool = '0';
+	    } else {
+	      bankerResultText = '庄家赢了';
+	      changedChipsTextForBanker = '+' + (Math.abs(gameResults.numOfWinningChipsForBanker) + gameResults.changedQuantityOfWaterpool);
+	      changedChipsTextForNonBankers = '-' + Math.abs(gameResults.numOfWinningChipsForBanker) / 3;
+	      changedChipsForWaterpool = '-' + Math.abs(gameResults.changedQuantityOfWaterpool);
+	    }
+	    usernames = [globalVariables.username, globalVariables.player1Username.text, globalVariables.player2Username.text, globalVariables.player3Username.text];
+	    changedChipsText = ['', '', '', ''];
+	    for (i = j = 0, ref = usernames.length; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
+	      if (usernames[i] === gameResults.bankerUsername) {
+	        changedChipsText[i] = changedChipsTextForBanker;
+	      } else {
+	        changedChipsText[i] = changedChipsTextForNonBankers;
+	      }
+	    }
+	    winOrLoseText = game.add.text(game.world.centerX - constants.TITLE_TEXT_WIDTH / 2, background.y + constants.MARGIN, bankerResultText, constants.LARGE_TEXT_STYLE);
+	    winOrLoseText.setTextBounds(0, 0, constants.TITLE_TEXT_WIDTH, constants.TITLE_TEXT_HEIGHT);
+	    globalVariables.gameResultsStage.add(winOrLoseText);
+	    for (i = k = 0, ref1 = usernames.length; 0 <= ref1 ? k < ref1 : k > ref1; i = 0 <= ref1 ? ++k : --k) {
+	      playerUsernameText = game.add.text(background.x + constants.MARGIN, background.y + (2 + i) * constants.MARGIN + (i + 1) * constants.TITLE_TEXT_HEIGHT, usernames[i], constants.TEXT_STYLE);
+	      globalVariables.gameResultsStage.add(playerUsernameText);
+	      playerChangedChipsText = game.add.text(background.x + background.width - constants.MARGIN - constants.TITLE_TEXT_WIDTH, background.y + (2 + i) * constants.MARGIN + (i + 1) * constants.TITLE_TEXT_HEIGHT, changedChipsText[i], constants.TEXT_STYLE);
+	      globalVariables.gameResultsStage.add(playerChangedChipsText);
+	    }
+	    waterpoolName = game.add.text(background.x + constants.MARGIN, background.y + 5 * constants.MARGIN + 5 * constants.TITLE_TEXT_HEIGHT, '水池', constants.TEXT_STYLE);
+	    globalVariables.gameResultsStage.add(waterpoolName);
+	    waterpoolChangedChipsText = game.add.text(background.x + background.width - constants.MARGIN - constants.TITLE_TEXT_WIDTH, background.y + 6 * constants.MARGIN + 5 * constants.TITLE_TEXT_HEIGHT, '' + gameResults.changedQuantityOfWaterpool, constants.TEXT_STYLE);
+	    globalVariables.gameResultsStage.add(waterpoolChangedChipsText);
+	    numOfCurrentChipsWon = parseInt(globalVariables.textOfChipsWon.text);
+	    updatedCurrentChipsWon = numOfCurrentChipsWon + parseInt(changedChipsText[0]);
+	    globalVariables.textOfChipsWon.text = '' + updatedCurrentChipsWon;
+	    globalVariables.textOfWaterpool.text = '' + gameResults.currentWaterpoll;
+	    return setTimeout(function() {
+	      globalVariables.gameResultsStage.destroy(true, false);
+	      showAndEnableButton(globalVariables.prepareButton);
+	      return showAndEnableButton(globalVariables.leaveButton);
+	    }, 2000);
+	  };
+
+	  hideAndDisableButton = function(button) {
+	    button.inputEnabled = false;
+	    button.visible = false;
+	    return button.setFrames(2, 2, 2);
+	  };
+
+	  showAndEnableButton = function(button) {
+	    button.inputEnabled = true;
+	    button.visible = true;
+	    return button.setFrames(1, 0, 1);
 	  };
 
 	  module.exports = {
@@ -2265,7 +2425,11 @@
 	    showBigStampForTheLargestPlayedCardsCurrentRound: showBigStampForTheLargestPlayedCardsCurrentRound,
 	    showEarnedScoreTextWithFadeOutEffect: showEarnedScoreTextWithFadeOutEffect,
 	    showHistoricallyPlayedCards: showHistoricallyPlayedCards,
-	    endGame: endGame
+	    endGame: endGame,
+	    showGameResultsPanel: showGameResultsPanel,
+	    clearGameInfo: clearGameInfo,
+	    hideAndDisableButton: hideAndDisableButton,
+	    showAndEnableButton: showAndEnableButton
 	  };
 
 	}).call(this);

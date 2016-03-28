@@ -36,6 +36,7 @@
     textOfAimedScores: null,
     textOfEarnedScores: null,
     textOfChipsWon: null,
+    textOfWaterpool: null,
     textOfRoomName: null,
     player1Username: null,
     player2Username: null,
@@ -44,14 +45,13 @@
     user2Avatar: null,
     user3Avatar: null,
     meStatusText: null,
-    player1IsBankerIcon: null,
-    player2IsBankerIcon: null,
-    player3IsBankerIcon: null,
     player1StatusText: null,
     player2StatusText: null,
     player3StatusText: null,
+    player1IsBankerIcon: null,
+    player2IsBankerIcon: null,
+    player3IsBankerIcon: null,
     callScoreStage: null,
-    selectMainStage: null,
     gameStatus: null,
     selectSuitButton: null,
     selectSuitStage: null,
@@ -70,7 +70,8 @@
     historicalRecordStage: null,
     historicalRoundIndex: null,
     isPlayCardButtonVisibleBeforeShowingHistoricalRecordStage: false,
-    nonBankerPlayersHaveNoMainSuit: constants.FALSE
+    nonBankerPlayersHaveNoMainSuit: constants.FALSE,
+    gameResultsStage: null
   };
 
 }).call(this);

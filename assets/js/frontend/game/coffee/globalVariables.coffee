@@ -31,22 +31,28 @@ module.exports =
     textOfAimedScores: null
     textOfEarnedScores: null
     textOfChipsWon: null
+    textOfWaterpool: null
+
     textOfRoomName: null
+
     player1Username: null
     player2Username: null
     player3Username: null
     user1Avatar: null
     user2Avatar: null
     user3Avatar: null
+
     meStatusText: null
-    player1IsBankerIcon: null
-    player2IsBankerIcon: null
-    player3IsBankerIcon: null
     player1StatusText: null
     player2StatusText: null
     player3StatusText: null
+
+    player1IsBankerIcon: null
+    player2IsBankerIcon: null
+    player3IsBankerIcon: null
+
     callScoreStage: null
-    selectMainStage: null
+
     gameStatus: null
     selectSuitButton: null
     selectSuitStage: null
@@ -68,3 +74,4 @@ module.exports =
     historicalRoundIndex: null
     isPlayCardButtonVisibleBeforeShowingHistoricalRecordStage: false
     nonBankerPlayersHaveNoMainSuit: constants.FALSE
+    gameResultsStage: null

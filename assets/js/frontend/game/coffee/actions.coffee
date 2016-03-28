@@ -332,14 +332,14 @@ pass = () ->
         if jwres.statusCode is 200 then globalVariables.callScoreStage.destroy true, false
         else alert resData
 
-surrender = (game) ->
+surrender = () ->
     csrfToken = document.getElementsByName('csrf-token')[0].content
     io.socket.post '/surrender',
         _csrf: csrfToken
         userId: globalVariables.userId
         loginToken: globalVariables.loginToken
     , (resData, jwres) ->
-        if jwres.statusCode is 200 then endGame(true, resData.gameResults, game)
+        if jwres.statusCode is 200
         else alert resData
 
 settleCoveredCards = () ->
@@ -574,19 +574,169 @@ showNextRoundPlayedCards = () ->
 endGame = (isSurrender, gameResults, game) ->
     # Banker surrendered
     if isSurrender
-        console.log '庄家投降了, 输赢：'
-        console.log gameResults
+        clearGameInfo()
+        showGameResultsPanel gameResults, game
     # Game ended
     else
-        console.log '游戏结束, 输赢：'
-        console.log gameResults
         # 庄家被扣底
         if gameResults.shouldEarnScoresInCoveredCards
             globalVariables.coveredCards.values = gameResults.coveredCardsToExpose
             showCoveredCards()
+            # show scores earned from covered cards
             showEarnedScoreTextWithFadeOutEffect gameResults.scoresEarnedFromCoveredCards, game
+            setTimeout(() ->
+                # hide exposed covered cards
+                globalVariables.coveredCards.removeAll()
+                clearGameInfo()
+                showGameResultsPanel gameResults, game
+            , 2000)
+        else
+            clearGameInfo()
+            showGameResultsPanel gameResults, game
 
+clearGameInfo = () ->
+    globalVariables.currentUserPlayedCards.removeAll()
+    globalVariables.user1PlayedCards.removeAll()
+    globalVariables.user2PlayedCards.removeAll()
+    globalVariables.user3PlayedCards.removeAll()
+    globalVariables.isShowingCoveredCards = false
+    globalVariables.cardsAtHand.removeAll()
+    globalVariables.coveredCards.removeAll()
 
+    hideAndDisableButton( globalVariables.playCardsButton )
+    hideAndDisableButton( globalVariables.historicalButton )
+
+    hideAndDisableButton( globalVariables.surrenderButton )
+    hideAndDisableButton( globalVariables.settleCoveredCardsButton )
+
+    globalVariables.startSwipeCardIndex = null
+    globalVariables.endSwipeCardIndex = null
+    globalVariables.iconOfMainSuit.frame = 0
+    globalVariables.textOfCurrentScores.text = '0'
+    globalVariables.textOfAimedScores.text = '80'
+    globalVariables.textOfEarnedScores.text = ''
+
+    globalVariables.meStatusText.text = ''
+    globalVariables.player1StatusText.text = ''
+    globalVariables.player2StatusText.text = ''
+    globalVariables.player3StatusText.text = ''
+
+    globalVariables.player1IsBankerIcon.destroy() if globalVariables.player1IsBankerIcon
+    globalVariables.player2IsBankerIcon.destroy() if globalVariables.player2IsBankerIcon
+    globalVariables.player3IsBankerIcon.destroy() if globalVariables.player3IsBankerIcon
+
+    globalVariables.callScoreStage.destroy( true, false ) if globalVariables.callScoreStage
+
+    globalVariables.gameStatus = null
+
+    hideAndDisableButton( globalVariables.selectSuitButton )
+    globalVariables.selectSuitStage.removeAll()
+    globalVariables.mainSuit = null
+    globalVariables.firstlyPlayedCardValuesForCurrentRound = []
+    globalVariables.bigSign.destroy() if globalVariables.bigSign
+
+    globalVariables.cardValueRanks = null
+
+    globalVariables.meHistoricalPlayedCardValues = []
+    globalVariables.player1HistoricalPlayedCardValues = []
+    globalVariables.player2HistoricalPlayedCardValues = []
+    globalVariables.player3HistoricalPlayedCardValues = []
+
+    globalVariables.meHistoricalPlayedCardGroupForOneRound.removeAll()
+    globalVariables.player1HistoricalPlayedCardGroupForOneRound.removeAll()
+    globalVariables.player2HistoricalPlayedCardGroupForOneRound.removeAll()
+    globalVariables.player3HistoricalPlayedCardGroupForOneRound.removeAll()
+
+    globalVariables.historicalRecordStage.destroy( true, false ) if globalVariables.historicalRecordStage
+    globalVariables.historicalRoundIndex = null
+
+    globalVariables.isPlayCardButtonVisibleBeforeShowingHistoricalRecordStage = false
+
+    globalVariables.nonBankerPlayersHaveNoMainSuit = constants.FALSE
+    globalVariables.gameResultsStage.destroy( true, false ) if globalVariables.gameResultsStage
+
+showGameResultsPanel = (gameResults, game) ->
+    globalVariables.gameResultsStage = game.add.group()
+    stageWidth = 11 * globalVariables.scaledCardWidth / 4 + 2 * constants.MARGIN
+    stageHeight = constants.TITLE_TEXT_HEIGHT * 6 + constants.MARGIN * 7
+
+    background = globalVariables.gameResultsStage.create(globalVariables.screenWidth / 2 - stageWidth / 2, globalVariables.screenHeight / 2 - stageHeight / 2, 'stageBackground')
+    background.alpha = 0.3
+    background.width = stageWidth
+    background.height = stageHeight
+
+    bankerResultText = ''
+    changedChipsTextForNonBankers = ''
+    changedChipsTextForBanker = ''
+    changedChipsForWaterpool = ''
+
+    # 庄家投降
+    if gameResults.changedQuantityOfWaterpool > 0
+        bankerResultText = '庄家输了'
+        changedChipsTextForBanker = '-' + Math.abs( gameResults.numOfWinningChipsForBanker )
+        changedChipsTextForNonBankers = '0'
+        changedChipsForWaterpool = '+' + gameResults.changedQuantityOfWaterpool
+    # 庄家没投降，被打输了
+    else if gameResults.numOfWinningChipsForBanker < 0
+        bankerResultText = '庄家输了'
+        changedChipsTextForBanker = '-' + Math.abs( gameResults.numOfWinningChipsForBanker )
+        changedChipsTextForNonBankers = '+' + Math.abs( gameResults.numOfWinningChipsForBanker ) / 3
+        changedChipsForWaterpool = '0'
+    # 庄家赢了
+    else
+        bankerResultText = '庄家赢了'
+        changedChipsTextForBanker = '+' + ( Math.abs( gameResults.numOfWinningChipsForBanker ) + gameResults.changedQuantityOfWaterpool )
+        changedChipsTextForNonBankers = '-' + Math.abs( gameResults.numOfWinningChipsForBanker ) / 3
+        changedChipsForWaterpool = '-' + Math.abs( gameResults.changedQuantityOfWaterpool )
+
+    usernames = [
+        globalVariables.username
+        globalVariables.player1Username.text
+        globalVariables.player2Username.text
+        globalVariables.player3Username.text
+    ]
+    changedChipsText = ['', '', '', '']
+    for i in [0...usernames.length]
+        if usernames[i] is gameResults.bankerUsername then changedChipsText[i] = changedChipsTextForBanker
+        else changedChipsText[i] = changedChipsTextForNonBankers
+
+    winOrLoseText = game.add.text( game.world.centerX - constants.TITLE_TEXT_WIDTH / 2, background.y + constants.MARGIN, bankerResultText, constants.LARGE_TEXT_STYLE )
+    winOrLoseText.setTextBounds( 0, 0, constants.TITLE_TEXT_WIDTH, constants.TITLE_TEXT_HEIGHT )
+    globalVariables.gameResultsStage.add( winOrLoseText )
+
+    for i in [0...usernames.length]
+        playerUsernameText = game.add.text( background.x + constants.MARGIN, background.y + (2 + i) * constants.MARGIN + (i + 1) * constants.TITLE_TEXT_HEIGHT, usernames[i], constants.TEXT_STYLE )
+        globalVariables.gameResultsStage.add( playerUsernameText )
+        playerChangedChipsText = game.add.text( background.x + background.width - constants.MARGIN - constants.TITLE_TEXT_WIDTH, background.y + (2 + i) * constants.MARGIN + (i + 1) * constants.TITLE_TEXT_HEIGHT, changedChipsText[i], constants.TEXT_STYLE )
+        globalVariables.gameResultsStage.add( playerChangedChipsText )
+
+    waterpoolName = game.add.text( background.x + constants.MARGIN, background.y + 5 * constants.MARGIN + 5 * constants.TITLE_TEXT_HEIGHT, '水池', constants.TEXT_STYLE )
+    globalVariables.gameResultsStage.add( waterpoolName )
+    waterpoolChangedChipsText = game.add.text( background.x + background.width - constants.MARGIN - constants.TITLE_TEXT_WIDTH, background.y + 6 * constants.MARGIN + 5 * constants. TITLE_TEXT_HEIGHT, '' + gameResults.changedQuantityOfWaterpool, constants.TEXT_STYLE )
+    globalVariables.gameResultsStage.add( waterpoolChangedChipsText )
+
+    # update the text of chips won at the upper right corner
+    numOfCurrentChipsWon = parseInt( globalVariables.textOfChipsWon.text )
+    updatedCurrentChipsWon = numOfCurrentChipsWon + parseInt( changedChipsText[0] )
+    globalVariables.textOfChipsWon.text = '' + updatedCurrentChipsWon
+    # update the waterpool
+    globalVariables.textOfWaterpool.text = '' + gameResults.currentWaterpoll
+
+    setTimeout(() ->
+        globalVariables.gameResultsStage.destroy true, false
+        showAndEnableButton( globalVariables.prepareButton )
+        showAndEnableButton( globalVariables.leaveButton )
+    , 2000)
+
+hideAndDisableButton = (button) ->
+    button.inputEnabled = false
+    button.visible = false
+    button.setFrames( 2, 2, 2 )
+
+showAndEnableButton = (button) ->
+    button.inputEnabled = true
+    button.visible = true
+    button.setFrames( 1, 0, 1 )
 
 module.exports =
     toggleCardSelection: toggleCardSelection
@@ -616,3 +766,7 @@ module.exports =
     showEarnedScoreTextWithFadeOutEffect: showEarnedScoreTextWithFadeOutEffect
     showHistoricallyPlayedCards: showHistoricallyPlayedCards
     endGame: endGame
+    showGameResultsPanel: showGameResultsPanel
+    clearGameInfo: clearGameInfo
+    hideAndDisableButton: hideAndDisableButton
+    showAndEnableButton: showAndEnableButton

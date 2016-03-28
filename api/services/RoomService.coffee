@@ -150,6 +150,7 @@ module.exports =
             room.seats.three
             room.seats.four
         ]
+        bankerUsername = room.banker
         numOfWinningChipsForBanker = 0
         changedQuantityOfWaterpool = 0
         didBankerWin = false
@@ -222,4 +223,5 @@ module.exports =
             firstScoreCallerUsername: firstScoreCallerUsername
             changedQuantityOfWaterpool: changedQuantityOfWaterpool
             currentWaterpoll: updatedRooms[0].waterpool
+            bankerUsername: bankerUsername
         .catch (err) -> Promise.reject err

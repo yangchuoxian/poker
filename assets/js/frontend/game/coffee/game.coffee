@@ -113,9 +113,7 @@ create = () ->
 
     globalVariables.leaveButton = game.add.button game.world.centerX + constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'leaveButton', actions.leaveRoom, this, 1, 0, 1
 
-    globalVariables.surrenderButton = game.add.button game.world.centerX - constants.BUTTON_WIDTH - constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'surrenderButton', () ->
-        actions.surrender(game)
-    , this, 1, 0, 1
+    globalVariables.surrenderButton = game.add.button game.world.centerX - constants.BUTTON_WIDTH - constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'surrenderButton', actions.surrender, this, 1, 0, 1
     globalVariables.surrenderButton.visible = false
 
     globalVariables.settleCoveredCardsButton = game.add.button game.world.centerX + constants.MARGIN / 2, globalVariables.screenHeight - globalVariables.scaledCardHeight - constants.BUTTON_HEIGHT - 2 * constants.MARGIN - constants.SELECTED_CARD_Y_OFFSET, 'settleCoveredCardsButton', actions.settleCoveredCards, this, 1, 0, 1
@@ -133,29 +131,35 @@ create = () ->
     globalVariables.user2PlayedCards = game.add.group()
     globalVariables.user3PlayedCards = game.add.group()
 
-    titleOfMainSuit = game.add.text globalVariables.screenWidth - 5 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '主牌', constants.TEXT_STYLE
+    titleOfMainSuit = game.add.text globalVariables.screenWidth - 6 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '主牌', constants.TEXT_STYLE
     titleOfMainSuit.setTextBounds 0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT
-    globalVariables.iconOfMainSuit = game.add.sprite globalVariables.screenWidth - 5 * constants.UPPER_RIGHT_TEXT_WIDTH + constants.MARGIN, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, 'suites'
+    globalVariables.iconOfMainSuit = game.add.sprite globalVariables.screenWidth - 6 * constants.UPPER_RIGHT_TEXT_WIDTH + constants.MARGIN, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, 'suites'
     globalVariables.iconOfMainSuit.scale.setTo constants.UPPER_RIGHT_TEXT_HEIGHT / constants.MAIN_SUIT_ICON_SIZE, constants.UPPER_RIGHT_TEXT_HEIGHT / constants.MAIN_SUIT_ICON_SIZE
     globalVariables.iconOfMainSuit.frame = 0
 
-    titleOfAimedScores = game.add.text globalVariables.screenWidth - 4 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '叫分', constants.TEXT_STYLE
+    titleOfAimedScores = game.add.text globalVariables.screenWidth - 5 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '叫分', constants.TEXT_STYLE
     titleOfAimedScores.setTextBounds 0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT
-    globalVariables.textOfAimedScores = game.add.text globalVariables.screenWidth - 4 * constants.UPPER_RIGHT_TEXT_WIDTH, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, '80', constants.TEXT_STYLE
+    globalVariables.textOfAimedScores = game.add.text globalVariables.screenWidth - 5 * constants.UPPER_RIGHT_TEXT_WIDTH, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, '80', constants.TEXT_STYLE
     globalVariables.textOfAimedScores.setTextBounds 0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT
-    titleOfCurrentScores = game.add.text globalVariables.screenWidth - 3 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '得分', constants.TEXT_STYLE
+    titleOfCurrentScores = game.add.text globalVariables.screenWidth - 4 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '得分', constants.TEXT_STYLE
     titleOfCurrentScores.setTextBounds 0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT
-    globalVariables.textOfCurrentScores = game.add.text globalVariables.screenWidth - 3 * constants.UPPER_RIGHT_TEXT_WIDTH, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, '0', constants.TEXT_STYLE
+    globalVariables.textOfCurrentScores = game.add.text globalVariables.screenWidth - 4 * constants.UPPER_RIGHT_TEXT_WIDTH, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, '0', constants.TEXT_STYLE
     globalVariables.textOfCurrentScores.setTextBounds 0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT
 
-    globalVariables.textOfEarnedScores = game.add.text globalVariables.screenWidth - 3 * constants.UPPER_RIGHT_TEXT_WIDTH, 3 * constants.MARGIN + 2 * constants.UPPER_RIGHT_TEXT_HEIGHT, '+ 0', constants.ALERT_TEXT_STYLE
+    globalVariables.textOfEarnedScores = game.add.text globalVariables.screenWidth - 4 * constants.UPPER_RIGHT_TEXT_WIDTH, 3 * constants.MARGIN + 2 * constants.UPPER_RIGHT_TEXT_HEIGHT, '+ 0', constants.ALERT_TEXT_STYLE
     globalVariables.textOfEarnedScores.setTextBounds 0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT
     globalVariables.textOfEarnedScores.alpha = 0
 
-    titleOfChipsWon = game.add.text globalVariables.screenWidth - 2 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '输赢', constants.TEXT_STYLE
+    titleOfChipsWon = game.add.text globalVariables.screenWidth - 3 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '输赢', constants.TEXT_STYLE
     titleOfChipsWon.setTextBounds 0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT
-    globalVariables.textOfChipsWon = game.add.text globalVariables.screenWidth - 2 * constants.UPPER_RIGHT_TEXT_WIDTH, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, '0', constants.TEXT_STYLE
+    globalVariables.textOfChipsWon = game.add.text globalVariables.screenWidth - 3 * constants.UPPER_RIGHT_TEXT_WIDTH, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, '0', constants.TEXT_STYLE
     globalVariables.textOfChipsWon.setTextBounds 0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT
+
+    titleOfWaterpool = game.add.text( globalVariables.screenWidth - 2 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '水钱', constants.TEXT_STYLE )
+    titleOfWaterpool.setTextBounds( 0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT )
+    globalVariables.textOfWaterpool = game.add.text( globalVariables.screenWidth - 2 * constants.UPPER_RIGHT_TEXT_WIDTH, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, '0', constants.TEXT_STYLE )
+    globalVariables.textOfWaterpool.setTextBounds 0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT
+
     titleOfRoomName = game.add.text globalVariables.screenWidth - 70, constants.MARGIN, '房间', constants.TEXT_STYLE
     titleOfRoomName.setTextBounds 0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT
     globalVariables.textOfRoomName = game.add.text globalVariables.screenWidth - constants.UPPER_RIGHT_TEXT_WIDTH, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, '', constants.TEXT_STYLE

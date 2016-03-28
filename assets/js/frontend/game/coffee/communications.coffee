@@ -114,6 +114,8 @@ socketEventHandler = (game) ->
         else if passedUser is globalVariables.player3Username.text then globalVariables.player3StatusText.text = '不要'
         if usernameToCallScore is globalVariables.username then actions.showCallScorePanel game, currentAimedScore
 
+    io.socket.on 'bankerSurrendered', (data) -> actions.endGame( true, data, game )
+
     io.socket.on 'bankerSettled', (data) ->
         aimedScore = data.aimedScore
         bankerUsername = data.bankerUsername
@@ -126,7 +128,9 @@ socketEventHandler = (game) ->
             globalVariables.cardsAtHand.values = globalVariables.cardsAtHand.values.concat coveredCards
             globalVariables.cardsAtHand.values = toolbox.sortCards globalVariables.cardsAtHand.values
             actions.displayCards globalVariables.cardsAtHand.values
-            globalVariables.surrenderButton.visible = true
+
+            actions.showAndEnableButton( globalVariables.surrenderButton )
+
             globalVariables.settleCoveredCardsButton.visible = true
             globalVariables.settleCoveredCardsButton.inputEnabled = false
             globalVariables.settleCoveredCardsButton.setFrames 2, 2, 2
@@ -200,8 +204,7 @@ socketEventHandler = (game) ->
         globalVariables.firstlyPlayedCardValuesForCurrentRound = []
 
         # now that at least one round is finished, enable the button to check historically played card
-        globalVariables.historicalButton.inputEnabled = true
-        globalVariables.historicalButton.visible = true
+        actions.showAndEnableButton( globalVariables.historicalButton )
 
         setTimeout(() ->
             # either already earned enough scores to triple chips or all cards have been played
