@@ -190,7 +190,7 @@
 	    titleOfChipsWon.setTextBounds(0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT);
 	    globalVariables.textOfChipsWon = game.add.text(globalVariables.screenWidth - 3 * constants.UPPER_RIGHT_TEXT_WIDTH, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, '0', constants.TEXT_STYLE);
 	    globalVariables.textOfChipsWon.setTextBounds(0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT);
-	    titleOfWaterpool = game.add.text(globalVariables.screenWidth - 2 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '水钱', constants.TEXT_STYLE);
+	    titleOfWaterpool = game.add.text(globalVariables.screenWidth - 2 * constants.UPPER_RIGHT_TEXT_WIDTH, constants.MARGIN, '拌禾钱', constants.TEXT_STYLE);
 	    titleOfWaterpool.setTextBounds(0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT);
 	    globalVariables.textOfWaterpool = game.add.text(globalVariables.screenWidth - 2 * constants.UPPER_RIGHT_TEXT_WIDTH, 2 * constants.MARGIN + constants.UPPER_RIGHT_TEXT_HEIGHT, '0', constants.TEXT_STYLE);
 	    globalVariables.textOfWaterpool.setTextBounds(0, 0, constants.UPPER_RIGHT_TEXT_WIDTH, constants.UPPER_RIGHT_TEXT_HEIGHT);
