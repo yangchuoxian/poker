@@ -30,7 +30,7 @@ displayCards = (array) ->
 showEarnedScoreTextWithFadeOutEffect = (numOfScoresEarnedCurrentRound, game) ->
     globalVariables.textOfEarnedScores.text = '+ ' + numOfScoresEarnedCurrentRound
     globalVariables.textOfEarnedScores.alpha = 1
-    game.add.tween(globalVariables.textOfEarnedScores).to( { alpha: 0 }, 2000, Phaser.Easing.Linear.None, true)
+    game.add.tween( globalVariables.textOfEarnedScores ).to( { alpha: 0 }, 2000, Phaser.Easing.Linear.None, true)
 
 showBigStampForTheLargestPlayedCardsCurrentRound = (numOfCardsPlayed, usernameWithLargestCardsForCurrentRound, game) ->
     startX = null
