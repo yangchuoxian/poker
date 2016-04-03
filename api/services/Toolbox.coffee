@@ -37,6 +37,20 @@ shuffleCards = ->
         n -= 1
     return copy
 
+###
+After all players have played his/her cards for this round, this function should be invoked to calculate how many scores
+are earned by non-banker players if one of the non-banker's cards are larger than banker
+@param: playedCardsInfo                                 played card info object with such format
+                                                        {
+                                                            username: 'someUsername',
+                                                            playedCardValues: [
+                                                                valueOfCard1,
+                                                                valueOfCard2,
+                                                                ...
+                                                            ]
+                                                        }
+@return: totalScores                                    number of total earned scores for this round
+###
 calculateTotalScoresForThisRound = (playedCardsInfo) ->
     totalScores = 0
     for i in [0...playedCardsInfo.length]

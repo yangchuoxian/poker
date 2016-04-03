@@ -584,12 +584,12 @@ endGame = (isSurrender, gameResults, game) ->
             showCoveredCards()
             # show scores earned from covered cards
             showEarnedScoreTextWithFadeOutEffect gameResults.scoresEarnedFromCoveredCards, game
-            setTimeout(() ->
+            setTimeout( () ->
                 # hide exposed covered cards
                 globalVariables.coveredCards.removeAll()
                 clearGameInfo()
                 showGameResultsPanel gameResults, game
-            , 2000)
+            , 2000 )
         else
             clearGameInfo()
             showGameResultsPanel gameResults, game
