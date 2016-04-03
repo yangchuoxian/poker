@@ -1,11 +1,11 @@
 constants = require './constants.js'
 module.exports =
-    screenWidth: Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
-    screenHeight: Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
-    userId: document.getElementById('userId').innerText
-    username: document.getElementById('username').innerText
-    loginToken: document.getElementById('loginToken').innerText
-    roomName: document.getElementById('roomName').innerText
+    screenWidth: Math.max( document.documentElement.clientWidth, window.innerWidth || 0 )
+    screenHeight: Math.max( document.documentElement.clientHeight, window.innerHeight || 0 )
+    userId: document.getElementById( 'userId' ).innerText
+    username: document.getElementById( 'username' ).innerText
+    loginToken: document.getElementById( 'loginToken' ).innerText
+    roomName: document.getElementById( 'roomName' ).innerText
     scaledCardWidth: null
     scaledCardHeight: null
     scaleWidthRatio: null
