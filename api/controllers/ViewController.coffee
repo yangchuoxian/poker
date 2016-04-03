@@ -6,6 +6,6 @@ ViewController
 ###
 
 module.exports =
-    showIndexPage: (req, res) ->
+    showIndexPage: ( req, res ) ->
         res.locals.layout = 'frontend_pages/frontend_layout'
-        res.view 'frontend_pages/index'
+        res.view( 'frontend_pages/index' )
